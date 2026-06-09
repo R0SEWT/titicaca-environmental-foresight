@@ -1,0 +1,49 @@
+id: fauna_endemicas_amenazadas
+name: "Especies endémicas y amenazadas del sistema Titicaca"
+institution: "SERNANP / MINAM (fuente probable)"
+type: tabular
+topic:
+  - ecology
+
+coverage_temporal:
+  start: "unknown"
+  end: "unknown"
+coverage_spatial:
+  description: "Sistema lago Titicaca y cuenca TDPS"
+  basins: []
+  country: PE
+
+drive_id: "1EOvRA1TA2j9wW22f7oPyE7zBJwPiWxMQ"
+drive_folder: "Animales"
+local_path: null
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-02-10"
+
+variables:
+  - especie
+  - grupo_taxonomico
+  - categoria_uicn
+  - cites
+  - endemismo
+granularity: "1 fila por especie"
+n_records_approx: "Pendiente; cubre Anfibios, Aves, Mamíferos, Reptiles, Invertebrados"
+schema_confirmed: false
+
+collection_method: "Compilación de listas rojas UICN y apéndices CITES para el sistema Titicaca"
+laboratory: null
+standard: "Categorías UICN (CR, EN, VU, NT); CITES Apéndices I/II/III"
+
+limitations:
+  - "Fecha de los listados no confirmada"
+  - "Las categorías de amenaza cambian con cada revisión de la lista roja"
+  - "Puede no incluir especies de invertebrados acuáticos endémicos"
+
+citation: "SERNANP/MINAM. Lista de especies endémicas y amenazadas, sistema Titicaca."
+related_reports: []
+
+status: available
+priority: low
+notes: >
+  Relevante para la capa ecológica narrativa: mostrar qué especies están en riesgo
+  en zonas de alta contaminación. El foco es Telmatobius culeus (rana gigante) y
+  Orestias spp. (peces nativos).

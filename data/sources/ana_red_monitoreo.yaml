@@ -1,0 +1,58 @@
+id: ana_red_monitoreo
+name: "Red de monitoreo — Unidades Hidrográficas Titicaca (ANA)"
+institution: "ANA — Autoridad Nacional del Agua"
+type: tabular
+topic:
+  - water_quality
+  - hydrology
+
+coverage_temporal:
+  start: "2013"
+  end: "2025"
+coverage_spatial:
+  description: "Red de estaciones de monitoreo en cuencas tributarias peruanas del Titicaca"
+  basins:
+    - Suches
+    - Huancané
+    - Coata
+    - Ilave
+    - Ilpa
+    - Azángaro
+    - Pucará
+    - Ramis
+  country: PE
+
+drive_id: "1dNkE4D9wl9caAEb-qTDJJXyyqdy3Ulsv"
+drive_folder: "Data para herramienta"
+local_path: null
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-05-03"
+
+variables:
+  - codigo_punto
+  - descripcion_punto
+  - cuenca
+  - subcuenca
+  - utm_este
+  - utm_norte
+  - altitud_msnm
+  - tipo_cuerpo_agua
+granularity: "1 fila por estación de monitoreo"
+n_records_approx: "~100–150 estaciones (pendiente confirmar)"
+schema_confirmed: false
+
+collection_method: "Catálogo de estaciones de la red de vigilancia ANA-AAA.TIT"
+laboratory: null
+standard: null
+
+limitations:
+  - "Schema no confirmado — requiere lectura del archivo .xls"
+  - "Puede no incluir todas las estaciones de emergencia (ad-hoc)"
+
+citation: "ANA. Red de Monitoreo de Unidades Hidrográficas, Sistema Titicaca. Autoridad Nacional del Agua."
+related_reports:
+  - ana_tributarias_2013_2025
+
+status: available
+priority: medium
+notes: "Catálogo espacial de estaciones. Usar para joins con datos de calidad de agua y para mapa de cobertura."

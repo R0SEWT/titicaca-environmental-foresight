@@ -1,0 +1,55 @@
+id: ana_informes_tecnicos_ala_huancane
+name: "Informes Técnicos ANA-AAA.TIT — ALA Huancané (UH Suches, UH Huancané, IFC, zona minera)"
+institution: "ANA — Autoridad Local del Agua Huancané"
+type: pdf_report
+topic:
+  - water_quality
+
+coverage_temporal:
+  start: "2013"
+  end: "2025"
+coverage_spatial:
+  description: "Cuencas Suches y Huancané; incluye zona minera Ananea y empresa Cumbres del Sur S.A.C."
+  basins:
+    - Suches
+    - Huancané
+  country: PE
+
+drive_id: null
+drive_folder: "Data para herramienta / Resultados de gestión del agua - Ala Huancané"
+local_path: "Data limpia /Data para herramienta/Resultados de gestión del agua - Ala Huancané/"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-05-03"
+
+variables:
+  - ph
+  - od_mg_l
+  - conductividad
+  - temperatura
+  - metales_pesados
+  - microbiologicos
+  - coordenadas_utm
+granularity: "Informe por campaña; incluye monitoreos emergencia y monitoreo acuícola Lago Arapa"
+n_records_approx: "Suches: 2013–2025; Huancané: 2022–2025; IFC: 2015, 2019, 2022, 2025"
+schema_confirmed: false
+
+collection_method: "Monitoreo de campo ALA + laboratorio SGS; denuncias por actividad minera (Cumbres del Sur S.A.C.)"
+laboratory: "SGS del Perú S.A.C."
+standard: "ECA Cat. 3 y 4-E1"
+
+limitations:
+  - "Datos en PDF; tabulares en ana_tributarias_2013_2025"
+  - "Cuenca Suches con impacto minero documentado (arsénico, cadmio altos)"
+  - "Empresa minera Cumbres del Sur S.A.C. identificada como fuente en 2024 y 2025"
+
+citation: "ANA-ALA Huancané. Informes Técnicos de Monitoreo UH Suches y Huancané, 2013–2025."
+related_reports:
+  - ana_tributarias_2013_2025
+
+status: available
+priority: medium
+notes: >
+  Los IFC (Identificación de Fuentes Contaminantes) de 2015, 2019, 2022 y 2025 para UH Suches
+  y Huancané son clave para la capa de "fuentes puntuales" del visor.
+  La Laguna Cumuni (emergencia 2025) y empresa Cumbres del Sur son identificables como
+  fuentes nominales de contaminación minera.

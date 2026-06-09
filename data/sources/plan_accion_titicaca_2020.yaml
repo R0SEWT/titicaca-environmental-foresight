@@ -1,0 +1,55 @@
+id: plan_accion_titicaca_2020
+name: "Plan de Acción del Lago Titicaca 2020–2024 (aprobado)"
+institution: "Gobierno del Perú — Comisión Multisectorial"
+type: pdf_report
+topic:
+  - policy
+  - water_quality
+
+coverage_temporal:
+  start: "2020"
+  end: "2024"
+coverage_spatial:
+  description: "Cuenca del lago Titicaca parte peruana"
+  basins:
+    - Titicaca
+    - Coata
+    - Ilave
+    - Ramis
+  country: PE
+
+drive_id: null
+drive_folder: "Estado de la calidad del agua"
+local_path: "Data limpia /Estado de la calidad del agua/plan_titicaca_de_accion_titicaca_2020-2024_aprobado.pdf"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-02-10"
+
+variables:
+  - metas_ambientales
+  - indicadores_seguimiento
+  - inversiones_planificadas
+  - responsables_institucionales
+granularity: "Documento de política; no tabular"
+n_records_approx: "No aplica"
+schema_confirmed: false
+
+collection_method: "Decreto Supremo aprobatorio; política pública oficial"
+laboratory: null
+standard: null
+
+limitations:
+  - "Documento de planificación; no garantiza que las metas se cumplieron"
+  - "Horizonte 2020–2024 ya concluido; no hay evaluación de cumplimiento disponible"
+
+citation: >
+  Perú, Comisión Multisectorial (2020). Plan de Acción del Lago Titicaca 2020–2024.
+  Decreto Supremo aprobatorio. Lima: Presidencia del Consejo de Ministros.
+related_reports:
+  - oas_pnuma_tdps_1996
+
+status: available
+priority: medium
+notes: >
+  Define los indicadores oficiales de calidad del agua y las metas comprometidas
+  por el Estado. Útil para el escenario 'con mitigación' de la herramienta:
+  contrastar estado actual vs. metas del Plan.

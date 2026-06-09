@@ -1,0 +1,55 @@
+id: ana_informes_tecnicos_ala_ramis
+name: "Informes Técnicos ANA-AAA.TIT — ALA Ramis (UH Azángaro, UH Pucará, Llallimayo, emergencias)"
+institution: "ANA — Autoridad Local del Agua Ramis"
+type: pdf_report
+topic:
+  - water_quality
+
+coverage_temporal:
+  start: "2015"
+  end: "2025"
+coverage_spatial:
+  description: "Cuencas Azángaro, Pucará y Llallimayo; zona minera de Ayaviri y Llalli"
+  basins:
+    - Azángaro
+    - Pucará
+    - "Llallimayo/Ramis"
+  country: PE
+
+drive_id: null
+drive_folder: "Data para herramienta / Resultados en gestión del agua - Ala Ramis"
+local_path: "Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Ramis/"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-05-02"
+
+variables:
+  - ph
+  - od_mg_l
+  - conductividad
+  - temperatura
+  - metales_pesados
+  - microbiologicos
+  - coordenadas_utm
+granularity: "Informe por campaña; incluye monitoreos de emergencia por denuncias"
+n_records_approx: "Azángaro: 2016–2025; Pucará: 2017–2025; Llallimayo emergencias: 2016–2025"
+schema_confirmed: false
+
+collection_method: "Monitoreo de campo ALA + laboratorio SGS; emergencias por denuncias formales"
+laboratory: "SGS del Perú S.A.C."
+standard: "ECA Cat. 3; DS-114-2024-PCM (Estado de Emergencia distritos Ayaviri-Llalli)"
+
+limitations:
+  - "Datos en PDF; tabulares en ana_tributarias_2013_2025"
+  - "Monitoreos de emergencia responden a eventos específicos, no son representativos de condiciones basales"
+  - "La cuenca Llallimayo tiene impacto minero activo (pasivos mineros zona Ayaviri)"
+
+citation: "ANA-ALA Ramis. Informes Técnicos de Monitoreo UH Azángaro, Pucará y Llallimayo, 2015–2025."
+related_reports:
+  - ana_tributarias_2013_2025
+
+status: available
+priority: medium
+notes: >
+  Los monitoreos de emergencia de Llallimayo son narrativamente relevantes para el especial
+  (eventos visibles: cambio de color del río, denuncias). Citar el DS-114-2024-PCM.
+  IFC Azángaro 2019 (43.7 MB) y 2025 (40.3 MB) documentan fuentes contaminantes puntuales.

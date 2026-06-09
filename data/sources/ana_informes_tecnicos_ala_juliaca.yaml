@@ -1,0 +1,52 @@
+id: ana_informes_tecnicos_ala_juliaca
+name: "Informes Técnicos ANA-AAA.TIT — ALA Juliaca (UH Coata, UH Ilpa, IFC)"
+institution: "ANA — Autoridad Local del Agua Juliaca"
+type: pdf_report
+topic:
+  - water_quality
+
+coverage_temporal:
+  start: "2011"
+  end: "2025"
+coverage_spatial:
+  description: "Cuencas Coata e Ilpa; incluye zona de descarga de Juliaca al río Coata"
+  basins:
+    - Coata
+    - Ilpa
+  country: PE
+
+drive_id: null
+drive_folder: "Data para herramienta / Resultados en gestión del agua - Ala Juliaca"
+local_path: "Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Juliaca/"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-05-02"
+
+variables:
+  - ph
+  - od_mg_l
+  - conductividad
+  - temperatura
+  - metales_pesados
+  - microbiologicos
+  - coordenadas_utm
+granularity: "Informe por campaña"
+n_records_approx: "Coata: desde 2011; Ilpa: 2013–2025; IFC Coata 2015"
+schema_confirmed: false
+
+collection_method: "Monitoreo de campo ALA + laboratorio SGS"
+laboratory: "SGS del Perú S.A.C."
+standard: "ECA Cat. 3 y 4-E1"
+
+limitations:
+  - "Datos en PDF; los tabulares consolidados están en ana_tributarias_2013_2025"
+  - "El informe IT-014-2012 (UH COATA-ILPA 2011-2012) es el más antiguo disponible, 76.8 MB"
+
+citation: "ANA-ALA Juliaca. Informes Técnicos de Monitoreo UH Coata e Ilpa, 2011–2025."
+related_reports:
+  - ana_tributarias_2013_2025
+
+status: available
+priority: medium
+notes: >
+  La cuenca Coata (descarga de Juliaca) es la de mayor impacto urbano documentado.
+  El IFC UH Coata 2015 (31 MB) es relevante para identificar fuentes puntuales.

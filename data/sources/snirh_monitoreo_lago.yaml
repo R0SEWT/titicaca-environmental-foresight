@@ -1,0 +1,48 @@
+id: snirh_monitoreo_lago
+name: "Monitoreo del Lago Titicaca — Reportes SNIRH (feb 2026)"
+institution: "ANA — Sistema Nacional de Información de Recursos Hídricos (SNIRH)"
+type: tabular
+topic:
+  - water_quality
+  - hydrology
+
+coverage_temporal:
+  start: "unknown"
+  end: "2026-02"
+coverage_spatial:
+  description: "Lago Titicaca parte peruana (pendiente confirmar estaciones)"
+  basins: []
+  country: PE
+
+drive_id: "1rh0TVVmw5UgGvsYh8GaiRd-TheK5zSg-"
+drive_folder: "Monitoreo del Lago Titicaca"
+local_path: null
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-02-10"
+
+variables:
+  - unknown
+granularity: "Pendiente inspección"
+n_records_approx: "16 archivos Excel; pendiente conteo"
+schema_confirmed: false
+
+collection_method: "Export desde plataforma SNIRH-ANA"
+laboratory: null
+standard: null
+
+limitations:
+  - "Archivos con nombres genéricos (Reporte10022026*.xlsx) — contenido exacto no confirmado"
+  - "Fecha de descarga única (10/02/2026); puede ser snapshot de un portal, no serie histórica"
+  - "Sin descripción de variables en nombre de archivo"
+
+citation: "ANA-SNIRH. Reportes de monitoreo, descargados 10/02/2026."
+related_reports:
+  - peblt_monitoreo_lago
+
+status: pending_extraction
+priority: high
+notes: >
+  PENDIENTE: inspeccionar al menos 1–2 archivos para confirmar si contienen
+  clorofila-a, Disco Secchi u otras variables limnológicas del lago.
+  Son 16 archivos en carpeta Drive 1rh0TVVmw5UgGvsYh8GaiRd-TheK5zSg-.
+  Si contienen parámetros ópticos, suben a prioridad ALTA para el Tier 1.

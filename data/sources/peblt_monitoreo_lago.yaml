@@ -1,0 +1,70 @@
+id: peblt_monitoreo_lago
+name: "Monitoreo limnológico del lago Titicaca — Bahías y cruceros (PEBLT/IMARPE, 2013–2020)"
+institution: "PEBLT — Proyecto Especial Binacional Lago Titicaca / IMARPE"
+type: pdf_report
+topic:
+  - water_quality
+  - hydrology
+
+coverage_temporal:
+  start: "2013"
+  end: "2020"
+coverage_spatial:
+  description: "Lago Titicaca parte peruana: bahía interior de Puno, lago mayor, aguas superficiales corrientes"
+  basins: []
+  country: PE
+
+drive_id: null
+drive_folder: "Estado de la calidad del agua"
+local_path: "Data limpia /Estado de la calidad del agua/"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-02-10"
+
+variables:
+  - temperatura_superficie
+  - oxigeno_disuelto
+  - ph
+  - conductividad
+  - turbidez
+  - transparencia_secchi
+  - nutrientes_no3_po4_nh4
+  - clorofila_a  # pendiente confirmar presencia en PDFs
+  - coliformes_fecales
+  - metales_disueltos
+granularity: "Campaña por crucero o monitoreo de bahía; datos por estación lacustre"
+n_records_approx: "Pendiente extracción de PDFs"
+schema_confirmed: false
+
+collection_method: >
+  Cruceros limnológicos en el lago (hidrogeoquímica, muestreo vertical por profundidad).
+  Monitoreos de bahía (perfiles superficiales). Laboratorio PEBLT/IMARPE.
+laboratory: "PEBLT / IMARPE"
+standard: "Protocolo Binacional Perú-Bolivia para monitoreo del lago Titicaca"
+
+limitations:
+  - "Datos en formato PDF — requieren extracción tabular (OCR o parseo manual)"
+  - "Cobertura hasta 2020; sin datos 2021–2025 en el conjunto disponible"
+  - "Cruceros irregulares: no hay una campaña por año en todos los años"
+  - "Bahía interior de Puno puede no representar el lago abierto"
+  - "Datos Bolivia (lago mayor parte boliviana) ausentes en este conjunto"
+
+citation: >
+  PEBLT. Informes de Monitoreo: Bahía Lago Titicaca 2019 y 2020; Cruceros
+  Hidroquímicos I y II 2019; Aguas Superficiales Corrientes 2019 y 2020;
+  Bahía Interior Puno 2020. Proyecto Especial Binacional Lago Titicaca, Puno.
+related_reports:
+  - ana_monitoreo_binacional
+  - ana_informes_tecnicos_ala_ilave
+
+status: available
+priority: high
+notes: >
+  FUENTE CRÍTICA para clorofila-a / Secchi — la variable objetivo del Tier 1.
+  Priorizar extracción de tablas de estos PDFs en la siguiente fase.
+  Archivos clave:
+  - INFORME BAHÍA LAGO TITICACA AÑO 2019.pdf (8.8 MB)
+  - INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf (5.8 MB)
+  - INFORME II CRUCERO HIDROQUIMICO AÑO 2019.pdf (2.6 MB)
+  - INFORME BAHÍA INTERIOS PUNO LAGO TITICACA 2020.pdf (3.4 MB)
+  - INFORME AGUAS SUPERFICIALES CORRIENTES 2020.pdf (5.4 MB)
+  - BOLETIN GESTION DE LA CALIDAD RRHH-TITICACA 2024.pdf (8 MB)

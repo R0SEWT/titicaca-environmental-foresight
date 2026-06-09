@@ -1,0 +1,54 @@
+id: ana_informes_tecnicos_ala_ilave
+name: "Informes Técnicos ANA-AAA.TIT — ALA Ilave (UH Ilave, monitoreo acuícola, IFC)"
+institution: "ANA — Autoridad Local del Agua Ilave"
+type: pdf_report
+topic:
+  - water_quality
+
+coverage_temporal:
+  start: "2013"
+  end: "2025"
+coverage_spatial:
+  description: "Cuenca del río Ilave y zona acuícola lago Titicaca (lado Ilave)"
+  basins:
+    - Ilave
+  country: PE
+
+drive_id: null
+drive_folder: "Data para herramienta / Resultados en gestión del agua - Ala Ilave"
+local_path: "Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Ilave/"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-05-02"
+
+variables:
+  - ph
+  - od_mg_l
+  - conductividad
+  - temperatura
+  - metales_pesados
+  - microbiologicos
+  - coordenadas_utm
+granularity: "Informe por campaña; tablas por punto de muestreo"
+n_records_approx: "~10 campañas regulares + emergencias + IFC; pendiente conteo exacto"
+schema_confirmed: false
+
+collection_method: "Monitoreo de campo ALA + laboratorio SGS del Perú"
+laboratory: "SGS del Perú S.A.C."
+standard: "ECA Cat. 3 y 4-E1; protocolos ANA de vigilancia y control"
+
+limitations:
+  - "Datos en PDF; requieren extracción"
+  - "Los datos tabulares consolidados ya están en ana_tributarias_2013_2025 — estos PDFs son la fuente primaria que respalda ese dataset"
+  - "IFC (Identificación de Fuentes Contaminantes) son estudios distintos a los monitoreos regulares"
+
+citation: "ANA-ALA Ilave. Informes Técnicos de Monitoreo UH Ilave, 2013–2025."
+related_reports:
+  - ana_tributarias_2013_2025
+  - ana_monitoreo_binacional
+
+status: available
+priority: medium
+notes: >
+  Función principal: respaldo documental de ana_tributarias_2013_2025.
+  Útil para verificar valores atípicos o recuperar variables no incluidas
+  en el dataset consolidado (ej. observaciones de campo, fotos, mapas de puntos).

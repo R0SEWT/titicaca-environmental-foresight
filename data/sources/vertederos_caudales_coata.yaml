@@ -1,0 +1,49 @@
+id: vertederos_caudales_coata
+name: "Registro de vertederos municipales y caudales — Cuenca Coata (2011–2024)"
+institution: "Gobierno Regional de Puno / MINAM (fuente probable)"
+type: tabular
+topic:
+  - water_quality
+  - hydrology
+
+coverage_temporal:
+  start: "2011"
+  end: "2024"
+coverage_spatial:
+  description: "Vertimientos y botaderos en la región Puno; rutas hacia el lago Titicaca vía cuenca Coata"
+  basins:
+    - Coata
+  country: PE
+
+drive_id: null
+drive_folder: "Data descargada (raíz) — 1BkOVn0FqqQT4jmwTAsQ1z1YJDP2_G_8r"
+local_path: null
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-02-10"
+
+variables:
+  - tipo_desecho
+  - caudal_m3s
+  - ruta_hacia_lago
+  - ubicacion_vertedero
+  - anio
+granularity: "1 fila por vertedero/evento de vertimiento"
+n_records_approx: "Pendiente; serie 2011–2024"
+schema_confirmed: false
+
+collection_method: "Registro administrativo de vertimientos y botaderos con desagregación territorial"
+laboratory: null
+standard: null
+
+limitations:
+  - "Schema no confirmado — requiere lectura del archivo"
+  - "Puede tener gaps en años intermedios"
+  - "No incluye caudales de todas las cuencas; centrado en Coata"
+
+citation: "Registro de Vertederos y Caudales, Cuenca Coata, Puno, 2011–2024. Fuente institucional pendiente confirmar."
+related_reports:
+  - ana_informes_tecnicos_ala_juliaca
+
+status: available
+priority: medium
+notes: "Relevante para la capa de 'fuentes de presión' en el visor. Permite visualizar evolución temporal de vertimientos."

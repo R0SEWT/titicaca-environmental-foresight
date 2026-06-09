@@ -1,0 +1,88 @@
+id: ana_tributarias_2013_2025
+name: "Monitoreo de calidad de agua — Cuencas tributarias del Titicaca (ANA, 2013–2025)"
+institution: "ANA — Autoridad Nacional del Agua / Autoridad Administrativa del Agua Titicaca (AAA.TIT)"
+type: tabular
+topic:
+  - water_quality
+
+coverage_temporal:
+  start: "2013-10"
+  end: "2025-10"
+coverage_spatial:
+  description: "Cuencas tributarias peruanas al lago Titicaca"
+  basins:
+    - Suches
+    - Huancané
+    - Coata
+    - Ilave
+    - Ilpa
+    - Azángaro
+    - Pucará
+    - Llallimayo/Ramis
+  country: PE
+
+drive_id: "1MUmAB3tmHIZ8u178an8tjnlpd5pOlaAF"
+drive_folder: "Data para herramienta"
+local_path: null
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-05-07"
+
+variables:
+  - od_mg_l
+  - ph
+  - conductividad_us_cm
+  - temperatura_c
+  - hierro_mg_l
+  - aluminio_mg_l
+  - arsenico_mg_l
+  - cadmio_mg_l
+  - mercurio_mg_l
+  - plomo_mg_l
+  - zinc_mg_l
+  - manganeso_mg_l
+  - boro_mg_l
+  - litio_mg_l
+  - fosforo_mg_l
+  - nitrogeno_mg_l
+  - ecoli_nmp_100ml
+  - colif_term_nmp_100ml
+  - excede_eca
+  - parametros_que_exceden
+granularity: "1 fila por punto de muestreo × campaña de monitoreo"
+n_records_approx: "~300 puntos en 19 campañas (2013–2025); incluye regulares + emergencia"
+schema_confirmed: true
+
+collection_method: >
+  Monitoreo fisicoquímico in situ (pH-metro, oxímetro, conductímetro, termómetro) +
+  toma de muestras para análisis de metales pesados y microbiológicos en laboratorio
+  SGS del Perú. Coordenadas UTM WGS84 registradas en campo. Informes individuales por
+  campaña emitidos como IT (Informe Técnico) numerados por la AAA.TIT.
+laboratory: "SGS del Perú S.A.C."
+standard: "ECA para agua: Categoría 3 (riego/bebida animal) y Categoría 4-E1 (conservación del ambiente acuático — lagos)"
+
+limitations:
+  - "Monitoreos puntuales (campaña de días a semanas), no series temporales continuas"
+  - "Cobertura temporal desigual por cuenca: Suches solo 2013, otras cuencas con mayor densidad 2023–2025"
+  - "Mezcla de campañas regulares (estiaje/avenida) y de emergencia (denuncias mineras); deben separarse en análisis"
+  - "Sin cobertura de cuencas bolivianas (Katari, Desaguadero)"
+  - "No incluye clorofila-a, Disco Secchi ni parámetros ópticos del lago principal"
+  - "Algunos puntos sin coordenadas o sin caudal registrado (marcados 'sin caudal')"
+  - "El campo nivel_lago_titicaca_msnm solo aparece en campañas recientes (Coata 2025)"
+
+citation: >
+  ANA-AAA.TIT/RWAA. Informes Técnicos de Monitoreo de Calidad de Agua, Cuencas
+  Tributarias del Sistema Titicaca, 2013–2025. Autoridad Nacional del Agua, Perú.
+  Dataset consolidado proporcionado por equipo periodístico El Comercio.
+related_reports:
+  - ana_informes_tecnicos_ala_ilave
+  - ana_informes_tecnicos_ala_juliaca
+  - ana_informes_tecnicos_ala_ramis
+  - ana_informes_tecnicos_ala_huancane
+
+status: available
+priority: high
+notes: >
+  DATASET PRINCIPAL para el modelo. Tiene estructura relacional en dos hojas:
+  1_monitoreo (nivel campaña) y 2_calidad_agua (nivel punto×campaña). El flag
+  excede_eca ya está calculado. Ver también ana_calidad_agua_v2 para versión con
+  detalle adicional de parámetros que exceden ECA.

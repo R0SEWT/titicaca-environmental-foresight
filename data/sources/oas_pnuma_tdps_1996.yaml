@@ -1,0 +1,62 @@
+id: oas_pnuma_tdps_1996
+name: "Diagnóstico Ambiental del Sistema TDPS (OAS/PNUMA, 1996)"
+institution: "OEA — Organización de los Estados Americanos / PNUMA"
+type: pdf_report
+topic:
+  - water_quality
+  - policy
+  - ecology
+
+coverage_temporal:
+  start: "1990"
+  end: "1996"
+coverage_spatial:
+  description: "Sistema Titicaca-Desaguadero-Poopó-Salar de Coipasa (TDPS); binacional Perú-Bolivia"
+  basins:
+    - Titicaca
+    - Desaguadero
+    - Poopó
+  country: PE/BO
+
+drive_id: null
+drive_folder: "Estado de la calidad del agua (referencia bibliográfica)"
+local_path: null
+provided_by: "Literatura académica; referenciado en deep-research-report.md"
+access_date: "2026-06-09"
+
+variables:
+  - focos_contaminacion
+  - fuentes_puntuales
+  - eutrofizacion_baya_puno
+  - descargas_juliaca_coata
+  - descargas_el_alto_rio_seco
+  - tendencias_ambientales
+  - pronostico_ambiental
+granularity: "Reporte de síntesis; no tabular"
+n_records_approx: "No aplica"
+schema_confirmed: false
+
+collection_method: "Síntesis binacional: inventario, evaluación temática y pronóstico ambiental"
+laboratory: null
+standard: null
+
+limitations:
+  - "Datos de 1990–1996; 30 años de antigüedad"
+  - "No expone dataset tabular con n consistente"
+  - "Sirve como marco causal, no como baseline predictivo"
+  - "Algunos focos documentados han cambiado (ej. El Alto tiene más tratamiento hoy)"
+
+citation: >
+  OEA/PNUMA (1996). Diagnóstico Ambiental del Sistema TDPS.
+  Proyecto de Gestión de los Recursos Naturales del Sistema Hídrico Binacional.
+  Washington D.C.: Organización de los Estados Americanos.
+related_reports:
+  - plan_accion_titicaca_2020
+
+status: pending_download
+priority: medium
+notes: >
+  Marco causal de referencia para el proyecto. Identifica focos dominantes que
+  siguen vigentes: contaminación orgánica y bacteriológica en bahía Puno,
+  descargas Juliaca→Coata, eutrofización creciente. Contiene capítulo de
+  'pronóstico ambiental' que es antecedente directo del enfoque de este proyecto.

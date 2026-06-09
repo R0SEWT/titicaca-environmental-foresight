@@ -1,0 +1,58 @@
+id: ana_calidad_agua_v2
+name: "Calidad de agua Titicaca ANA 2013–2025 v2 (con detalle ECA)"
+institution: "ANA — Autoridad Nacional del Agua / AAA.TIT"
+type: tabular
+topic:
+  - water_quality
+
+coverage_temporal:
+  start: "2013-10"
+  end: "2025-10"
+coverage_spatial:
+  description: "Cuencas tributarias peruanas; misma cobertura que ana_tributarias_2013_2025"
+  basins:
+    - Suches
+    - Huancané
+    - Coata
+    - Ilave
+    - Ilpa
+    - Azángaro
+    - Pucará
+    - Llallimayo/Ramis
+  country: PE
+
+drive_id: "1SP1JIqJ0f8Q-i1ZB5Buwc4GQToM9HrKP"
+drive_folder: "Data para herramienta"
+local_path: null
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-06-06"
+
+variables:
+  - parametros_exceden_ECA
+  - n_parametros_exceden
+  - metales_exceden
+  - parametros_fisicoquimicos_exceden
+  - parametros_microbiologicos_exceden
+  - codigo_ensayo_SGS
+granularity: "1 fila por punto × campaña; extiende ana_tributarias_2013_2025"
+n_records_approx: "Mismo corpus; agrega columnas de detalle ECA"
+schema_confirmed: true
+
+collection_method: "Ídem ana_tributarias_2013_2025"
+laboratory: "SGS del Perú S.A.C."
+standard: "ECA para agua Categorías 3 y 4-E1"
+
+limitations:
+  - "Versión alternativa del mismo dataset principal; mismas limitaciones temporales y espaciales"
+  - "No reemplaza sino complementa a ana_tributarias_2013_2025"
+  - "El campo codigo_ensayo_SGS permite trazabilidad al certificado de laboratorio original"
+
+citation: >
+  ANA-AAA.TIT/RWAA. Dataset consolidado v2, 2026. Ver ana_tributarias_2013_2025
+  para cita completa.
+related_reports:
+  - ana_tributarias_2013_2025
+
+status: available
+priority: high
+notes: "Usar en conjunto con ana_tributarias_2013_2025. El código SGS permite cruzar con certificados originales si se necesita."
