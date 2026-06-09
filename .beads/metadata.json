@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "titicaca_enironmental_foresight",
+  "project_id": "c87054df-991b-491f-bae8-7909f3674f9b"
+}
