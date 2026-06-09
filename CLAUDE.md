@@ -2,42 +2,57 @@
 
 ## Domain / Scientific Context
 
-<!-- The real-world problem this project addresses. State the claim/objective, the outcome,
-     and — critically — the data provenance (own data? regional/Peruvian domain? public source?).
-     This is the differentiator; be concrete. -->
-
-- **Problem**: <!-- fill -->
-- **Outcome / target**: <!-- fill -->
-- **Data provenance**: <!-- fill: source, ownership, how acquired -->
+- **Problem**: Environmental contamination and ecological deterioration of Lake Titicaca (Peru/Bolivia). The project builds a visual-predictive tool for a journalism special (El Comercio) that shows how pollution distributes across zones, what signals evidence it, and what scenarios emerge if current conditions continue or mitigation is applied.
+- **Outcome / target**: Interactive visual tool with (1) spatial contamination risk maps by zone, (2) key indicator signals (chlorophyll-a / eutrophication as primary proxy, metals and coliforms as secondary), (3) counterfactual scenarios (business-as-usual vs. mitigation). Output: JSON for web + narrative visualizations.
+- **Data provenance**: Mixed. (a) "Data limpia" files provided by project partners (in-situ stations — contents pending inventory); (b) public institutional sources: IMARPE-PELT monitoring reports, OAS/PNUMA TDPS diagnostics; (c) satellite imagery: Sentinel-2 (chlorophyll-a / optical proxies), MODIS/VIIRS (temporal series); (d) bibliography-derived variables from `deep-research-report.md`. **First deliverable is a data inventory** before any modeling.
 
 ## Architecture
 
-<!-- How the project runs. If it's a pipeline, describe the stages and the data flow between them. -->
+Three-tier baseline approach (see `deep-research-report.md`):
 
 ```bash
-# e.g. uv run ingest && uv run features && uv run model
+# Tier 1 — eutrophication risk map (minimum viable)
+uv run ingest      # load raw zip files → data/bronze/
+uv run clean       # standardize schema, QA flags → data/silver/
+uv run features    # spatial joins, satellite matchups → data/gold/
+uv run scenarios   # risk classification + counterfactuals → outputs/
+
+# Tier 2 — chlorophyll-a regression with Sentinel-2 (medium effort)
+# Tier 3 — hybrid multi-output system (ambitious, requires dense historical data)
 ```
+
+Primary variables: `chlorophyll_a`, `secchi_m`, `turbidity_ntu`, `do_mg_l`, `water_temp_c`, `ph`, `nh4`, `no3`, `po4`, `fecal_coliforms`, `as`, `pb`, `cd`. See research report for full target schema.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `src/titicaca_environmental_foresight/...` | <!-- fill --> |
-| `configs/...` | <!-- fill --> |
+| `deep-research-report.md` | State-of-the-art review; defines baselines, variables and methodological risks |
+| `data/bronze/` | Raw zip files from partners + downloaded satellite/institutional data |
+| `data/silver/` | Cleaned, schema-normalized parquet with QA flags |
+| `data/gold/` | Analytical tables: spatial risk grids, scenario outputs, matchup tables |
+| `src/titicaca_environmental_foresight/ingest.py` | Raw data loading and bronze layer |
+| `src/titicaca_environmental_foresight/features.py` | Feature engineering, spatial joins, satellite matchups |
+| `src/titicaca_environmental_foresight/model.py` | Risk classification / Chl-a regression |
+| `src/titicaca_environmental_foresight/scenarios.py` | Counterfactual scenario generation |
+| `outputs/` | JSON and static assets for web visualization |
 
 ## Data Conventions
-
-<!-- Adjust/remove if this is not a data project. Defaults reflect the medallion + polars/duckdb stack. -->
 
 - **Layers**: raw → `data/bronze/`, cleaned → `data/silver/`, analytic → `data/gold/`. All gitignored.
 - **Polars over pandas** everywhere; only drop to numpy when a library requires it.
 - **DuckDB for SQL joins** across parquet; Polars for local transforms.
-- **Remote silver**: reference the remote root via `$SILVER` in SQL when pulling shared data.
-- Keep dates as typed `Date`, never strings, in intermediate tables.
+- **Master schema**: every silver table must have `station_id`, `datetime`, `lat`, `lon`, `depth_m`, `qa_flag`, `sampling_agency`.
+- Keep dates as typed `Date`, never strings. Temporal splits must respect dry/wet season boundary — never random splits (leakage risk).
+- Spatial validation: no train/test pairs with collocated stations (spatial leakage risk).
+- Do not claim satellite-derived proxies are direct measurements of dissolved metals — document as proxy/inference explicitly.
 
 ## Conventions
 
-<!-- Project-specific rules: ID normalization, seeds, temporal discipline, naming, etc. -->
+- Issue prefix: `titicaca-enironmental-foresight` (beads, matches directory name with typo — do not rename)
+- Scenario outputs must be reproducible: seed all random processes, pin library versions in `pyproject.toml`.
+- All zone labels must match OAS/PNUMA TDPS geographic names for cross-referencing with institutional reports.
+- **No AI tool metadata in commits**: never include `Co-Authored-By: Claude` or similar AI attribution lines in commit messages.
 
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->

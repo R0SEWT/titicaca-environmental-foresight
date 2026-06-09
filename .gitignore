@@ -4,6 +4,10 @@ data/silver/
 data/gold/
 data/_metadata/
 
+# Raw data files in root (partner-provided, too large for git)
+*.zip
+outputs/
+
 # Python
 __pycache__/
 *.pyc
