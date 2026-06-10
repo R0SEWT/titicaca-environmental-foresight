@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections import Counter
 from pathlib import Path
 
 import polars as pl
@@ -87,9 +88,9 @@ def load_sources(sources_dir: Path = SOURCES_DIR) -> tuple[list[dict], dict[str,
         records.append(record)
 
     ids = [r.get("id") for r in records if r.get("id")]
-    dupes = {x for x in ids if ids.count(x) > 1}
+    dupes = sorted(i for i, n in Counter(ids).items() if n > 1)
     if dupes:
-        all_errors["<catalog>"] = [f"duplicate ids: {sorted(dupes)}"]
+        all_errors["<catalog>"] = [f"duplicate ids: {dupes}"]
 
     return records, all_errors
 
@@ -113,6 +114,7 @@ def build_catalog(records: list[dict]) -> pl.DataFrame:
             "country": cs.get("country", ""),
             "basins": ", ".join(cs.get("basins", [])),
             "drive_id": r.get("drive_id") or "",
+            "drive_folder": r.get("drive_folder") or "",
             "local_path": r.get("local_path") or "",
             "provided_by": r.get("provided_by", ""),
             "access_date": r.get("access_date", ""),
