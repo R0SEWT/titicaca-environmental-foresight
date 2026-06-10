@@ -54,6 +54,18 @@ Primary variables: `chlorophyll_a`, `secchi_m`, `turbidity_ntu`, `do_mg_l`, `wat
 - All zone labels must match OAS/PNUMA TDPS geographic names for cross-referencing with institutional reports.
 - **No AI tool metadata in commits**: never include `Co-Authored-By: Claude` or similar AI attribution lines in commit messages.
 
+## Session Close (este repo — supersede el protocolo beads genérico de abajo)
+
+`main` está protegida (PR requerido, CI `test` + conversaciones resueltas; sin aprobación formal). **NO se hace push directo a `main`.**
+
+Al cerrar sesión:
+1. Commit del trabajo en una **rama** y `git push -u origin <rama>`.
+2. Abrir/actualizar un **PR** y pedir review de Copilot.
+3. El merge espera **CI verde + todas las conversaciones de Copilot resueltas** (no se requiere `--admin`; si lo necesitas, algo está mal configurado).
+4. Tracking: `bd ready` al abrir y archivar issues de seguimiento al cerrar (backlog entre sesiones). **TodoWrite está permitido para pasos efímeros in-session**; beads es para el backlog que cruza sesiones.
+5. `bd dolt push` **NO aplica** (no hay remote dolt configurado); el `.beads/issues.jsonl` versionado en git es el mecanismo de sync. `bd remember` y el `MEMORY.md` del harness (que vive **fuera** del repo, en `~/.claude/...`) no compiten — usa cualquiera.
+
+> El bloque "Session Completion" inyectado más abajo asume trunk-based (push directo a `main`, `bd dolt push`) y queda **superseded** por esta sección.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker

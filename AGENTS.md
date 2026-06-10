@@ -28,6 +28,19 @@ cp -rf source dest          # NOT: cp -r source dest
 - `apt-get` — use `-y` flag
 - `brew` — use `HOMEBREW_NO_AUTO_UPDATE=1` env var
 
+## Session Close (este repo — supersede el protocolo beads genérico de abajo)
+
+`main` está protegida (PR requerido, CI `test` + conversaciones resueltas; sin aprobación formal). **NO se hace push directo a `main`.**
+
+Al cerrar sesión:
+1. Commit del trabajo en una **rama** y `git push -u origin <rama>`.
+2. Abrir/actualizar un **PR** y pedir review de Copilot.
+3. El merge espera **CI verde + todas las conversaciones de Copilot resueltas** (no se requiere `--admin`).
+4. Tracking: `bd ready` al abrir y archivar issues al cerrar (backlog entre sesiones). **TodoWrite permitido** para pasos efímeros in-session; beads para el backlog que cruza sesiones.
+5. `bd dolt push` **NO aplica** (no hay remote dolt); el `.beads/issues.jsonl` versionado en git es el sync. `bd remember` y el `MEMORY.md` del harness (vive **fuera** del repo) no compiten.
+
+> El bloque "Session Completion" inyectado más abajo asume trunk-based y queda **superseded** por esta sección.
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker
 
