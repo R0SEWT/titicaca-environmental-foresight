@@ -23,7 +23,7 @@ coverage_spatial:
 
 drive_id: "1SP1JIqJ0f8Q-i1ZB5Buwc4GQToM9HrKP"
 drive_folder: "Data para herramienta"
-local_path: null
+local_path: "bronze/data_limpia/Data limpia /Data para herramienta/calidad_agua_titicaca_ANA_2013-2025_v2 (1).xlsx"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-06-06"
 
@@ -55,4 +55,8 @@ related_reports:
 
 status: available
 priority: high
-notes: "Usar en conjunto con ana_tributarias_2013_2025. El código SGS permite cruzar con certificados originales si se necesita."
+notes: >
+  DUPLICADO: apunta a la MISMA planilla física que ana_tributarias_2013_2025
+  (calidad_agua_titicaca_ANA_2013-2025_v2.xlsx) — no es un archivo distinto. Verificado
+  en T2 (2026-06-10). Candidato a dedupe/consolidación en T6 (reconciliación de catálogo).
+  El código SGS (codigo_ensayo_SGS) permite cruzar con certificados de laboratorio originales.

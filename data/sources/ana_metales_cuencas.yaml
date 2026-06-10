@@ -1,0 +1,80 @@
+id: ana_metales_cuencas
+name: "Monitoreo de metales por cuenca — formato largo (ANA, METALES mg-L)"
+institution: "ANA — Autoridad Nacional del Agua / AAA.TIT"
+type: tabular
+topic:
+  - water_quality
+
+coverage_temporal:
+  start: "2025"
+  end: "2025"
+coverage_spatial:
+  description: "Cuencas tributarias peruanas; un archivo por cuenca/ámbito"
+  basins:
+    - Azángaro
+    - Pucará
+    - Ilave
+    - Huancané
+    - Suches
+    - Lagunillas
+  country: PE
+
+drive_id: null
+drive_folder: "Data para herramienta"
+local_path: "bronze/data_limpia/Data limpia /Data para herramienta/METALES mg-L"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-06-10"
+
+# Verificado leyendo los archivos en T2 (2026-06-10). Formato LARGO/tidy:
+# 1 fila por punto × fecha × parámetro, con valor numérico real (lo que la planilla
+# principal ana_tributarias_2013_2025 NO tiene — ahí los metales son texto censurado).
+variables:
+  - ano
+  - mes
+  - ubicacion_codigo     # código de estación ANA (ej. RPata 1)
+  - rio_fuente
+  - distrito
+  - provincia
+  - ubigeo               # INEI 6 dígitos — PRIMARY KEY de cruce (ver diccionario)
+  - coord_este           # UTM
+  - coord_norte
+  - parametro            # ej. "Arsénico (As)", "Aluminio (Al)"
+  - unidad               # mg/L
+  - valor                # numérico (con quirks, ver limitations)
+  - umbral_eca
+  - categoria_eca        # 3-D1 / 4-E1 / 4-E2 (varía por cuenca)
+  - supera_eca           # Sí / No / Sin valor
+granularity: "1 fila por punto de muestreo × fecha × parámetro (formato largo); ~1,700 filas en 6 cuencas"
+n_records_approx: "Azángaro 433, Ilave 357, Lagunillas 333, Huancané 205, + Pucará/Suches"
+schema_confirmed: true
+
+collection_method: >
+  Muestreo de calidad de agua ANA con análisis de metales totales en laboratorio acreditado.
+  Coordenadas UTM WGS84 y Ubigeo INEI registrados por estación. Consolidado en formato largo
+  por el equipo partner; diccionarios de datos en METALES mg-L/DICCIONARIOS/.
+laboratory: "Laboratorio acreditado (SGS del Perú u otro; confirmar por cuenca)"
+standard: "ECA para agua DS 004-2017-MINAM (categoría varía por cuerpo: 3-D1, 4-E1, 4-E2)"
+
+limitations:
+  - "CALIDAD: campo 'Valor' es string con coma decimal Y punto mezclados entre archivos (ej. '0,048' vs '1.38') → requiere normalización numérica"
+  - "Valores censurados por debajo del límite de detección ('< 0,000010', '< 0.00010') → dato izquierda-censurado, no es cero"
+  - "Schema NO homogéneo entre cuencas: nombres/orden de columnas difieren (ej. 'Umbral ECA (Cat 3-D1)' vs 'Umbral ECA' vs 'Umbral ECA (Cat 3)'); algunas traen 'Mes' y otras no → armonizar en silver"
+  - "'Supera_ECA' es categórico {Sí, No, Sin valor}; 'Sin valor' marca parámetros sin umbral ECA aplicable o censurados"
+  - "Cobertura temporal observada principalmente 2025; rango por cuenca a confirmar al ingerir el corpus completo"
+
+citation: >
+  ANA-AAA.TIT. Monitoreo de metales en cuencas del Sistema Titicaca. Consolidado en formato
+  largo y diccionarios de datos elaborados por el equipo periodístico El Comercio.
+related_reports:
+  - ana_tributarias_2013_2025
+  - ana_informes_tecnicos_ala_ramis
+  - ana_informes_tecnicos_ala_ilave
+
+status: available
+priority: high
+notes: >
+  CAPA NUMÉRICA DE METALES (complementa ana_tributarias_2013_2025, donde los metales solo
+  figuran como texto de excedencia). El diccionario_RAMIS.docx designa 'Ubigeo' (INEI 6 díg.)
+  como PRIMARY KEY para cruces relacionales confiables con datasets censales, de salud y
+  socioeconómicos (evita homónimos/errores de nombre de distrito). Cuencas: Azángaro/Pucará
+  (RAMIS), Ilave, Huancané/Suches, Lagunillas (acuícola). Diccionarios en METALES mg-L/DICCIONARIOS/.

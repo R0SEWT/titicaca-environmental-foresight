@@ -1,0 +1,66 @@
+id: minsa_salud_morbilidad_puno
+name: "Salud y morbilidad — Departamento de Puno (MINSA/DIRESA, 2004–2024)"
+institution: "MINSA — DIRESA Puno (HIS / estadística sectorial)"
+type: tabular
+topic:
+  - health
+
+coverage_temporal:
+  start: "2004"
+  end: "2024"
+coverage_spatial:
+  description: "Departamento de Puno por provincia y distrito (incluye distritos ribereños al lago)"
+  basins: []
+  country: PE
+
+drive_id: null
+drive_folder: "Salud"
+local_path: "bronze/data_limpia/Data limpia /Salud"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-06-10"
+
+# 6 tablas en la carpeta Salud/. Verificado leyendo muestra en T4 y reconfirmado en T7
+# (2026-06-10): hoja 'Establecimientos' con UBIGEO/Categoría limpia; archivo de muertes con
+# una hoja por año (2004…) + banner en fila 1 y cabeceras multinivel por etapa de vida.
+variables:
+  - muertes_por_agua_contaminada    # por etapa de vida × sexo × provincia (OUTCOME clave)
+  - personas_atendidas              # por categoría de establecimiento × etapa de vida × sexo
+  - principales_afecciones          # morbilidad por categoría CIE-10
+  - personas_con_problema_salud
+  - perfil_pacientes
+  - establecimientos_salud          # 724 EESS: institución, ubigeo, categoría, inicio actividad
+  - personal_salud                  # especialistas por establecimiento
+  - provincia
+  - distrito
+  - ubigeo
+  - anio
+  - sexo
+  - etapa_vida
+granularity: "Varía por tabla: matrices anuales por provincia/distrito × etapa de vida × sexo; catálogo de 724 establecimientos"
+n_records_approx: "6 archivos; tablas de mortalidad/morbilidad con 21-22 hojas (una por año 2004-2024)"
+schema_confirmed: true
+
+collection_method: >
+  Estadística sectorial MINSA/DIRESA Puno: registros HIS de atenciones y morbilidad,
+  defunciones por causas atribuibles al consumo de agua contaminada, e inventario de
+  establecimientos de salud (RENAES). Productor identificado: Marco Polo Bardales Espinoza.
+laboratory: null
+standard: "Clasificación CIE-10"
+
+limitations:
+  - "Tablas de mortalidad/morbilidad con 21-22 hojas (una por año) + título-banner en fila 1 y cabeceras multinivel → requieren parseo por hoja y resolución de cabecera"
+  - "Tabla 'atendidos' muy ancha (124 columnas) por cruces etapa-vida×sexo×categoría"
+  - "Excepción: hoja 'Establecimientos' (724×11) está limpia (incluye UBIGEO, Categoría, Inicio de Actividad)"
+  - "Nomenclaturas CIE-10 con variantes/typos (advertencia del partner) → riesgo de doble conteo, normalizar antes de agregar"
+  - "Es dato de salud poblacional (outcome), no medición ambiental; el vínculo contaminación→salud es asociación, no causalidad directa"
+
+citation: "MINSA — Dirección Regional de Salud Puno. Estadísticas de salud y morbilidad, 2004–2024."
+related_reports: []
+
+status: available
+priority: high
+notes: >
+  OUTCOME HUMANO que valida la señal de contaminación: la tabla 'enfermedades atribuibles al
+  consumo de agua contaminada' (987 muertes 2004-2024 según Inventario I) es la variable de
+  impacto clave. Cruce con capas ambientales vía UBIGEO/distrito (ver ana_metales_cuencas).
+  Productor: Marco Polo Bardales Espinoza (ver data/_metadata/authorship.tsv).

@@ -17,7 +17,7 @@ coverage_spatial:
 
 drive_id: null
 drive_folder: "Data para herramienta / Resultados de gestión del agua - Ala Huancané"
-local_path: "Data limpia /Data para herramienta/Resultados de gestión del agua - Ala Huancané/"
+local_path: "bronze/data_limpia/Data limpia /Data para herramienta/Resultados de gestión del agua - Ala Huancané/"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-05-03"
 

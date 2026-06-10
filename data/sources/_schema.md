@@ -61,3 +61,15 @@ notes: str | null
 - `schema_confirmed: true` requiere que alguien haya leído el archivo real y verificado columnas
 - `limitations` nunca puede ser lista vacía en fuentes primarias (`type: tabular`)
 - `drive_id` o `local_path` debe estar presente (al menos uno)
+
+## Semántica de `schema_confirmed` por tipo (DECISION-004)
+
+`schema_confirmed` es un **gate de calidad solo para tipos legibles por máquina**
+(`tabular`, `gis`): ahí `false` significa "perfilado pendiente" y es un defecto. El catálogo
+falla (`catalog.py --check` sale != 0) si una fuente `tabular`/`gis` de **prioridad alta** queda
+sin confirmar.
+
+Para `pdf_report` e `image_series` el contenido tabular requiere **extracción** (OCR/parseo o
+descarga de escenas), que es trabajo de otra fase. Ahí `schema_confirmed:false` **no es un
+defecto**: se reporta aparte como "pendiente de extracción" y se rastrea vía `status` + un issue
+de extracción dedicado. No se debe falsear el flag para pasar el gate.

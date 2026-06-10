@@ -1,0 +1,48 @@
+id: inei_demografia_proyecciones_puno
+name: "Demografía y proyecciones de población — Puno (INEI, 1995–2030)"
+institution: "INEI — Instituto Nacional de Estadística e Informática"
+type: tabular
+topic:
+  - socioeconomic
+
+coverage_temporal:
+  start: "1995"
+  end: "2030"
+coverage_spatial:
+  description: "Departamento de Puno; departamental, distrital y por centro poblado"
+  basins: []
+  country: PE
+
+drive_id: null
+drive_folder: "Demografía de Puno y Proyecciones"
+local_path: "bronze/data_limpia/Data limpia /Demografía de Puno y Proyecciones"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-06-10"
+
+# 4 archivos: población estimada/proyectada, indicadores demográficos, CPV2017 centro poblado, proyecciones distritales.
+variables:
+  - anio
+  - departamento
+  - distrito
+  - poblacion_estimada_proyectada   # por edad simple y año calendario
+  - indicadores_demograficos        # tasas (natalidad, mortalidad, etc.)
+  - centro_poblado
+granularity: "Series de población por edad/sexo/año a nivel departamental, distrital y centro poblado"
+n_records_approx: "4 archivos; proyecciones distritales ~2139 filas"
+schema_confirmed: false
+
+collection_method: "Estimaciones y proyecciones de población INEI (boletines), basadas en censos. Compilado por Joaquín Suazo."
+laboratory: null
+standard: null
+
+limitations:
+  - "Formato de boletín INEI ('CUADRO Nº NN') con título-banner; cabecera real desplazada → requiere parseo"
+  - "Proyecciones son estimaciones, no conteos observados (post-2017)"
+
+citation: "INEI. Estimaciones y Proyecciones de Población, Departamento de Puno, 1995–2030."
+related_reports:
+  - inei_censo_puno_2007_2017
+
+status: available
+priority: medium
+notes: "Denominadores poblacionales para normalizar outcomes de salud y exposición; presión demográfica por distrito ribereño."

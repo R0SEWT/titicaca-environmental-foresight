@@ -1,0 +1,54 @@
+id: inei_censo_puno_2007_2017
+name: "Censos de Población y Vivienda — Puno distrital (INEI, CPV 2007 y 2017)"
+institution: "INEI — Instituto Nacional de Estadística e Informática"
+type: tabular
+topic:
+  - socioeconomic
+
+coverage_temporal:
+  start: "2007"
+  end: "2017"
+coverage_spatial:
+  description: "Departamento de Puno a nivel distrital (incluye distritos ribereños al lago)"
+  basins: []
+  country: PE
+
+drive_id: null
+drive_folder: "Censo Puno 2007 y 2017 - Joaquin Suazo + Viviendas por tipo de material"
+local_path: "bronze/data_limpia/Data limpia /Censo Puno 2007 y 2017 - Joaquin Suazo"
+provided_by: "Equipo periodístico El Comercio (compilado por Joaquín Suazo)"
+access_date: "2026-06-10"
+
+# CPV 2007 + 2017 distrital (3 hojas: Población/Hogar/Vivienda) + viviendas por materialidad 2017.
+variables:
+  - distrito
+  - ubigeo                  # clave de cruce con capas ambientales/salud
+  - poblacion               # por sexo, grupo de edad, área urbana/rural
+  - hogar                   # características del hogar
+  - vivienda                # tipo, condición de ocupación, material de pisos/paredes/techos
+  - abastecimiento_agua     # red pública / pozo / río (Inventario III)
+  - servicio_higienico      # red / letrina / pozo ciego
+  - combustible_cocina      # gas / leña / bosta
+  - ocupacion
+granularity: "1 fila por distrito × indicador censal (matrices anchas con cabeceras jerárquicas)"
+n_records_approx: "~130 distritos; CPV 2017 hoja Población = 130×331 columnas"
+schema_confirmed: false
+
+collection_method: "Censos Nacionales de Población y Vivienda 2007 (XI/V) y 2017 (XII/VII), INEI. Compilado distrital por Joaquín Suazo."
+laboratory: null
+standard: null
+
+limitations:
+  - "MUY COSTOSO de normalizar: hoja Población 130×331 con cabeceras jerárquicas multinivel + título-banner en fila 1 → cada bloque de columnas es un cruce (sexo×edad×área)"
+  - "Solo 2 puntos temporales (2007, 2017); no es serie continua"
+  - "Requiere mapeo cuidadoso de columnas multinivel antes de usar"
+
+citation: "INEI. Censos Nacionales 2007 (XI Población, V Vivienda) y 2017 (XII Población, VII Vivienda), Puno."
+related_reports: []
+
+status: available
+priority: medium
+notes: >
+  Covariables de exposición/vulnerabilidad (acceso a agua, saneamiento, materialidad de vivienda).
+  CLAVE: cruzar por UBIGEO con calidad de agua/metales y salud (el diccionario de metales designa
+  Ubigeo como PK relacional, ver ana_metales_cuencas y nota en T11). Compilador: Joaquín Suazo.

@@ -1,0 +1,101 @@
+id: ana_observatorio_calidad_lago
+name: "Monitoreo de calidad de agua del lago y cuencas — Observatorio ANA (reportes por estación, 2018–2023)"
+institution: "ANA — Autoridad Nacional del Agua / Observatorio del Agua"
+type: tabular
+topic:
+  - water_quality
+  - ecology
+
+coverage_temporal:
+  start: "2018"
+  end: "2023"
+coverage_spatial:
+  description: "Mayormente puntos del lago Titicaca (peruano); algunos puntos en ríos Ramis/Willy/Desaguadero"
+  basins:
+    - Lago Titicaca
+    - Ramis
+  country: PE
+
+drive_id: null
+drive_folder: "Monitoreo de cuencas"
+local_path: "bronze/data_limpia/Data limpia /Monitoreo de cuencas"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-06-10"
+
+# Verificado leyendo los 81 .xls en T3 (2026-06-10). Formato TRANSPUESTO:
+# 1 archivo = 1 estación × 1 campaña; parámetros en filas, columnas = UNIDAD / umbral ECA / Resultado.
+variables:
+  # metadata por reporte
+  - codigo_estacion          # ej. LTit94
+  - cuerpo_agua              # ej. "Otros Lago Titicaca", "Otros Río Ramis"
+  - fecha_monitoreo
+  - hora_monitoreo
+  - nro_informe_ensayo
+  - categoria_eca            # Cat.4-E1 Lagunas y Lagos
+  # físico-químicos (suite limnológica/eutrofización)
+  - clorofila_a              # presente con valor en 57/81 archivos
+  - transparencia            # proxy tipo Secchi
+  - fosforo_total
+  - nitrogeno_total
+  - dbo5
+  - oxigeno_disuelto
+  - pH
+  - conductividad
+  - solidos_suspendidos_totales
+  - temperatura
+  - amoniaco_n
+  - sulfuros
+  - aceites_y_grasas
+  # inorgánicos / metales (lista completa)
+  - aluminio
+  - arsenico
+  - cadmio
+  - plomo
+  - mercurio
+  - zinc
+  - hierro
+  - manganeso
+  - cobre
+  - cromo_total
+  - niquel
+  - boro
+  - litio
+  - antimonio
+  - bario
+  - selenio
+  - vanadio
+  # microbiológico
+  - coliformes_termotolerantes
+granularity: "1 archivo = 1 estación × 1 campaña (formato transpuesto: ~50 parámetros en filas)"
+n_records_approx: "81 reportes; campañas 2019-II (46), 2018-II (30), 2021-I (4), 2023-I (1)"
+schema_confirmed: true
+
+collection_method: >
+  Monitoreo de vigilancia de calidad de agua de la red ANA, exportado desde el Observatorio
+  del Agua como reporte por punto×campaña. Parámetros fisicoquímicos, metales totales,
+  microbiológicos y organolépticos comparados contra ECA-Agua Cat.4-E1 (lagunas y lagos).
+laboratory: "Laboratorio acreditado (informe de ensayo numerado por reporte)"
+standard: "ECA para agua DS 004-2017-MINAM — Categoría 4-E1 (lagunas y lagos)"
+
+limitations:
+  - "PARSEO: layout transpuesto con banner (filas 0-4) + bloque metadata + tabla de parámetros en filas; requiere parser dedicado, no lectura tabular directa"
+  - "Valores con quirks: censurados (`< 1`, `< 0,006`), coma decimal, y `----` = parámetro no medido"
+  - "Cobertura temporal concentrada en 2018-II y 2019-II; muy pocos puntos 2021/2023"
+  - "Clorofila A presente pero no medida en todos los puntos (con valor en 57/81)"
+  - "Mayormente puntos del lago (72/81); pocos puntos de ríos tributarios"
+  - "1 estación × 1 archivo: reconstruir panel requiere unir los 81 reportes por estación+fecha"
+
+citation: >
+  ANA — Observatorio del Agua. Reportes de monitoreo de calidad de agua, Sistema Titicaca,
+  campañas 2018-II a 2023-I. Autoridad Nacional del Agua, Perú.
+related_reports:
+  - peblt_monitoreo_lago
+  - ana_red_monitoreo
+
+status: available
+priority: high
+notes: >
+  SUITE LIMNOLÓGICA IN-SITU DEL LAGO con clorofila-a, transparencia, P y N totales — fuente
+  DIRECTA para el target de eutrofización del Tier 1 (la planilla principal ana_tributarias_2013_2025
+  NO tiene chl-a; aquí sí). Complementa peblt_monitoreo_lago (PDFs 2013-2020) y la vía satelital
+  (issue T13). Catálogo de estaciones asociado: ana_red_monitoreo.

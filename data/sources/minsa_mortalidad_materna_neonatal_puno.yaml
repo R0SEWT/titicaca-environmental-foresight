@@ -1,0 +1,56 @@
+id: minsa_mortalidad_materna_neonatal_puno
+name: "Mortalidad materna y neonatal — Puno (MINSA, 2000–2025)"
+institution: "MINSA — DIRESA Puno"
+type: tabular
+topic:
+  - health
+
+coverage_temporal:
+  start: "2000"
+  end: "2025"
+coverage_spatial:
+  description: "Departamento de Puno; mortalidad materna a nivel departamental y neonatal por provincia/distrito"
+  basins: []
+  country: PE
+
+drive_id: null
+drive_folder: "Muertes maternas + Mortalidad neonatal"
+local_path: "bronze/data_limpia/Data limpia /Muertes maternas"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-06-10"
+
+# 3 archivos de muertes maternas + 1 de mortalidad neonatal. Verificado en T4.
+variables:
+  - anio
+  - n_muertes_maternas        # serie anual 2000-2025
+  - lugar_deceso              # MINSA / ESSALUD / trayecto / otro (2012-2025)
+  - provincia
+  - distrito
+  - categoria
+  - sexo                      # neonatal: Femenino/Masculino/Total
+  - n_muertes_neonatales
+granularity: "Muertes maternas: 1 fila/año (y por lugar de deceso 2012-2025). Neonatal: 1 fila por provincia×distrito×categoría×año×sexo"
+n_records_approx: "Maternas: serie 2000-2025; Neonatal: 567 filas (SAIP, ya limpia)"
+schema_confirmed: true
+
+collection_method: >
+  Registros de mortalidad MINSA/DIRESA Puno. La tabla neonatal proviene de una solicitud de
+  acceso a la información pública (SAIP 25-004785) y fue limpiada por el equipo partner (creador
+  openpyxl, sufijo _limpia) → es derivado, no crudo original.
+laboratory: null
+standard: null
+
+limitations:
+  - "Mortalidad materna a nivel departamental (sin desagregación distrital en la serie anual) → poca resolución espacial para cruce con zonas de contaminación"
+  - "Neonatal: archivo derivado (limpiado por partner); conservar trazabilidad al SAIP original"
+  - "Vínculo con contaminación del agua indirecto/débil; útil como contexto de salud materno-infantil"
+
+citation: "MINSA — DIRESA Puno. Mortalidad materna 2000–2025 y neonatal (SAIP 25-004785)."
+related_reports:
+  - minsa_salud_morbilidad_puno
+
+status: available
+priority: medium
+notes: >
+  Contexto de salud materno-infantil (Inventario I/II). Menor relevancia directa al modelo de
+  contaminación que minsa_salud_morbilidad_puno. Neonatal ya curado por el equipo partner.
