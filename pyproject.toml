@@ -1,7 +1,7 @@
 [project]
 name = "titicaca-environmental-foresight"
 version = "0.1.0"
-description = "TODO: one-line description"
+description = "Visual-predictive tool mapping contamination risk and eutrophication scenarios for Lake Titicaca (El Comercio special)"
 requires-python = ">=3.11"
 dependencies = [
     "polars>=1.0",

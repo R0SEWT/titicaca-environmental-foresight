@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections import Counter
 from pathlib import Path
 
 import polars as pl
@@ -60,8 +61,11 @@ def _validate(record: dict, path: Path) -> list[str]:
     if record.get("type") == "tabular" and not lims:
         errors.append("tabular sources must list at least one limitation")
 
-    if not record.get("drive_id") and not record.get("local_path"):
-        errors.append("at least one of drive_id or local_path must be set")
+    has_locator = (
+        record.get("drive_id") or record.get("local_path") or record.get("drive_folder")
+    )
+    if record.get("status") == "available" and not has_locator:
+        errors.append("available source must set a locator (drive_id, drive_folder or local_path)")
 
     slug = path.stem
     if record.get("id") != slug:
@@ -70,7 +74,7 @@ def _validate(record: dict, path: Path) -> list[str]:
     return errors
 
 
-def load_sources(sources_dir: Path = SOURCES_DIR) -> list[dict]:
+def load_sources(sources_dir: Path = SOURCES_DIR) -> tuple[list[dict], dict[str, list[str]]]:
     yamls = sorted(p for p in sources_dir.glob("*.yaml") if not p.name.startswith("_"))
     records = []
     all_errors: dict[str, list[str]] = {}
@@ -83,18 +87,12 @@ def load_sources(sources_dir: Path = SOURCES_DIR) -> list[dict]:
             all_errors[path.name] = errs
         records.append(record)
 
-    if all_errors:
-        for fname, errs in all_errors.items():
-            for e in errs:
-                print(f"  [WARN] {fname}: {e}", file=sys.stderr)
-
-    ids = [r["id"] for r in records]
-    dupes = {x for x in ids if ids.count(x) > 1}
+    ids = [r.get("id") for r in records if r.get("id")]
+    dupes = sorted(i for i, n in Counter(ids).items() if n > 1)
     if dupes:
-        print(f"  [ERROR] duplicate ids: {dupes}", file=sys.stderr)
-        sys.exit(1)
+        all_errors["<catalog>"] = [f"duplicate ids: {dupes}"]
 
-    return records
+    return records, all_errors
 
 
 def build_catalog(records: list[dict]) -> pl.DataFrame:
@@ -116,6 +114,7 @@ def build_catalog(records: list[dict]) -> pl.DataFrame:
             "country": cs.get("country", ""),
             "basins": ", ".join(cs.get("basins", [])),
             "drive_id": r.get("drive_id") or "",
+            "drive_folder": r.get("drive_folder") or "",
             "local_path": r.get("local_path") or "",
             "provided_by": r.get("provided_by", ""),
             "access_date": r.get("access_date", ""),
@@ -164,7 +163,13 @@ def main() -> None:
     parser.add_argument("--check", action="store_true", help="validate only, no output written")
     args = parser.parse_args()
 
-    records = load_sources()
+    records, errors = load_sources()
+    if errors:
+        for fname, errs in errors.items():
+            for e in errs:
+                print(f"  [ERROR] {fname}: {e}", file=sys.stderr)
+        sys.exit(1)
+
     df = build_catalog(records)
     print_summary(df)
 
