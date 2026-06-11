@@ -252,8 +252,11 @@ def render_inventory_section(df: pl.DataFrame) -> str:
     lines.append("")
     seen_topics = [t for t in TOPIC_ORDER if df["topic"].str.contains(t).any()]
     for topic in seen_topics:
+        # Pertenencia a la lista completa de topics: una fuente multi-topic
+        # (p.ej. water_quality + ecology) debe aparecer en TODAS sus secciones,
+        # no solo en la del primer topic. La matriz es de procedencia por topic.
         sub = df.filter(
-            pl.col("topic").str.split(", ").list.first() == topic
+            pl.col("topic").str.split(", ").list.contains(topic)
         )
         if len(sub) == 0:
             continue

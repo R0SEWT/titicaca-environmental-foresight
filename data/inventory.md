@@ -47,18 +47,24 @@ Pendiente de extracción (pdf_report/image_series, no es defecto): **8** — ana
 | `ana_informes_tecnicos_ala_ramis` | ANA — Autoridad Local del Agua Ramis | pdf_report | 2015–2025 | PE | available | medium | ○ pend. extracción | 3 | `bronze/data_limpia/Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Ramis/` |
 | `ana_red_monitoreo` | ANA — Autoridad Nacional del Agua | tabular | 2013–2025 | PE | available | medium | ⚠ sin confirmar | 2 | drive: Data para herramienta |
 | `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
+| `plan_accion_titicaca_2020` | Gobierno del Perú — Comisión Multisectorial | pdf_report | 2020–2024 | PE | available | medium | ○ pend. extracción | 2 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/plan_titicaca_de_accion_titicaca_2020-2024_aprobado.pdf` |
 | `vertederos_caudales_coata` | Gobierno Regional de Puno / MINAM (fuente probable) | tabular | 2011–2024 | PE | available | medium | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Registro de vertederos municipales en la región Puno (2011–2024), con desagregación territorial, tipología de desechos y rutas de transporte hacia el lago Titicaca./Vertederos_Caudales_Coata_Actualizados.xlsx` |
 
 #### hydrology
 
 | id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
 |----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `peblt_monitoreo_lago` | PEBLT — Proyecto Especial Binacional Lago Titicaca / IMARPE | pdf_report | 2013–2020 | PE | available | high | ○ pend. extracción | 5 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/` |
+| `ana_red_monitoreo` | ANA — Autoridad Nacional del Agua | tabular | 2013–2025 | PE | available | medium | ⚠ sin confirmar | 2 | drive: Data para herramienta |
 | `snirh_monitoreo_lago` | ANA — Sistema Nacional de Información de Recursos Hídricos (SNIRH) | tabular | unknown–2026-02 | PE | available | medium | ✓ confirmado | 4 | `bronze/data_limpia/Data limpia /Monitoreo del Lago Titicaca` |
+| `vertederos_caudales_coata` | Gobierno Regional de Puno / MINAM (fuente probable) | tabular | 2011–2024 | PE | available | medium | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Registro de vertederos municipales en la región Puno (2011–2024), con desagregación territorial, tipología de desechos y rutas de transporte hacia el lago Titicaca./Vertederos_Caudales_Coata_Actualizados.xlsx` |
 
 #### ecology
 
 | id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
 |----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `ana_observatorio_calidad_lago` | ANA — Autoridad Nacional del Agua / Observatorio del Agua | tabular | 2018–2023 | PE | available | high | ✓ confirmado | 6 | `bronze/data_limpia/Data limpia /Monitoreo de cuencas` |
+| `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
 | `fauna_endemicas_amenazadas` | SERNANP / MINAM (fuente probable) | tabular | unknown–unknown | PE | available | low | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Animales/Endemicas y amenazadas.xlsx` |
 
 #### health
@@ -83,6 +89,7 @@ Pendiente de extracción (pdf_report/image_series, no es defecto): **8** — ana
 
 | id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
 |----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
 | `plan_accion_titicaca_2020` | Gobierno del Perú — Comisión Multisectorial | pdf_report | 2020–2024 | PE | available | medium | ○ pend. extracción | 2 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/plan_titicaca_de_accion_titicaca_2020-2024_aprobado.pdf` |
 <!-- CATALOG:END -->
 
