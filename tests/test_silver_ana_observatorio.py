@@ -30,6 +30,18 @@ class TestParseValue:
     def test_not_measured_none(self):
         assert ao.parse_value(None) == (None, None, False, "not_measured")
 
+    def test_non_numeric_token_is_parse_error(self):
+        # "ND"/"NA"/texto inesperado: no es un valor válido ni un "no medido" explícito
+        assert ao.parse_value("ND") == (None, None, False, "parse_error")
+
+
+class TestBuildSilverEmpty:
+    def test_empty_dir_returns_typed_empty_frame_no_crash(self, tmp_path):
+        df = ao.build_silver(tmp_path, out_path=None)
+        assert df.height == 0
+        master = {"station_id", "datetime", "lat", "lon", "depth_m", "qa_flag", "sampling_agency"}
+        assert master <= set(df.columns)
+
 
 # Matriz mínima que imita un reporte real (transpuesto, 7 columnas).
 SAMPLE_ROWS = [
@@ -165,6 +177,15 @@ class TestBuildSilverIntegration:
         import polars as pl
 
         assert df.schema["datetime"] in (pl.Datetime, pl.Date)
+
+    def test_datetime_has_no_nulls(self, df):
+        assert df["datetime"].null_count() == 0
+
+    def test_no_duplicate_parameter_within_a_report(self, df):
+        import polars as pl
+
+        dups = df.group_by("source_file", "parameter").len().filter(pl.col("len") > 1)
+        assert dups.height == 0
 
     def test_chlorophyll_present(self, df):
         assert "chlorophyll_a" in set(df["parameter"].to_list())

@@ -86,6 +86,7 @@ def parse_value(raw: str | None) -> ValueParse:
     - número (coma decimal) → (value, None, False, "ok")
     - "< X"                 → (None, X, True, "below_detection")
     - "----"/""/None        → (None, None, False, "not_measured")
+    - token no numérico      → (None, None, False, "parse_error")
     """
     if raw is None:
         return (None, None, False, "not_measured")
@@ -95,7 +96,12 @@ def parse_value(raw: str | None) -> ValueParse:
     if s.startswith("<"):
         rest = s[1:].lstrip("=").strip()
         return (None, _to_float(rest), True, "below_detection")
-    return (_to_float(s), None, False, "ok")
+    value = _to_float(s)
+    if value is None:
+        # No vacío, no dash, no censurado y no parseable (p.ej. "ND", "NA", texto):
+        # se marca como error para no confundirlo con un valor válido aguas abajo.
+        return (None, None, False, "parse_error")
+    return (value, None, False, "ok")
 
 
 def _to_float(s: str) -> float | None:
@@ -193,10 +199,30 @@ def read_report(path: Path) -> list[list]:
     return [list(r) for r in df.iter_rows()]
 
 
-# Columnas del master schema, primero; luego las de parámetro/trazabilidad.
-_MASTER_FIRST = [
-    "station_id", "datetime", "lat", "lon", "depth_m", "qa_flag", "sampling_agency",
-]
+# Esquema final del panel (master schema primero; luego parámetro/trazabilidad).
+SILVER_SCHEMA: dict[str, pl.DataType] = {
+    "station_id": pl.String,
+    "datetime": pl.Datetime,
+    "lat": pl.Float64,
+    "lon": pl.Float64,
+    "depth_m": pl.Float64,
+    "qa_flag": pl.String,
+    "sampling_agency": pl.String,
+    "campaign": pl.String,
+    "water_body": pl.String,
+    "parameter": pl.String,
+    "parameter_raw": pl.String,
+    "unit": pl.String,
+    "eca_threshold": pl.String,
+    "value": pl.Float64,
+    "detection_limit": pl.Float64,
+    "censored": pl.Boolean,
+    "monitoring_date": pl.String,
+    "monitoring_time": pl.String,
+    "report_no": pl.String,
+    "source_file": pl.String,
+}
+_MASTER_FIRST = list(SILVER_SCHEMA)[:7]
 
 
 def build_silver(bronze_dir: Path = BRONZE_DIR, out_path: Path | None = OUT_PATH) -> pl.DataFrame:
@@ -206,6 +232,15 @@ def build_silver(bronze_dir: Path = BRONZE_DIR, out_path: Path | None = OUT_PATH
         for rec in parse_report_rows(read_report(path)):
             rec["source_file"] = path.name
             records.append(rec)
+
+    if not records:
+        # Sin .xls o sin parámetros: devolver un frame vacío TIPADO (evita que
+        # with_columns/select fallen por columnas inexistentes; main() sigue corriendo).
+        df = pl.DataFrame(schema=SILVER_SCHEMA)
+        if out_path is not None:
+            Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+            df.write_parquet(out_path)
+        return df
 
     df = pl.DataFrame(records)
     df = df.with_columns(
@@ -231,15 +266,15 @@ def main() -> None:
     if not BRONZE_DIR.exists():
         raise SystemExit(f"No existe el directorio bronze: {BRONZE_DIR}")
     df = build_silver(BRONZE_DIR, OUT_PATH)
-    qa = dict(
-        zip(df["qa_flag"].value_counts(sort=True)["qa_flag"], df["qa_flag"].value_counts(sort=True)["count"])
-    )
+    vc = df["qa_flag"].value_counts(sort=True)
+    qa = dict(zip(vc["qa_flag"], vc["count"]))
+    campaigns = sorted(c for c in df["campaign"].unique().to_list() if c is not None)
     chl = df.filter(pl.col("parameter") == "chlorophyll_a")
     print(f"\n{'='*60}\n  ana_observatorio → silver\n{'='*60}")
     print(f"  filas:        {df.height}")
     print(f"  archivos:     {df['source_file'].n_unique()}")
     print(f"  estaciones:   {df['station_id'].n_unique()}")
-    print(f"  campañas:     {', '.join(sorted(df['campaign'].unique().to_list()))}")
+    print(f"  campañas:     {', '.join(campaigns)}")
     print(f"  datetime:     {df['datetime'].min()} → {df['datetime'].max()} (null: {df['datetime'].null_count()})")
     print(f"  chlorophyll_a: {chl.height} filas, {chl.filter(pl.col('qa_flag')=='ok').height} con valor")
     print(f"  qa_flag:      {qa}")
