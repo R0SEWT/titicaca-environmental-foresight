@@ -145,6 +145,11 @@ class TestParseReportRowsCat3:
         assert r["value"] == 6.2
         assert r["qa_flag"] == "ok"
 
+    def test_preserves_both_eca_thresholds(self):
+        # Cat.3 tiene D1 (= 5) y D2 (= 4); no debe descartarse ninguno
+        eca = self.recs[0]["eca_threshold"]
+        assert "= 5" in eca and "= 4" in eca
+
 
 class TestCanon:
     def test_known_param_maps_to_master_name(self):

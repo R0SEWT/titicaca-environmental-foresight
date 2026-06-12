@@ -178,13 +178,17 @@ def parse_report_rows(rows: list[list]) -> list[dict]:
         if not name or not unit:  # separadores de sección no tienen unidad
             continue
         value, det, censored, qa = parse_value(_cell(row, rcol))
+        # Columnas ECA entre la unidad (idx 2) y el resultado: 1 en Cat.4-E1, 2 en
+        # Cat.3 (D1|D2). Se conservan TODAS para no perder subcategorías aplicables.
+        eca_cells = [_cell(row, j) for j in range(3, rcol)]
+        eca = " | ".join(c for c in eca_cells if c)
         records.append({
             "station_id": station_id,
             **meta,
             "parameter": canon(name),
             "parameter_raw": name,
             "unit": unit,
-            "eca_threshold": _cell(row, 3),
+            "eca_threshold": eca or None,
             "value": value,
             "detection_limit": det,
             "censored": censored,
