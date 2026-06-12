@@ -98,4 +98,5 @@ notes: >
   SUITE LIMNOLÓGICA IN-SITU DEL LAGO con clorofila-a, transparencia, P y N totales — fuente
   DIRECTA para el target de eutrofización del Tier 1 (la planilla principal ana_tributarias_2013_2025
   NO tiene chl-a; aquí sí). Complementa peblt_monitoreo_lago (PDFs 2013-2020) y la vía satelital
-  (issue T13). Catálogo de estaciones asociado: ana_red_monitoreo.
+  (sentinel2_chla_titicaca), que se calibra/valida contra estos matchups in-situ. Catálogo de
+  estaciones asociado: ana_red_monitoreo.
