@@ -38,7 +38,7 @@ variables:
   - MCI                 # Maximum Chlorophyll Index — proxy secundario
   - chlorophyll_a_proxy # estimación inferida de chl-a (NO medición directa)
 granularity: "1 escena MSI (~10–20 m) por fecha de paso; revisita ~5 días; recortada al AOI lago PE"
-n_records_approx: "~cientos de escenas (revisita ~5 días, 2017–2025) sobre el AOI peruano"
+n_records_approx: "~cientos de escenas (revisita ~5 días, 2017–presente; estimado a 2026-06-12) sobre el AOI peruano"
 schema_confirmed: false
 
 collection_method: >
