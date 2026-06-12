@@ -1,0 +1,48 @@
+id: midagri_precio_chacra_puno
+name: "Precio en chacra de cultivos — Puno por distrito (MIDAGRI/DRA Puno, 2014–2025)"
+institution: "MIDAGRI — Dirección Regional Agraria Puno"
+type: tabular
+topic:
+  - socioeconomic
+
+coverage_temporal:
+  start: "2014"
+  end: "2025"
+coverage_spatial:
+  description: "Departamento de Puno por distrito"
+  basins: []
+  country: PE
+
+drive_id: null
+drive_folder: "Información agricultura, precio en chacra - Joaquin Suazo"
+local_path: "bronze/data_limpia/Data limpia /Información agricultura, precio en chacra - Joaquin Suazo"
+provided_by: "Equipo periodístico El Comercio (compilado por Joaquín Suazo)"
+access_date: "2026-06-10"
+
+# 2 archivos ANEXO. Verificado en T4: hoja 'Precio' formato largo 31,319 x 7.
+variables:
+  - distrito
+  - cultivo
+  - categoria_cultivo       # granos andinos, tubérculos, hortalizas, pastos/forrajes...
+  - anio
+  - mes
+  - precio_chacra_soles_kg
+granularity: "Formato largo: 1 fila por distrito × cultivo × periodo (~31,319 filas)"
+n_records_approx: "2 archivos ANEXO; ~31,319 filas en hoja Precio"
+schema_confirmed: false
+
+collection_method: "Sistema de información de precios agrarios MIDAGRI/DRA Puno (precio en chacra). Compilado por Joaquín Suazo."
+laboratory: null
+standard: null
+
+limitations:
+  - "Título-banner en fila 1 (cabecera real desplazada) → fijar header_row al ingerir"
+  - "Cobertura por cultivo/distrito desigual; algunos distritos/cultivos con vacíos"
+  - "Vínculo con contaminación del agua débil/indirecto (contexto económico-agrícola, presión por riego)"
+
+citation: "MIDAGRI — DRA Puno. Precio en chacra de los principales cultivos por distrito, 2014–2025."
+related_reports: []
+
+status: available
+priority: low
+notes: "Contexto económico-agrícola (Inventario II): subida de precios ligada a sequías y demanda. Compilador: Joaquín Suazo."

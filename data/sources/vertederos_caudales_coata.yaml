@@ -16,8 +16,8 @@ coverage_spatial:
   country: PE
 
 drive_id: null
-drive_folder: "Data descargada (raíz) — 1BkOVn0FqqQT4jmwTAsQ1z1YJDP2_G_8r"
-local_path: null
+drive_folder: "Registro de vertederos municipales en la región Puno (2011–2024)"
+local_path: "bronze/data_limpia/Data limpia /Registro de vertederos municipales en la región Puno (2011–2024), con desagregación territorial, tipología de desechos y rutas de transporte hacia el lago Titicaca./Vertederos_Caudales_Coata_Actualizados.xlsx"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-02-10"
 

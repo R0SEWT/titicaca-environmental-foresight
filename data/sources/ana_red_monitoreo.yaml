@@ -55,4 +55,8 @@ related_reports:
 
 status: available
 priority: medium
-notes: "Catálogo espacial de estaciones. Usar para joins con datos de calidad de agua y para mapa de cobertura."
+notes: >
+  Catálogo espacial de estaciones (1 fila/estación). Usar para joins con datos de calidad de
+  agua y mapa de cobertura. NOTA (T3): este es el catálogo de estaciones (archivo en Drive, aún
+  no extraído localmente → schema_confirmed sigue false). Los REPORTES de resultados de monitoreo
+  por estación×campaña se catalogan aparte en ana_observatorio_calidad_lago (81 .xls ya perfilados).

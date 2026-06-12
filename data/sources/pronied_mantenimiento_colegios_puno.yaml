@@ -1,0 +1,55 @@
+id: pronied_mantenimiento_colegios_puno
+name: "Mantenimiento de locales escolares — Puno (PRONIED/MINEDU, 2008–2025)"
+institution: "PRONIED — Programa Nacional de Infraestructura Educativa / MINEDU"
+type: tabular
+topic:
+  - socioeconomic
+
+coverage_temporal:
+  start: "2008"
+  end: "2025"
+coverage_spatial:
+  description: "Departamento de Puno por provincia/distrito (locales escolares por UGEL)"
+  basins: []
+  country: PE
+
+drive_id: null
+drive_folder: "Colegios"
+local_path: "bronze/data_limpia/Data limpia /Colegios"
+provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
+access_date: "2026-06-10"
+
+# 17 archivos: mantenimiento por año + normas PMLE + acondicionamiento térmico. Verificado en T4.
+variables:
+  - cod_local
+  - region
+  - provincia
+  - distrito
+  - centro_poblado
+  - codooii
+  - ugel
+  - nombre_iiee
+  - aulas_consideradas
+  - monto                  # monto de mantenimiento asignado
+  - anio
+granularity: "1 fila por local escolar × año de mantenimiento"
+n_records_approx: "17 archivos; ~2,500 locales/año en el archivo consolidado 2008-2024"
+schema_confirmed: true
+
+collection_method: "Padrones de mantenimiento del Programa de Mantenimiento de Locales Escolares (PMLE), PRONIED/MINEDU. Productores: Rosie Fontinier, Phillyps Bravo, Beatriz Gonzales."
+laboratory: null
+standard: null
+
+limitations:
+  - "Algunos archivos con 2ª hoja (cierre/leyenda); usar la hoja del padrón principal"
+  - "Vínculo con contaminación del agua DÉBIL; es contexto de infraestructura/inversión pública"
+  - "Cobertura por año variable; nombres de campaña heterogéneos entre archivos"
+
+citation: "PRONIED/MINEDU. Programa de Mantenimiento de Locales Escolares (PMLE), Puno, 2008–2025."
+related_reports: []
+
+status: available
+priority: low
+notes: >
+  Contexto de inversión/infraestructura educativa (Inventario I). Vínculo débil con el problema
+  ambiental; baja prioridad. Productores identificados en data/_metadata/authorship.tsv.

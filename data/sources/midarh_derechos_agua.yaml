@@ -1,52 +1,68 @@
 id: midarh_derechos_agua
-name: "Derechos de uso de agua — ALA Huancané (MIDARH, 2005–2020)"
-institution: "ANA — Autoridad Local del Agua Huancané / MIDARH"
+name: "Derechos de uso de agua — Sistema Titicaca (registro administrativo ANA, 1991–2025)"
+institution: "ANA — Autoridad Nacional del Agua (módulo MIDARH / SNIRH-SARH)"
 type: administrative
 topic:
-  - water_quality
   - socioeconomic
 
 coverage_temporal:
-  start: "2005"
-  end: "2020"
+  start: "1991"
+  end: "2025"
 coverage_spatial:
-  description: "Comunidades de Puno, San Antonio de Putina, Huancané, Moho, Azángaro"
+  description: "Departamento de Puno: 14 provincias, 92 distritos (cuencas del sistema Titicaca)"
   basins:
-    - Suches
+    - Ramis
     - Huancané
+    - Coata
+    - Ilave
+    - Suches
     - Azángaro
   country: PE
 
 drive_id: "1vQ-cq_JDGGm1pD3BsiEcNW4yFJ1WfAY0"
 drive_folder: "MIDARH"
-local_path: null
+local_path: "bronze/data_limpia/Data limpia /MIDARH/MIDARH.xlsx"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-02-10"
 
+# Verificado leyendo MIDARH.xlsx en T6 (2026-06-10): 3804 filas × 12 columnas.
 variables:
-  - numero_resolucion
-  - tipo_licencia
-  - uso_agua
-  - volumen_m3
-  - comunidad
+  - cuenca
+  - autoridad_local_agua    # ALA
+  - resolucion
+  - lugar_uso
+  - uso                     # Agrícola 77.5%, Acuícola 12%, Poblacional 7.8%, Minero 2.5%
+  - clase
+  - volumen_m3              # total ~704.42 M m³
+  - area_ha                 # total ~42,780 ha
+  - usuario
+  - departamento
   - provincia
-  - anio
-granularity: "1 fila por resolución/licencia de uso de agua"
-n_records_approx: "~300+ resoluciones RA/RD"
-schema_confirmed: false
+  - distrito
+granularity: "1 fila por resolución/derecho de uso de agua"
+n_records_approx: "3,804 registros (3,605 resoluciones, 3,524 usuarios); 704.42 M m³; 1991–2025"
+schema_confirmed: true
 
-collection_method: "Registro administrativo de licencias y resoluciones de uso de agua"
+collection_method: >
+  Registro administrativo de derechos de uso de agua de la ANA (módulo MIDARH dentro de
+  SNIRH/SARH). Archivo consolidado/limpiado por el equipo partner (creador openpyxl) → DERIVADO,
+  no crudo original. Es el mismo corpus analizado en el "Inventario de datos III" del partner.
 laboratory: null
 standard: null
 
 limitations:
-  - "Cubre solo ALA Huancané; no otras ALAs del sistema Titicaca"
-  - "Corte en 2020; sin datos recientes"
-  - "Los usos minero pueden estar sub-registrados (operaciones informales)"
+  - "ARCHIVO DERIVADO: limpiado por el equipo partner (creador openpyxl); conservar trazabilidad al export ANA original"
+  - "Mide DEMANDA/presión hídrica (volumen con derecho), NO contaminación — no usar como target ambiental"
+  - "Usos mineros/informales pueden estar sub-registrados; concentración: Melgar+Azángaro+Lampa = 46.3% del volumen"
+  - "Solo 54 registros (49.31 M m³, 7% del total) están asociados explícitamente al lago Titicaca; el resto es cuenca tributaria"
 
-citation: "ANA-ALA Huancané. Registro MIDARH de Derechos de Uso de Agua, 2005–2020."
-related_reports: []
+citation: "ANA — módulo MIDARH/SNIRH. Registro Administrativo de Derechos de Uso de Agua, Sistema Titicaca, 1991–2025."
+related_reports:
+  - ana_metales_cuencas
 
 status: available
-priority: low
-notes: "Útil para capa de 'presión antrópica': qué usos del agua compiten en cada cuenca y cuánto volumen representan."
+priority: medium
+notes: >
+  CAPA DE PRESIÓN ANTRÓPICA (demanda hídrica por cuenca/uso). Repriorizada low→medium en T6 al
+  confirmar que es el registro COMPLETO (3,804 registros, no solo ALA Huancané como decía la ficha
+  previa). Cruce por distrito/provincia con calidad de agua y salud. Es el dataset del Inventario III.

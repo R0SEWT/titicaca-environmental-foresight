@@ -1,0 +1,52 @@
+id: mincetur_turismo_puno
+name: "Llegada de visitantes a destinos turísticos de Puno (MINCETUR/DIRCETUR, 2005–2025)"
+institution: "MINCETUR — DIRCETUR Puno"
+type: tabular
+topic:
+  - socioeconomic
+
+coverage_temporal:
+  start: "2005"
+  end: "2025"
+coverage_spatial:
+  description: "Destinos turísticos de Puno: Uros, Taquile, Sillustani, Pukara, Amantaní, Reserva del Titicaca, San Juan de Letrán"
+  basins:
+    - Lago Titicaca
+  country: PE
+
+drive_id: null
+drive_folder: "Turismo en Puno - Joaquin Suazo"
+local_path: "bronze/data_limpia/Data limpia /Turismo en Puno - Joaquin Suazo"
+provided_by: "Equipo periodístico El Comercio (compilado por Joaquín Suazo)"
+access_date: "2026-06-10"
+
+# 7 archivos .xls, uno por destino. Verificado en T4 (Uros: hoja rptaniomes3, 19x64).
+variables:
+  - destino
+  - anio
+  - mes
+  - visitantes_nacionales
+  - visitantes_extranjeros
+  - total_visitantes
+granularity: "Por destino: matriz meses × años de llegada de visitantes (nacional/extranjero)"
+n_records_approx: "7 destinos; Titicaca acumula >2.5M visitantes histórico (Inventario I)"
+schema_confirmed: false
+
+collection_method: "Registros de afluencia turística DIRCETUR Puno por destino. Compilado por Joaquín Suazo."
+laboratory: null
+standard: null
+
+limitations:
+  - "Formato matriz meses×años con título-banner por destino (rptaniomes3) → requiere pivot/parseo de cabecera"
+  - "Un archivo .xls por destino (estructura repetida) → consolidar para análisis"
+  - "Mide presión turística (proxy de carga antropogénica), no contaminación directa"
+
+citation: "MINCETUR — DIRCETUR Puno. Llegada de visitantes a destinos turísticos, 2005–2025."
+related_reports: []
+
+status: available
+priority: medium
+notes: >
+  Presión turística estacional sobre el lago (Uros, Taquile, Amantaní están EN el lago).
+  El turismo del Titicaca depende fuertemente del visitante extranjero y cayó tras 2020
+  (Inventario I). Compilador: Joaquín Suazo.

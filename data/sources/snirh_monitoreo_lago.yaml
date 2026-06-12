@@ -3,11 +3,10 @@ name: "Monitoreo del Lago Titicaca — Reportes SNIRH (feb 2026)"
 institution: "ANA — Sistema Nacional de Información de Recursos Hídricos (SNIRH)"
 type: tabular
 topic:
-  - water_quality
   - hydrology
 
 coverage_temporal:
-  start: "unknown"
+  start: "unknown"   # serie histórica; rango exacto por archivo no enumerado aún
   end: "2026-02"
 coverage_spatial:
   description: "Lago Titicaca parte peruana (pendiente confirmar estaciones)"
@@ -16,33 +15,42 @@ coverage_spatial:
 
 drive_id: "1rh0TVVmw5UgGvsYh8GaiRd-TheK5zSg-"
 drive_folder: "Monitoreo del Lago Titicaca"
-local_path: null
+local_path: "bronze/data_limpia/Data limpia /Monitoreo del Lago Titicaca"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-02-10"
 
+# Verificado leyendo los 16 .xlsx en T3 (2026-06-10). Estructura: bloque metadata
+# clave-valor SENAMHI (filas superiores) + serie temporal debajo.
 variables:
-  - unknown
-granularity: "Pendiente inspección"
-n_records_approx: "16 archivos Excel; pendiente conteo"
-schema_confirmed: false
+  - estacion              # Enafer (cód. 270000); 1 archivo: Muelle Enafer (47256412)
+  - variable              # "Cota Promedio 1 Día (m.s.n.m.)"; 1 archivo: "Cota Instantánea 1 Hora"
+  - operador              # SENAMHI
+  - latitud
+  - longitud
+  - fecha
+  - valor_cota_msnm
+granularity: "Serie temporal por estación hidrométrica (15/16 = misma estación Enafer, distintos rangos de fecha)"
+n_records_approx: "16 archivos; nivel del lago (cota), 1 estación principal"
+schema_confirmed: true
 
-collection_method: "Export desde plataforma SNIRH-ANA"
+collection_method: "Estación hidrométrica SENAMHI (Convencional/Hidrométrica); export desde plataforma SNIRH-ANA"
 laboratory: null
 standard: null
 
 limitations:
-  - "Archivos con nombres genéricos (Reporte10022026*.xlsx) — contenido exacto no confirmado"
-  - "Fecha de descarga única (10/02/2026); puede ser snapshot de un portal, no serie histórica"
-  - "Sin descripción de variables en nombre de archivo"
+  - "NO contiene clorofila-a ni limnología: la variable es NIVEL del lago (cota m.s.n.m.), uso hidrológico"
+  - "15/16 archivos son la MISMA estación (Enafer 270000), partidos en distintos rangos de fecha"
+  - "Estructura de 2 partes: bloque metadata clave-valor arriba + serie temporal abajo → requiere parseo dedicado"
+  - "Fecha de descarga única (10/02/2026), snapshot del portal SNIRH"
 
 citation: "ANA-SNIRH. Reportes de monitoreo, descargados 10/02/2026."
 related_reports:
   - peblt_monitoreo_lago
 
-status: pending_extraction
-priority: high
+status: available
+priority: medium
 notes: >
-  PENDIENTE: inspeccionar al menos 1–2 archivos para confirmar si contienen
-  clorofila-a, Disco Secchi u otras variables limnológicas del lago.
-  Son 16 archivos en carpeta Drive 1rh0TVVmw5UgGvsYh8GaiRd-TheK5zSg-.
-  Si contienen parámetros ópticos, suben a prioridad ALTA para el Tier 1.
+  CONFIRMADO (T3): NO contiene clorofila-a/limnología — son series de NIVEL del lago (cota
+  m.s.n.m.) de la estación SENAMHI Enafer. Útil para balance hídrico del lago y escenarios de
+  nivel, no para el target de eutrofización. Para chl-a in-situ ver ana_observatorio_calidad_lago.
+  Bajada de prioridad high→medium (no aporta parámetros ópticos como se esperaba).

@@ -23,32 +23,45 @@ coverage_spatial:
 
 drive_id: "1MUmAB3tmHIZ8u178an8tjnlpd5pOlaAF"
 drive_folder: "Data para herramienta"
-local_path: null
+local_path: "bronze/data_limpia/Data limpia /Data para herramienta/calidad_agua_titicaca_ANA_2013-2025_v2 (1).xlsx"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-05-07"
 
+# Columnas REALES verificadas leyendo el archivo (T2, 2026-06-10).
+# Hoja 1_monitoreo (nivel campaña) y 2_calidad_agua (nivel punto×campaña).
 variables:
-  - od_mg_l
-  - ph
-  - conductividad_us_cm
-  - temperatura_c
-  - hierro_mg_l
-  - aluminio_mg_l
-  - arsenico_mg_l
-  - cadmio_mg_l
-  - mercurio_mg_l
-  - plomo_mg_l
-  - zinc_mg_l
-  - manganeso_mg_l
-  - boro_mg_l
-  - litio_mg_l
-  - fosforo_mg_l
-  - nitrogeno_mg_l
-  - ecoli_nmp_100ml
-  - colif_term_nmp_100ml
-  - excede_eca
-  - parametros_que_exceden
-granularity: "1 fila por punto de muestreo × campaña de monitoreo"
+  # 1_monitoreo (19 campañas)
+  - id_informe
+  - codigo_IT
+  - unidad_hidrografica
+  - subcuenca
+  - fecha_inicio
+  - fecha_fin
+  - periodo            # avenida (dic-abr) / estiaje (may-nov)
+  - tipo_monitoreo     # regular / emergencia
+  - n_puntos
+  - ALA_responsable
+  # 2_calidad_agua (72 puntos×campaña)
+  - codigo_punto
+  - descripcion_punto
+  - cuerpo_agua
+  - este_utm           # WGS84 zona 19S
+  - norte_utm
+  - altitud_msnm
+  - categoria_eca      # 1-A2 / 3-D1 / 4-E1 / 4-E2
+  # únicos parámetros NUMÉRICOS in-situ:
+  - pH
+  - OD_mgL
+  - conductividad_uScm
+  - temperatura_C
+  # excedencias en TEXTO (presentes solo si superan ECA):
+  - parametros_exceden_ECA
+  - n_parametros_exceden
+  - metales_exceden                      # texto: "Aluminio (11.058 mg/L > 5); ..."
+  - parametros_fisicoquimicos_exceden    # texto
+  - parametros_microbiologicos_exceden   # texto
+  - codigo_ensayo_SGS
+granularity: "Relacional 2 hojas: 1_monitoreo (1 fila/campaña, n=19) + 2_calidad_agua (1 fila/punto×campaña, n=72)"
 n_records_approx: "~300 puntos en 19 campañas (2013–2025); incluye regulares + emergencia"
 schema_confirmed: true
 
@@ -65,7 +78,9 @@ limitations:
   - "Cobertura temporal desigual por cuenca: Suches solo 2013, otras cuencas con mayor densidad 2023–2025"
   - "Mezcla de campañas regulares (estiaje/avenida) y de emergencia (denuncias mineras); deben separarse en análisis"
   - "Sin cobertura de cuencas bolivianas (Katari, Desaguadero)"
-  - "No incluye clorofila-a, Disco Secchi ni parámetros ópticos del lago principal"
+  - "No incluye clorofila-a, Disco Secchi ni parámetros ópticos del lago principal (proxy de eutrofización deberá venir de satélite Sentinel-2)"
+  - "CRÍTICO: metales, fisicoquímicos y microbiológicos NO son columnas numéricas; se registran solo como TEXTO de excedencia (valor presente únicamente si supera ECA → dato censurado). Para series numéricas de metales usar ana_metales_cuencas"
+  - "Hoja 3_sedimentos casi vacía (1 sola fila); hoja 4_fuentes_contaminantes con 14 registros descriptivos"
   - "Algunos puntos sin coordenadas o sin caudal registrado (marcados 'sin caudal')"
   - "El campo nivel_lago_titicaca_msnm solo aparece en campañas recientes (Coata 2025)"
 

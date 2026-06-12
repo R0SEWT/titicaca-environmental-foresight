@@ -16,7 +16,7 @@ coverage_spatial:
 
 drive_id: null
 drive_folder: "Estado de la calidad del agua"
-local_path: "Data limpia /Estado de la calidad del agua/"
+local_path: "bronze/data_limpia/Data limpia /Estado de la calidad del agua/"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-02-10"
 

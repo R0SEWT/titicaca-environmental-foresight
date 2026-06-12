@@ -1,187 +1,124 @@
 # Inventario de datos — Titicaca Environmental Foresight
 
-> Estado: junio 2026. Elaborado a partir de revisión de Drive (especial y data descargada) + archivos locales.
+> Primer entregable del proyecto: mapa de procedencia de los datos.
+> La **fuente de verdad** son las fichas YAML en `data/sources/` (una por dataset),
+> validadas por `catalog.py` (DECISION-001). La matriz de abajo se **genera** desde ellas
+> — no se edita a mano. Las secciones narrativas (gaps, roadmap) sí son hand-written.
 
 ---
 
-## 1. Datos primarios para modelado — DISPONIBLES
+## Matriz de procedencia (generada)
 
-### 1.1 Calidad de agua — Cuencas tributarias (ANA-AAA.TIT, 2013–2025)
+<!-- CATALOG:BEGIN -->
+_Generado automáticamente por `catalog.py` desde `data/sources/*.yaml` — no editar a mano (los cambios se sobrescriben)._
 
-| Archivo | Drive ID | Cobertura | Variables clave | Prioridad |
-|---------|----------|-----------|-----------------|-----------|
-| `Datos_herramienta.xlsx` | `1MUmAB3tmHIZ8u178an8tjnlpd5pOlaAF` | 19 campañas, cuencas: Suches, Huancané, Coata, Ilave, Ilpa, Azángaro, Pucará, Llallimayo/Ramis | pH, OD, conductividad, T, Fe, Al, **As, Cd, Hg, Pb, Zn**, Mn, Bo, Li, P, N, E.coli, coliformes termotolerantes. Coords UTM (WGS84). Flag `excede_eca`. | **ALTA — dataset principal** |
-| `calidad_agua_titicaca_ANA_2013-2025_v2.xlsx` | `1SP1JIqJ0f8Q-i1ZB5Buwc4GQToM9HrKP` | Mismo corpus, versión con detalle de parámetros que exceden ECA y n_puntos_exceden | Ampliada vs. anterior: suma `parametros_exceden_ECA`, `n_parametros_exceden`, por tipo (fisicoquímico / microbiológico / metal) | **ALTA — complementa anterior** |
-| `RED MONITOREO UNIDADES HIDROGRAFICAS - TITICACA_.xls` | `1dNkE4D9wl9caAEb-qTDJJXyyqdy3Ulsv` | Red de estaciones de monitoreo | Códigos de punto, cuenca, subcuenca | Media — catálogo espacial |
+### Resumen
 
-**Estructura tabular confirmada en `Datos_herramienta.xlsx`:**
-```
-1_monitoreo:  id_monitoreo | cuenca | codigo_cuenca | fecha_inicio | fecha_fin |
-              n_monitoreo | periodo | n_puntos | n_puntos_exceden_eca |
-              fuentes_contaminantes_total | poblacion_cuenca_hab |
-              superficie_cuenca_km2 | nivel_lago_titicaca_msnm |
-              caudal_rio_principal_m3s | informe_ref
+| status | n |
+|--------|---|
+| available | 23 |
+| pending_download | 1 |
 
-2_calidad_agua: id | id_monitoreo | cuenca | codigo_punto | descripcion_punto |
-                tipo_cuerpo | fecha_muestreo | utm_este | utm_norte | altitud_msnm |
-                od_mg_l | ph | conductividad_us_cm | temperatura_c |
-                hierro_mg_l | aluminio_mg_l | arsenico_mg_l | cadmio_mg_l |
-                mercurio_mg_l | plomo_mg_l | zinc_mg_l | manganeso_mg_l |
-                boro_mg_l | litio_mg_l | fosforo_mg_l | nitrogeno_mg_l |
-                ecoli_nmp_100ml | colif_term_nmp_100ml | excede_eca | parametros_que_exceden
-```
+| prioridad | n |
+|-----------|---|
+| high | 7 |
+| medium | 14 |
+| low | 3 |
 
-Cuencas con datos confirmados: Suches (2013), Huancané (2023, 2024, 2025), Coata (2025 avenida + estiaje), Ilave (2024, 2025), Ilpa (2025), Azángaro (2023, 2025), Pucará (2023), Llallimayo/Ramis (2023 emergencia, 2024 emergencia, 2025 emergencia). Incluye monitoreos de emergencia por denuncias mineras y cambios de coloración.
+**Gate schema (tabular/gis prioridad alta sin confirmar): ✓ limpio (0).**
 
----
+Pendiente de extracción (pdf_report/image_series, no es defecto): **8** — ana_informes_tecnicos_ala_huancane, ana_informes_tecnicos_ala_ilave, ana_informes_tecnicos_ala_juliaca, ana_informes_tecnicos_ala_ramis, ana_monitoreo_binacional, oas_pnuma_tdps_1996, peblt_monitoreo_lago, plan_accion_titicaca_2020.
 
-### 1.2 Monitoreo del lago Titicaca (bahía / cruceros)
+### Matriz de procedencia
 
-| Archivo | Drive ID | Tipo | Notas |
-|---------|----------|------|-------|
-| 16 archivos `Reporte10022026*.xlsx` | carpeta `1rh0TVVmw5UgGvsYh8GaiRd-TheK5zSg-` | Exports de monitoreo del lago | Nombres genéricos; contienen datos limnológicos del lago principal |
-| `IT 007-2013-ANA_MONITOREO LAGO TITICACA BAHIA PUNO ABRIL 2013.pdf` | `18-MJ7KWKkvsMhH2lzeNvU6dySlKxq6mE` | PDF técnico (62.9 MB) | Línea base bahía interior Puno |
-| `INFORME BAHÍA LAGO TITICACA AÑO 2019.pdf` | ídem | PDF (8.8 MB) | Bahía 2019 |
-| `INFORME I + II CRUCERO HIDROQUIMICO AÑO 2019.pdf` | ídem | PDF (5.8 MB + 2.6 MB) | Cruceros lago abierto 2019 |
-| `INFORME BAHÍA INTERIOS PUNO LAGO TITICACA 2020.pdf` | ídem | PDF (3.4 MB) | Bahía 2020 |
-| `INFORME AGUAS SUPERFICIALES CORRIENTES 2020.pdf` | ídem | PDF (5.4 MB) | Aguas superficiales |
-| `BOLETIN GESTION DE LA CALIDAD RRHH-TITICACA 2024.pdf` | ídem | PDF (8 MB) | Síntesis más reciente disponible |
+#### water_quality
 
----
+| id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
+|----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `ana_calidad_agua_v2` | ANA — Autoridad Nacional del Agua / AAA.TIT | tabular | 2013-10–2025-10 | PE | available | high | ✓ confirmado | 3 | `bronze/data_limpia/Data limpia /Data para herramienta/calidad_agua_titicaca_ANA_2013-2025_v2 (1).xlsx` |
+| `ana_metales_cuencas` | ANA — Autoridad Nacional del Agua / AAA.TIT | tabular | 2025–2025 | PE | available | high | ✓ confirmado | 5 | `bronze/data_limpia/Data limpia /Data para herramienta/METALES mg-L` |
+| `ana_monitoreo_binacional` | ANA — Autoridad Nacional del Agua / AAA.TIT | pdf_report | 2013–2019 | PE | available | high | ○ pend. extracción | 4 | `bronze/data_limpia/Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Ilave/01. MONITOREOS/03. MONITOREO BINACIONAL LAGO TITICACA/` |
+| `ana_observatorio_calidad_lago` | ANA — Autoridad Nacional del Agua / Observatorio del Agua | tabular | 2018–2023 | PE | available | high | ✓ confirmado | 6 | `bronze/data_limpia/Data limpia /Monitoreo de cuencas` |
+| `ana_tributarias_2013_2025` | ANA — Autoridad Nacional del Agua / Autoridad Administrativa del Agua Titicaca (AAA.TIT) | tabular | 2013-10–2025-10 | PE | available | high | ✓ confirmado | 9 | `bronze/data_limpia/Data limpia /Data para herramienta/calidad_agua_titicaca_ANA_2013-2025_v2 (1).xlsx` |
+| `peblt_monitoreo_lago` | PEBLT — Proyecto Especial Binacional Lago Titicaca / IMARPE | pdf_report | 2013–2020 | PE | available | high | ○ pend. extracción | 5 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/` |
+| `ana_informes_tecnicos_ala_huancane` | ANA — Autoridad Local del Agua Huancané | pdf_report | 2013–2025 | PE | available | medium | ○ pend. extracción | 3 | `bronze/data_limpia/Data limpia /Data para herramienta/Resultados de gestión del agua - Ala Huancané/` |
+| `ana_informes_tecnicos_ala_ilave` | ANA — Autoridad Local del Agua Ilave | pdf_report | 2013–2025 | PE | available | medium | ○ pend. extracción | 3 | `bronze/data_limpia/Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Ilave/` |
+| `ana_informes_tecnicos_ala_juliaca` | ANA — Autoridad Local del Agua Juliaca | pdf_report | 2011–2025 | PE | available | medium | ○ pend. extracción | 2 | `bronze/data_limpia/Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Juliaca/` |
+| `ana_informes_tecnicos_ala_ramis` | ANA — Autoridad Local del Agua Ramis | pdf_report | 2015–2025 | PE | available | medium | ○ pend. extracción | 3 | `bronze/data_limpia/Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Ramis/` |
+| `ana_red_monitoreo` | ANA — Autoridad Nacional del Agua | tabular | 2013–2025 | PE | available | medium | ⚠ sin confirmar | 2 | drive: Data para herramienta |
+| `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
+| `plan_accion_titicaca_2020` | Gobierno del Perú — Comisión Multisectorial | pdf_report | 2020–2024 | PE | available | medium | ○ pend. extracción | 2 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/plan_titicaca_de_accion_titicaca_2020-2024_aprobado.pdf` |
+| `vertederos_caudales_coata` | Gobierno Regional de Puno / MINAM (fuente probable) | tabular | 2011–2024 | PE | available | medium | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Registro de vertederos municipales en la región Puno (2011–2024), con desagregación territorial, tipología de desechos y rutas de transporte hacia el lago Titicaca./Vertederos_Caudales_Coata_Actualizados.xlsx` |
 
-### 1.3 Monitoreo de cuencas (ANA-SNIRH, feb 2026)
+#### hydrology
 
-| Carpeta | Drive ID | Contenido | Notas |
-|---------|----------|-----------|-------|
-| `Monitoreo de cuencas` | `1AbwkN7lsZIGf533ACnQGM5FVZ0wOKQI1` | ~30 archivos XLS, todos nombrados `2026_02_10_17_xx.xls` | Exports SNIRH; misma fecha de descarga (~feb 2026); cubren diferentes estaciones |
-| `Puntos críticos_Titicaca` | `1WpaE3YhudPwvYiLjSnL3EQws47mv-DbM` | 9 archivos XLS, nombres genéricos `2026_02_10_18_xx.xls` | Puntos críticos de contaminación |
-| `Visor de cuencas_puntos críticos` | `1I5TpZES5lPbEc5MkiOJjpaZ36Jq60VLW` | Sin explorar | Probable visor GIS |
+| id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
+|----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `peblt_monitoreo_lago` | PEBLT — Proyecto Especial Binacional Lago Titicaca / IMARPE | pdf_report | 2013–2020 | PE | available | high | ○ pend. extracción | 5 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/` |
+| `ana_red_monitoreo` | ANA — Autoridad Nacional del Agua | tabular | 2013–2025 | PE | available | medium | ⚠ sin confirmar | 2 | drive: Data para herramienta |
+| `snirh_monitoreo_lago` | ANA — Sistema Nacional de Información de Recursos Hídricos (SNIRH) | tabular | unknown–2026-02 | PE | available | medium | ✓ confirmado | 4 | `bronze/data_limpia/Data limpia /Monitoreo del Lago Titicaca` |
+| `vertederos_caudales_coata` | Gobierno Regional de Puno / MINAM (fuente probable) | tabular | 2011–2024 | PE | available | medium | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Registro de vertederos municipales en la región Puno (2011–2024), con desagregación territorial, tipología de desechos y rutas de transporte hacia el lago Titicaca./Vertederos_Caudales_Coata_Actualizados.xlsx` |
 
-**Nota:** estos archivos requieren inspección para determinar schema exacto (probable export de SNIRH/ANA con variables limnológicas/hidrológicas).
+#### ecology
 
----
+| id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
+|----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `ana_observatorio_calidad_lago` | ANA — Autoridad Nacional del Agua / Observatorio del Agua | tabular | 2018–2023 | PE | available | high | ✓ confirmado | 6 | `bronze/data_limpia/Data limpia /Monitoreo de cuencas` |
+| `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
+| `fauna_endemicas_amenazadas` | SERNANP / MINAM (fuente probable) | tabular | unknown–unknown | PE | available | low | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Animales/Endemicas y amenazadas.xlsx` |
 
-### 1.4 Vertimientos y botaderos
+#### health
 
-| Archivo | Drive ID | Cobertura | Variables |
-|---------|----------|-----------|-----------|
-| `Vertederos_Caudales_Coata_Actualizados.xlsx` | en `Datos_ProyectoTiticaca.xlsx` / carpeta raíz | Vertimientos/botaderos Puno 2011–2024 | Tipo desecho, caudal, rutas hacia lago Titicaca |
+| id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
+|----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `minsa_salud_morbilidad_puno` | MINSA — DIRESA Puno (HIS / estadística sectorial) | tabular | 2004–2024 | PE | available | high | ✓ confirmado | 5 | `bronze/data_limpia/Data limpia /Salud` |
+| `minsa_mortalidad_materna_neonatal_puno` | MINSA — DIRESA Puno | tabular | 2000–2025 | PE | available | medium | ✓ confirmado | 3 | `bronze/data_limpia/Data limpia /Muertes maternas` |
 
----
+#### socioeconomic
 
-### 1.5 Derechos de uso del agua (MIDARH)
+| id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
+|----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `inei_censo_puno_2007_2017` | INEI — Instituto Nacional de Estadística e Informática | tabular | 2007–2017 | PE | available | medium | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Censo Puno 2007 y 2017 - Joaquin Suazo` |
+| `inei_demografia_proyecciones_puno` | INEI — Instituto Nacional de Estadística e Informática | tabular | 1995–2030 | PE | available | medium | ⚠ sin confirmar | 2 | `bronze/data_limpia/Data limpia /Demografía de Puno y Proyecciones` |
+| `midarh_derechos_agua` | ANA — Autoridad Nacional del Agua (módulo MIDARH / SNIRH-SARH) | administrative | 1991–2025 | PE | available | medium | ✓ confirmado | 4 | `bronze/data_limpia/Data limpia /MIDARH/MIDARH.xlsx` |
+| `mincetur_turismo_puno` | MINCETUR — DIRCETUR Puno | tabular | 2005–2025 | PE | available | medium | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Turismo en Puno - Joaquin Suazo` |
+| `midagri_precio_chacra_puno` | MIDAGRI — Dirección Regional Agraria Puno | tabular | 2014–2025 | PE | available | low | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Información agricultura, precio en chacra - Joaquin Suazo` |
+| `pronied_mantenimiento_colegios_puno` | PRONIED — Programa Nacional de Infraestructura Educativa / MINEDU | tabular | 2008–2025 | PE | available | low | ✓ confirmado | 3 | `bronze/data_limpia/Data limpia /Colegios` |
 
-| Archivo | Drive ID | Cobertura | Variables |
-|---------|----------|-----------|-----------|
-| `MIDARH.xlsx` | `1vQ-cq_JDGGm1pD3BsiEcNW4yFJ1WfAY0` (carpeta) | 300+ resoluciones/licencias RA/RD, 2005–2020 | ALA Huancané; usos minero, poblacional, agrícola, acuícola, pecuario. Comunidades de Puno, San Antonio de Putina, Huancané, Moho, Azángaro |
+#### policy
 
----
-
-### 1.6 Fauna / ecología
-
-| Archivo | Drive ID | Contenido |
-|---------|----------|-----------|
-| `Endemicas y amenazadas.xlsx` | en `Datos_ProyectoTiticaca.xlsx` / carpeta `1EOvRA1TA2j9wW22f7oPyE7zBJwPiWxMQ` | Anfibios, Aves, Mamíferos, Reptiles, Invertebrados — clasificados por categoría UICN (CR, EN, VU) y CITES |
-| `Efecto contaminación en peces del Género Orestias.pdf` | `18-MJ7KWKkvsMhH2lzeNvU6dySlKxq6mE` | Impacto toxicológico en peces nativos |
-| Carpeta `FAUNA` | `15wSBNvb-I3T2LuHxGVQijZzozvFnHgdg` | Sin explorar — datos de fauna para modelo |
-
----
-
-### 1.7 Niveles del lago
-
-| Fuente | Drive ID | Cobertura |
-|--------|----------|-----------|
-| Carpeta `NIVELES DEL AGUA (LAGO)` | `1euhLa16fjczyxGZzP_7iS12_ykOHweWS` | Sin explorar — series históricas de nivel |
-| `Evolucion del nivel del Lago Titicaca durante el siglo XX.pdf` | `18-MJ7KWKkvsMhH2lzeNvU6dySlKxq6mE` | Contextual siglo XX |
-| `Estudio sobre el lago y sus niveles.pptx` | `1R9BqHjOebBVj4Q3r3X3T1RJYihEixKg0` (especial) | Presentación del equipo |
+| id | institución | tipo | cobertura | país | status | prio | schema | nº lim | locator |
+|----|-------------|------|-----------|------|--------|------|--------|--------|---------|
+| `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
+| `plan_accion_titicaca_2020` | Gobierno del Perú — Comisión Multisectorial | pdf_report | 2020–2024 | PE | available | medium | ○ pend. extracción | 2 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/plan_titicaca_de_accion_titicaca_2020-2024_aprobado.pdf` |
+<!-- CATALOG:END -->
 
 ---
 
-## 2. Datos de contexto — DISPONIBLES
+## Datos a capturar / pendientes
 
-### 2.1 Documentos de síntesis y diagnóstico
-
-| Archivo | Drive ID | Relevancia |
-|---------|----------|-----------|
-| `Resumen de datos analizados.pdf` | `1C6KtfuBNfuHhhKqP91cBpEe5fMLBzi9n` | Síntesis ejecutiva del equipo: salud, contaminación, fauna, economía, gestión del agua — **punto de partida narrativo** |
-| `Datos_ProyectoTiticaca.xlsx` | `12YW6cDVqQd2e4PaT6HmRJy0c5Ywq38vv` | Índice maestro de todos los datasets del proyecto con descripción por archivo |
-| `Análisis de Políticas Públicas I.pdf` | `1Wlo6D3PXUkBN3s4aestZuDhRGzVKBuAm` | Marco de amenazas: aguas residuales, metales, pesca, pastoreo, turismo informal, quema de totorales |
-| `ESTUDIO-DEL-ESTADO-DE-LA-CALIDAD-AMBIENTAL-CUENCA-DEL-TITICACA.pdf` | `18-MJ7KWKkvsMhH2lzeNvU6dySlKxq6mE` | Diagnóstico ambiental integral de la cuenca |
-| `plan_titicaca_de_accion_titicaca_2020-2024_aprobado.pdf` | ídem | Plan de acción oficial — define metas e indicadores |
-| `PROTOCOLO-BINACIONAL_compressed.pdf` | ídem | Marco metodológico bilateral Perú-Bolivia |
-| `Evaluación fuentes contaminantes.pdf` | ídem | Fuentes puntuales y difusas |
-| `Dinámica de metales pesados_final.pdf` | ídem | Geoquímica de metales en agua/sedimento |
-
-### 2.2 Informes técnicos ANA (PDFs)
-
-Serie de informes `ANA0000xxx.pdf` y reportes de unidades hidrográficas específicas (Coata mayo 2021, Suches mayo 2021, etc.) — en carpeta `Estado de la calidad del agua`.
-
-### 2.3 Contexto periodístico del especial
-
-| Archivo | Drive ID | Tipo |
-|---------|----------|------|
-| `📍 NEW VER_PROPUESTA VISUAL_ESPECIAL TITICACA` | `1R9BqHjOebBVj4Q3r3X3T1RJYihEixKg0` | Propuesta visual definitiva del especial |
-| `Proyecto Titicaca_estructura` | ídem | Estructura narrativa del especial |
-| `Plan de contendio - proyecto titicaca.pdf` | ídem | Plan de contenido completo (28 MB) |
-| `Propuestas visuales 08.11.25_LAGO TITICACA_EC.pdf` | ídem | Maquetas visuales (15 MB) |
-
----
-
-## 3. Datos socioeconómicos — DISPONIBLES (contexto)
-
-| Categoría | Archivos / Carpeta | Cobertura |
-|-----------|-------------------|-----------|
-| Demografía | Censos 2007 y 2017 distritales Puno | Población, educación, empleo, salud |
-| Demografía | Proyecciones 2024–2025 (1,891 distritos) | Proyecciones INEI |
-| Salud | `Perfil de los pacientes.xlsx`, `Estadísticas de enfermedades...` | Tifoidea, diarrea, amebiasis 2004; mortalidad neonatal 2017–2023 |
-| Salud | `Resumen de datos analizados.pdf` | 987 muertes por agua contaminada en 20 años; 54.7% niños 0-11 años |
-| Agricultura | Precios en chacra 2004–2025 | Quinua, papa, oca, alfalfa, avena |
-| Pecuario | Precios productos pecuarios 2024–2025 | Ave, ovino, vacuno, huevo, leche |
-| Turismo | Carpeta `Turismo en Puno` | Series históricas visitantes |
-| Vivienda | `Mendoza Grecia_ECDATA CONSTRUCCION 2007 y 2017.xlsx` | Materiales de construcción por distrito |
-| Colegios | Carpeta `Colegios` | Mantenimiento IIEE 2008–2024 |
-| Muertes maternas | Carpeta `Muertes maternas` | Series históricas |
-
----
-
-## 4. Datos locales (zip files descargados)
-
-Ubicados en `/home/rosewt-dell/Code/titicaca-enironmental-foresight/`:
-
-| Archivo | Tamaño estimado | Contenido probable |
-|---------|----------------|-------------------|
-| `Data limpia -20260609T194642Z-3-001.zip` | — | Subset de "Data limpia" del Drive del especial |
-| `Data limpia -20260609T194642Z-3-002.zip` | — | ídem |
-| `Data limpia -20260609T194642Z-3-003.zip` | — | ídem |
-| `Data limpia -20260609T194642Z-3-004.zip` | — | ídem |
-
-**Pendiente:** descomprimir e inspeccionar para identificar superposición con datasets del Drive.
-
----
-
-## 5. Datos a capturar / pendientes
+Variables y fuentes aún ausentes del catálogo, ordenadas por prioridad para el baseline.
 
 | Dato | Fuente probable | Prioridad | Método de captura |
-|------|----------------|-----------|-------------------|
-| Series de nivel del lago (diarias/mensuales) | ANA-SNIRH, PEBLT, SENAMHI | **Alta** — necesario para temporal splits y contexto estacional | SNIRH API o descarga directa |
-| Datos limnológicos lago principal (temperatura, clorofila-a, Secchi, OD, nutrientes) | IMARPE-PELT, PEBLT cruceros | **Alta** — variable objetivo principal del baseline | Solicitud PEBLT / IMARPE o scraping PDFs |
-| Imágenes Sentinel-2 del lago | ESA Copernicus Open Access Hub | **Media** — para baseline satelital | `sentinelhub` o `openeo` |
-| Descargas de ríos principales (caudal diario) | SENAMHI-SNIRH | **Media** — covariable hidrológica | SNIRH descarga |
-| Datos Bolivia (cuencas Katari, desagüe) | SENASBA, MMAyA Bolivia | **Media** — para contexto binacional | Coordinación binacional / protocolo |
-| Coordenadas y estado de plantas de tratamiento | SUNASS, ANA | **Media** — fuente de presión puntual | SUNASS portal / solicitud |
-| Ubicación georeferenciada de pasivos mineros | MINEM-PASIVOS | **Media** — fuente contaminación metales | Portal MINEM / GEOCATMIN |
-| Datos de pesca artesanal (PNUD/PRODUCE) | PRODUCE, RNT | **Baja** | Portal estadístico |
-| Datos de *Telmatobius culeus* (abundancia) | Ramos Rodrigo et al. 2019 | **Baja** — indicador ecológico | Paper + contacto autores |
+|------|-----------------|-----------|-------------------|
+| Clorofila-a / Secchi in situ del lago | PDFs PEBLT/IMARPE (`peblt_monitoreo_lago`) y monitoreo binacional (`ana_monitoreo_binacional`) | **Alta** — variable objetivo del Tier 1 | Extracción tabular de PDFs (issue dedicado; binacional depende de T5) |
+| Clorofila-a satelital (proxy óptico) | Sentinel-2 vía Copernicus | **Alta** — Tier 2 | T13 (`sentinelhub`/`openeo`) |
+| Series de nivel del lago (diarias/mensuales) | ANA-SNIRH, PEBLT, SENAMHI | **Alta** — contexto estacional y temporal splits | SNIRH API / descarga |
+| Caudal diario de ríos principales | SENAMHI-SNIRH | **Media** — covariable hidrológica | SNIRH descarga |
+| Datos Bolivia (cuencas Katari, desagüe) | MMAyA / SENASBA Bolivia | **Media** — contexto binacional | Coordinación binacional / protocolo |
+| Coordenadas de plantas de tratamiento (PTAR) | SUNASS, ANA | **Media** — presión puntual | Portal SUNASS / solicitud |
+| Pasivos mineros georeferenciados | MINEM — GEOCATMIN | **Media** — fuente de metales | Portal MINEM |
+| Pesca artesanal | PRODUCE / RNT | **Baja** | Portal estadístico |
 
----
+## Gaps críticos para el modelo
 
-## 6. Gaps críticos para el modelo
-
-1. **Clorofila-a / Secchi in situ**: no se encontró en los datasets tabulares revisados — es la variable objetivo principal del baseline Tier 1. Puede estar en los PDFs de cruceros PEBLT (pendiente extracción) o en los `Reporte10022026*.xlsx` (pendiente inspección).
-2. **Cobertura temporal**: los datos de cuencas tributarias son eventos de monitoreo discretos (no series continuas). La cobertura 2013–2025 es buena pero con gaps.
-3. **Datos Bolivia**: ausentes en el inventario actual.
-4. **Matchups satélite-campo**: no hay matchups Sentinel-2 / MODIS preparados — es el componente que requiere más trabajo para el Tier 2.
-
----
-
-*Fuentes primarias Drive exploradas: `1R9BqHjOebBVj4Q3r3X3T1RJYihEixKg0` (especial) y `1BkOVn0FqqQT4jmwTAsQ1z1YJDP2_G_8r` (data descargada). Exploración de segundo nivel realizada en: Data para herramienta, DATA PARA MODELO, Estado de la calidad del agua, Monitoreo del Lago Titicaca, Monitoreo de cuencas, Puntos críticos.*
+1. **Clorofila-a / Secchi in situ**: ausente de las fuentes tabulares confirmadas; vive en los
+   PDFs de cruceros PEBLT y del monitoreo binacional, que son la **cola de extracción** (no defecto
+   de catálogo — ver la línea de gate del resumen). Es la variable objetivo principal del Tier 1.
+2. **Cobertura temporal discreta**: los monitoreos de cuencas son eventos discretos (no series
+   continuas); 2013–2025 con gaps. Respetar frontera estación seca/húmeda en los splits (no random).
+3. **Datos Bolivia**: ausentes; todo el conjunto actual es de la parte peruana.
+4. **Matchups satélite-campo**: aún no preparados — el componente de mayor esfuerzo para el Tier 2.
+5. **Metales en formato numérico**: solo `ana_metales_cuencas` trae valores numéricos (formato largo);
+   en `ana_tributarias_2013_2025` los metales figuran como texto de excedencia. Cruce relacional vía
+   `UBIGEO` (PK designada en el diccionario RAMIS).

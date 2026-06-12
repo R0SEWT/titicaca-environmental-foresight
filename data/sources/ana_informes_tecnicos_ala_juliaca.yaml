@@ -17,7 +17,7 @@ coverage_spatial:
 
 drive_id: null
 drive_folder: "Data para herramienta / Resultados en gestión del agua - Ala Juliaca"
-local_path: "Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Juliaca/"
+local_path: "bronze/data_limpia/Data limpia /Data para herramienta/Resultados en gestión del agua - Ala Juliaca/"
 provided_by: "Equipo periodístico El Comercio (especial Titicaca)"
 access_date: "2026-05-02"
 
