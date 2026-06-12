@@ -9,7 +9,7 @@
         "name": "Lago Titicaca — lado peruano (AOI grueso)",
         "country": "PE",
         "precision": "coarse_bbox",
-        "note": "AOI grueso (bbox) para acotar consultas STAC. Refinar con una máscara de agua antes de calcular proxies; recorta lago + orilla, no separa tierra/agua.",
+        "note": "AOI grueso (bbox) para acotar consultas STAC. Cubre la extensión latitudinal peruana completa (~15.1°S a 16.58°S, incl. bahías sur Juli/Pomata/Zepita/Desaguadero). Refinar con una máscara de agua + frontera PE/BO antes de calcular proxies; recorta lago + orilla, no separa tierra/agua ni país.",
         "source_id": "sentinel2_chla_titicaca",
         "decision": "DECISION-005"
       },
@@ -19,8 +19,8 @@
           [
             [-70.20, -15.10],
             [-69.00, -15.10],
-            [-69.00, -16.30],
-            [-70.20, -16.30],
+            [-69.00, -16.60],
+            [-70.20, -16.60],
             [-70.20, -15.10]
           ]
         ]
