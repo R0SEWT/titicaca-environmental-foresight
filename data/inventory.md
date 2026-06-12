@@ -17,17 +17,17 @@ _Generado automáticamente por `catalog.py` desde `data/sources/*.yaml` — no e
 | status | n |
 |--------|---|
 | available | 23 |
-| pending_download | 1 |
+| pending_download | 2 |
 
 | prioridad | n |
 |-----------|---|
 | high | 7 |
-| medium | 14 |
+| medium | 15 |
 | low | 3 |
 
 **Gate schema (tabular/gis prioridad alta sin confirmar): ✓ limpio (0).**
 
-Pendiente de extracción (pdf_report/image_series, no es defecto): **8** — ana_informes_tecnicos_ala_huancane, ana_informes_tecnicos_ala_ilave, ana_informes_tecnicos_ala_juliaca, ana_informes_tecnicos_ala_ramis, ana_monitoreo_binacional, oas_pnuma_tdps_1996, peblt_monitoreo_lago, plan_accion_titicaca_2020.
+Pendiente de extracción (pdf_report/image_series, no es defecto): **9** — ana_informes_tecnicos_ala_huancane, ana_informes_tecnicos_ala_ilave, ana_informes_tecnicos_ala_juliaca, ana_informes_tecnicos_ala_ramis, ana_monitoreo_binacional, oas_pnuma_tdps_1996, peblt_monitoreo_lago, plan_accion_titicaca_2020, sentinel2_chla_titicaca.
 
 ### Matriz de procedencia
 
@@ -48,6 +48,7 @@ Pendiente de extracción (pdf_report/image_series, no es defecto): **8** — ana
 | `ana_red_monitoreo` | ANA — Autoridad Nacional del Agua | tabular | 2013–2025 | PE | available | medium | ⚠ sin confirmar | 2 | drive: Data para herramienta |
 | `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
 | `plan_accion_titicaca_2020` | Gobierno del Perú — Comisión Multisectorial | pdf_report | 2020–2024 | PE | available | medium | ○ pend. extracción | 2 | `bronze/data_limpia/Data limpia /Estado de la calidad del agua/plan_titicaca_de_accion_titicaca_2020-2024_aprobado.pdf` |
+| `sentinel2_chla_titicaca` | ESA / Copernicus — Copernicus Data Space Ecosystem | image_series | 2017–ongoing | PE | pending_download | medium | ○ pend. extracción | 7 | — |
 | `vertederos_caudales_coata` | Gobierno Regional de Puno / MINAM (fuente probable) | tabular | 2011–2024 | PE | available | medium | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Registro de vertederos municipales en la región Puno (2011–2024), con desagregación territorial, tipología de desechos y rutas de transporte hacia el lago Titicaca./Vertederos_Caudales_Coata_Actualizados.xlsx` |
 
 #### hydrology
@@ -65,6 +66,7 @@ Pendiente de extracción (pdf_report/image_series, no es defecto): **8** — ana
 |----|-------------|------|-----------|------|--------|------|--------|--------|---------|
 | `ana_observatorio_calidad_lago` | ANA — Autoridad Nacional del Agua / Observatorio del Agua | tabular | 2018–2023 | PE | available | high | ✓ confirmado | 6 | `bronze/data_limpia/Data limpia /Monitoreo de cuencas` |
 | `oas_pnuma_tdps_1996` | OEA — Organización de los Estados Americanos / PNUMA | pdf_report | 1990–1996 | PE/BO | pending_download | medium | ○ pend. extracción | 4 | drive: Estado de la calidad del agua (referencia bibliográfica) |
+| `sentinel2_chla_titicaca` | ESA / Copernicus — Copernicus Data Space Ecosystem | image_series | 2017–ongoing | PE | pending_download | medium | ○ pend. extracción | 7 | — |
 | `fauna_endemicas_amenazadas` | SERNANP / MINAM (fuente probable) | tabular | unknown–unknown | PE | available | low | ⚠ sin confirmar | 3 | `bronze/data_limpia/Data limpia /Animales/Endemicas y amenazadas.xlsx` |
 
 #### health

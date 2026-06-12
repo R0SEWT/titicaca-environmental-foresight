@@ -1,0 +1,75 @@
+id: sentinel2_chla_titicaca
+name: "Sentinel-2 MSI — proxy óptico de clorofila-a (lago Titicaca, lado peruano)"
+institution: "ESA / Copernicus — Copernicus Data Space Ecosystem"
+type: image_series
+topic:
+  - water_quality
+  - ecology
+
+coverage_temporal:
+  start: "2017"
+  end: "ongoing"
+coverage_spatial:
+  description: "Lago Titicaca, lado peruano (Lago Mayor + orilla PE). AOI grueso en data/sources/aoi/titicaca_pe.geojson, a refinar con máscara de agua."
+  basins:
+    - Lago Titicaca
+  country: PE
+
+drive_id: null
+drive_folder: null
+local_path: null
+provided_by: "Adquisición propia (fuente pública ESA/Copernicus)"
+access_date: "2026-06-12"
+
+# Fuente NO descargada: ficha de catalogación (T13). El contenido (escenas + índices)
+# se computa en el pipeline Tier-2; aquí solo se define fuente / AOI / periodo / proxy.
+variables:
+  # bandas MSI relevantes para recuperación óptica de chl-a en aguas interiores
+  - B2    # azul 490 nm
+  - B3    # verde 560 nm
+  - B4    # rojo 665 nm
+  - B5    # red-edge 705 nm (clave para NDCI/MCI)
+  - B6    # red-edge 740 nm
+  - B7    # red-edge 783 nm
+  - B8    # NIR 842 nm
+  - B8A   # NIR estrecho 865 nm
+  # índices derivados (proxies ópticos, se calculan en Tier-2)
+  - NDCI                # (B5 - B4) / (B5 + B4)  — proxy primario
+  - MCI                 # Maximum Chlorophyll Index — proxy secundario
+  - chlorophyll_a_proxy # estimación inferida de chl-a (NO medición directa)
+granularity: "1 escena MSI (~10–20 m) por fecha de paso; revisita ~5 días; recortada al AOI lago PE"
+n_records_approx: "~cientos de escenas (revisita ~5 días, 2017–presente; estimado a 2026-06-12) sobre el AOI peruano"
+schema_confirmed: false
+
+collection_method: >
+  Consulta STAC al catálogo SENTINEL-2 L2A (reflectancia de superficie) del Copernicus Data Space
+  Ecosystem, filtrando por el AOI del lago lado peruano y por nubosidad; cálculo de proxies ópticos
+  de clorofila-a (NDCI primario, MCI secundario) sobre las bandas visibles/red-edge. La estimación
+  de chl-a es una INFERENCIA óptica, no una medición de laboratorio.
+laboratory: null
+standard: "Sentinel-2 L2A (corrección atmosférica Sen2Cor); proxy NDCI (Mishra & Mishra 2012)"
+
+limitations:
+  - "PROXY, NO MEDICIÓN: chlorophyll_a_proxy es una inferencia óptica; no equivale a chl-a de laboratorio (regla CLAUDE.md)"
+  - "Corrección atmosférica sobre aguas interiores turbias (Sen2Cor/ACOLITE) con incertidumbre apreciable"
+  - "Efectos de adyacencia y reflectancia de fondo en zonas someras del lago"
+  - "Nubes, hielo y sun-glint reducen la cobertura útil; requiere enmascarado"
+  - "NDCI satura a alta biomasa algal; relación con chl-a no lineal"
+  - "Matchups in-situ escasos (57 valores en ana_observatorio_calidad_lago, concentrados 2018-II/2019-II) → calibración local limitada"
+  - "L2A sistemático recién desde ~2018–2019; escenas previas pueden requerir procesamiento on-demand (Sen2Cor sobre L1C)"
+
+citation: >
+  Copernicus Sentinel-2 (ESA), procesado por Copernicus Data Space Ecosystem. Productos L2A,
+  AOI lago Titicaca (lado peruano), 2017–presente. Proxy de clorofila-a vía NDCI.
+related_reports:
+  - ana_observatorio_calidad_lago
+
+status: pending_download
+priority: medium
+notes: >
+  COMPLEMENTO de la chl-a in-situ, no fuente única. La planilla principal ana_tributarias_2013_2025
+  no tiene chl-a; sí existe in-situ en ana_observatorio_calidad_lago (57/81 con valor, 2018-II/2019-II).
+  Sentinel-2 aporta densidad temporal y años recientes (2020–2025) donde el in-situ es escaso, y se
+  CALIBRA/VALIDA contra esos matchups. AOI: data/sources/aoi/titicaca_pe.geojson. Decisión de proxy y
+  plataforma: ver docs/DECISION_LOG.md DECISION-005. El pipeline real (STAC pull, índices, matchup,
+  regresión) es trabajo Tier-2, no T13.

@@ -36,3 +36,11 @@ No se edita el pasado; si una decisión se revierte, se añade una nueva entrada
 **Decisión:** C. `schema_confirmed` es defecto solo para `tabular`/`gis` (legibles por máquina); el gate de T7 (`catalog.py --check` sale !=0) solo cuenta esas. Para `pdf_report`/`image_series`, `false` = "pendiente de extracción" (estado, no defecto), se reporta aparte y se rastrea con un issue dedicado.
 **Razón:** Honra el rigor: no se infla la confianza de datos no leídos. El gate sigue siendo ejecutable y blindado en CI (`test_gate_clean`).
 **Impacto:** `minsa_salud_morbilidad_puno` (tabular, leída en T4) pasa a `true`; PEBLT/binacional siguen `false` pero documentados como cola de extracción. T7 cierra con gate verde sin trampa.
+
+## DECISION-005 — La clorofila-a satelital es un proxy óptico inferido, no una medición
+**Fecha:** 2026-06-12
+**Contexto:** El target primario (eutrofización/chl-a) casi no existe in-situ: la planilla principal `ana_tributarias_2013_2025` no tiene chl-a; sí hay 57 valores en `ana_observatorio_calidad_lago`, concentrados en 2018-II/2019-II. Sentinel-2 puede aportar chl-a, pero solo como inferencia óptica.
+**Opciones:** A) tratar la chl-a satelital como medición directa · B) catalogarla como proxy inferido, complemento del in-situ, calibrado/validado contra los matchups disponibles.
+**Decisión:** B. Fuente `sentinel2_chla_titicaca` (`type: image_series`, `priority: medium`). Plataforma **Copernicus Data Space Ecosystem** (STAC, L2A); AOI **lado peruano** (`data/sources/aoi/titicaca_pe.geojson`); proxy primario **NDCI** = (B5−B4)/(B5+B4) (Mishra & Mishra 2012), MCI secundario, ML calibrado (XGBoost, Sherf 2025) como ruta futura.
+**Razón:** El satélite ve el estado óptico superficial, no chl-a de laboratorio; afirmar lo contrario viola la regla de honestidad de CLAUDE.md. Como complemento densifica la serie en años recientes (2020–2025).
+**Impacto:** T13 entrega solo la catalogación (ficha + AOI + proxy + esta decisión). El pipeline real (STAC pull, corrección atmosférica, índices, matchup con in-situ, regresión con splits temporales/espaciales sin leakage) es un bead Tier-2 que depende de T13.
