@@ -69,22 +69,26 @@ def classify(tsi: float | None) -> tuple[str | None, str | None]:
     return ("hypereutrophic", "alto")
 
 
-def _threshold_number(threshold: str | None) -> float | None:
+def _threshold_limits(threshold: str | None) -> list[float]:
+    """Límites numéricos distintos en el string ECA (Cat.4-E1: 1; Cat.3: hasta 2)."""
     if threshold is None:
-        return None
-    m = re.search(r"\d+(?:[.,]\d+)?", str(threshold))
-    return float(m.group().replace(",", ".")) if m else None
+        return []
+    nums = [float(m.replace(",", ".")) for m in re.findall(r"\d+(?:[.,]\d+)?", str(threshold))]
+    return sorted(set(nums))
 
 
 def eca_exceed(parameter: str, value: float | None, threshold: str | None) -> bool | None:
     """¿`value` incumple el ECA del parámetro? None si no evaluable.
 
     Dirección por ECA_DIRECTION: "max" → incumple si value > límite; "min" → si value < límite.
+    Si el umbral trae varios límites distintos (Cat.3 D1/D2), la subcategoría aplicable es
+    ambigua → None (no se marca contra un límite que quizá no corresponde).
     """
     direction = ECA_DIRECTION.get(parameter)
-    limit = _threshold_number(threshold)
-    if direction is None or limit is None or value is None:
+    limits = _threshold_limits(threshold)
+    if direction is None or value is None or len(limits) != 1:
         return None
+    limit = limits[0]
     return value > limit if direction == "max" else value < limit
 
 
@@ -109,7 +113,8 @@ def build_trophic_risk(silver_df: pl.DataFrame) -> dict:
     """
     df = (
         silver_df.filter(pl.col("parameter").is_in(_USED_PARAMS))
-        .unique(subset=["station_id", "datetime", "parameter"], keep="first")
+        # dedup alineado con la llave real del registro (no colapsa campañas/cuerpos distintos)
+        .unique(subset=["station_id", "datetime", "water_body", "campaign", "parameter"], keep="first")
         .sort("station_id", "datetime", "parameter")
     )
 
@@ -155,7 +160,7 @@ def build_trophic_risk(silver_df: pl.DataFrame) -> dict:
             "risk_level": risk_level,
         })
 
-    records.sort(key=lambda r: (r["station_id"], r["campaign"]))
+    records.sort(key=lambda r: (r["station_id"], r["campaign"] or ""))
 
     # Rollup por estación: peor caso del risk_level entre campañas.
     summary = []
@@ -177,7 +182,7 @@ def build_trophic_risk(silver_df: pl.DataFrame) -> dict:
             "method": "Carlson TSI (clorofila-a, Secchi) + escalado por hipoxia (OD<ECA) + flags ECA-Agua",
             "n_stations": len(summary),
             "n_records": len(records),
-            "campaigns": sorted({r["campaign"] for r in records}),
+            "campaigns": sorted({r["campaign"] for r in records if r["campaign"]}),
             "caveats": [
                 "TSI es una inferencia de estado trófico, no una medición de 'riesgo'.",
                 "Umbral de OD = ECA-Agua Cat.4-E1 (referencia legal); el lago a ~3810 m tiene saturación de OD reducida.",
@@ -194,7 +199,17 @@ def build_trophic_risk(silver_df: pl.DataFrame) -> dict:
 def main() -> None:
     from titicaca_environmental_foresight.silver import ana_observatorio as ao
 
-    silver = ao.build_silver(out_path=None)
+    # Contrato silver→gold: consume el parquet silver persistido; si no existe, lo
+    # construye desde bronze. Falla en vez de escribir un JSON vacío en silencio.
+    if ao.OUT_PATH.exists():
+        silver = pl.read_parquet(ao.OUT_PATH)
+    else:
+        silver = ao.build_silver(out_path=None)
+    if silver.height == 0:
+        raise SystemExit(
+            "Panel silver vacío: corre el parser silver primero "
+            "(python -m titicaca_environmental_foresight.silver.ana_observatorio)."
+        )
     out = build_trophic_risk(silver)
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2))

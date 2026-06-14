@@ -79,6 +79,14 @@ class TestEcaExceed:
     def test_unparseable_threshold_is_none(self):
         assert tr.eca_exceed("chlorophyll_a", 0.02, None) is None
 
+    def test_ambiguous_cat3_thresholds_is_none(self):
+        # "= 5 | = 4" (Cat.3 D1/D2): no sabemos la subcategoría → no evaluable
+        assert tr.eca_exceed("do_mg_l", 4.5, "= 5 | = 4") is None
+
+    def test_repeated_equal_threshold_is_evaluable(self):
+        # "<=0,1 | <=0,1": mismo límite duplicado → no es ambiguo
+        assert tr.eca_exceed("chlorophyll_a", 0.2, "<=0,1 | <=0,1") is True
+
 
 class TestEscalate:
     def test_hypoxia_bumps_one_level(self):
@@ -113,6 +121,8 @@ def _silver_fixture():
         ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "chlorophyll_a", 0.02, "<=0,008"),
         ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "secchi_m", 1.0, None),
         ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "do_mg_l", 4.0, "= 5"),
+        # LTit03 2018-II: solo OD (sin chl ni Secchi) → sin TSI ni risk
+        ("LTit03", d18, "Otros Lago Titicaca", "2018-II", "do_mg_l", 7.5, "= 5"),
     ]
     return pl.DataFrame(
         rows,
@@ -130,8 +140,16 @@ class TestBuildTrophicRisk:
         return next(r for r in self.recs if r["station_id"] == station and r["campaign"] == campaign)
 
     def test_one_record_per_station_campaign_after_dedup(self):
-        # LTit01×2 campañas + LTit02×1 = 3 (el duplicado de chl no infla)
-        assert len(self.recs) == 3
+        # LTit01×2 + LTit02×1 + LTit03×1 = 4 (el duplicado de chl no infla)
+        assert len(self.recs) == 4
+
+    def test_od_only_station_has_no_tsi_or_risk(self):
+        r = self._rec("LTit03", "2018-II")
+        assert r["tsi_chl"] is None and r["tsi_sd"] is None and r["tsi"] is None
+        assert r["trophic_state"] is None and r["base_risk"] is None
+        assert r["risk_level"] is None
+        assert r["hypoxia"] is False          # OD 7.5 ≥ 5
+        assert r["eca_exceedances"] == []
 
     def test_oligotrophic_low_risk(self):
         r = self._rec("LTit01", "2018-II")
@@ -153,6 +171,35 @@ class TestBuildTrophicRisk:
         assert summ["LTit01"]["risk_level"] == "alto"
         assert summ["LTit01"]["n_campaigns"] == 2
 
+    def test_station_summary_rollup_flags(self):
+        summ = {s["station_id"]: s for s in self.out["station_summary"]}
+        # LTit02: hipoxia (OD 4<5) + excede ECA chl/P → ambos flags True
+        assert summ["LTit02"]["hypoxia_any"] is True
+        assert summ["LTit02"]["eca_exceed_any"] is True
+        # LTit01: OD ok en ambas campañas → hypoxia_any False; pero 2019-II
+        # excede ECA chl (0.02>0.008) → eca_exceed_any True
+        assert summ["LTit01"]["hypoxia_any"] is False
+        assert summ["LTit01"]["eca_exceed_any"] is True
+
     def test_meta_present(self):
         assert "Carlson" in self.out["meta"]["method"]
-        assert self.out["meta"]["n_stations"] == 2
+        assert self.out["meta"]["n_stations"] == 3
+
+
+class TestNullCampaignTolerance:
+    def test_build_tolerates_null_campaign(self):
+        import datetime as dt
+
+        import polars as pl
+
+        df = pl.DataFrame(
+            [
+                ("LTit09", dt.datetime(2018, 11, 1, 9, 0), "Otros Lago Titicaca", None, "secchi_m", 3.0, None),
+                ("LTit09", dt.datetime(2018, 11, 1, 9, 0), "Otros Lago Titicaca", None, "do_mg_l", 6.0, "= 5"),
+            ],
+            schema=["station_id", "datetime", "water_body", "campaign", "parameter", "value", "eca_threshold"],
+            orient="row",
+        )
+        out = tr.build_trophic_risk(df)  # no debe lanzar TypeError
+        assert len(out["records"]) == 1
+        assert None not in out["meta"]["campaigns"]
