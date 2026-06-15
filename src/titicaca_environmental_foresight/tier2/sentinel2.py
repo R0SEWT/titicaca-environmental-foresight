@@ -262,6 +262,13 @@ def configure_cdse_s3() -> None:
     os.environ["AWS_S3_ENDPOINT"] = CDSE_S3_ENDPOINT
     os.environ["AWS_VIRTUAL_HOSTING"] = "FALSE"
     os.environ["AWS_HTTPS"] = "YES"
+    # Robustez de lectura JP2 sobre S3 CDSE: el endpoint trunca streams bajo alta
+    # concurrencia (errores GDAL "Stream too short"/opj_get_decoded_tile failed). Reintentos
+    # + desactivar HTTP/2 multiplex (causa truncados con CDSE) hacen el reintento efectivo.
+    # Va a os.environ porque GDAL las lee del entorno en TODOS los caminos (incl. reader dask).
+    os.environ.setdefault("GDAL_HTTP_MAX_RETRY", "10")
+    os.environ.setdefault("GDAL_HTTP_RETRY_DELAY", "1")
+    os.environ.setdefault("GDAL_HTTP_MULTIPLEX", "NO")
 
     import odc.stac
 
@@ -272,6 +279,9 @@ def configure_cdse_s3() -> None:
         AWS_VIRTUAL_HOSTING="FALSE",
         AWS_HTTPS="YES",
         GDAL_HTTP_TCP_KEEPALIVE="YES",
+        GDAL_HTTP_MAX_RETRY="10",
+        GDAL_HTTP_RETRY_DELAY="1",
+        GDAL_HTTP_MULTIPLEX="NO",
     )
 
 
@@ -343,7 +353,14 @@ def main() -> None:
     # materializa UNA vez (`.compute()`) y se muestrea/coarsena desde memoria (no re-lee S3).
     import dask
 
-    dask.config.set(scheduler=os.environ.get("TITICACA_S2_SCHEDULER", "threads"))
+    # Concurrencia acotada: el scheduler "threads" usa nº de cores por defecto (p.ej. 32),
+    # lo que dispara demasiadas lecturas S3 simultáneas a CDSE y trunca los JP2. Limitar a
+    # pocos workers (default 4) evita el throttling/truncado sin volver al síncrono lento.
+    num_workers = max(1, int(os.environ.get("TITICACA_S2_NUM_WORKERS", "4")))
+    dask.config.set(
+        scheduler=os.environ.get("TITICACA_S2_SCHEDULER", "threads"),
+        num_workers=num_workers,
+    )
     # Resolución del zonal: coarsen ×N (default 5 → 100 m, acota RAM en máquinas chicas).
     # En máquinas con RAM holgada usar TITICACA_S2_COARSEN=1 → zonal a 20 m nativo.
     coarsen_n = max(1, int(os.environ.get("TITICACA_S2_COARSEN", str(COARSEN))))
