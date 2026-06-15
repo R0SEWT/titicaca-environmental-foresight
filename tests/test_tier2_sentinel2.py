@@ -145,6 +145,9 @@ def _pixel_center_lonlat(row: int, col: int) -> tuple[float, float]:
 
 class TestSampleIndexAtPoints:
     def setup_method(self):
+        # `sample_index_at_points` opera sobre xr.DataArray (dep del extra `satellite`,
+        # no instalada en CI que solo trae `dev`). Estos tests se saltan donde no esté.
+        pytest.importorskip("xarray")
         self.vals = np.arange(25, dtype=float).reshape(5, 5) / 100.0  # 0.00..0.24
         self.index = _da(self.vals)
         self.water = _da(np.ones((5, 5), dtype=bool))
