@@ -1,0 +1,77 @@
+station_id,lat,lon,utm_este,utm_norte,datum,water_body,coord_original_text,coord_source,coord_source_file,extraction_method,confidence,status,notes
+LTit02,-15.335242,-69.693578,425551,8304475,UTM 19S (EPSG:32719) → WGS84,L Mayor,425551 8304475 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit03,-15.396108,-69.829035,411036,8297691,UTM 19S (EPSG:32719) → WGS84,L Mayor,411036 8297691 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit04,-15.404148,-69.690666,425888,8296854,UTM 19S (EPSG:32719) → WGS84,L Mayor,425888 8296854 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit05,-15.420595,-69.547057,441303,8295079,UTM 19S (EPSG:32719) → WGS84,L Mayor,441303 8295079 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit06,-15.493526,-69.861641,407580,8286901,UTM 19S (EPSG:32719) → WGS84,L Mayor,407580 8286901 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit07,-15.480808,-69.611288,434430,8288400,UTM 19S (EPSG:32719) → WGS84,L Mayor,434430 8288400 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit08,-15.51609,-69.4463,452136,8284541,UTM 19S (EPSG:32719) → WGS84,L Mayor,452136 8284541 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit09,-15.607905,-69.743748,420270,8274296,UTM 19S (EPSG:32719) → WGS84,L Mayor,420270 8274296 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit10,-15.578157,-69.510948,445219,8277660,UTM 19S (EPSG:32719) → WGS84,L Mayor,445219 8277660 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit100,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit101,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit102,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit103,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit104,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit105,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit106,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit12,-15.753402,-69.746795,420000,8258200,UTM 19S (EPSG:32719) → WGS84,L Mayor,420000 8258200 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit13,-15.705724,-69.645085,430880,8263510,UTM 19S (EPSG:32719) → WGS84,L Mayor,430880 8263510 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit14,-15.67972,-69.406229,456468,8266450,UTM 19S (EPSG:32719) → WGS84,L Mayor,456468 8266450 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit16,-15.807722,-69.539738,442197,8252259,UTM 19S (EPSG:32719) → WGS84,L Mayor,442197 8252259 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit18,-15.902631,-69.728838,421981,8241699,UTM 19S (EPSG:32719) → WGS84,L Mayor,421981 8241699 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit19,-15.906088,-69.581561,437748,8241366,UTM 19S (EPSG:32719) → WGS84,L Mayor,437748 8241366 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit20,-15.8638,-69.371291,460248,8246095,UTM 19S (EPSG:32719) → WGS84,L Mayor,460248 8246095 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit23,-15.989851,-69.428541,454147,8232140,UTM 19S (EPSG:32719) → WGS84,L Mayor,454147 8232140 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit26,-16.028429,-69.311479,466679,8227895,UTM 19S (EPSG:32719) → WGS84,L Mayor,466679 8227895 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit29,-16.146223,-69.439829,452976,8214840,UTM 19S (EPSG:32719) → WGS84,L Mayor,452976 8214840 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit33,-16.196283,-69.385565,458788,8209314,UTM 19S (EPSG:32719) → WGS84,L Mayor,458788 8209314 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit34,-16.25589,-69.29162,468839,8202737,UTM 19S (EPSG:32719) → WGS84,L Mayor,468839 8202737 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit35,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit41,-16.260836,-68.938316,506591,8202211,UTM 19S (EPSG:32719) → WGS84,L Menor,506591 8202211 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit46,-16.29819,-69.009351,499001,8198080,UTM 19S (EPSG:32719) → WGS84,L Menor,499001 8198080 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit50,-16.357935,-68.970093,503194,8191471,UTM 19S (EPSG:32719) → WGS84,L Menor,503194 8191471 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit53,-16.418894,-68.99099,500962,8184728,UTM 19S (EPSG:32719) → WGS84,L Menor,500962 8184728 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit54,-16.480637,-69.008554,499087,8177898,UTM 19S (EPSG:32719) → WGS84,L Menor,499087 8177898 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit56,-16.561605,-69.035309,496233,8168941,UTM 19S (EPSG:32719) → WGS84,L Menor,496233 8168941 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit59,-15.835367,-70.014143,391402,8249013,UTM 19S (EPSG:32719) → WGS84,B Puno,391402 8249013 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit60,-15.830622,-70.00241,392656,8249544,UTM 19S (EPSG:32719) → WGS84,B Puno,392656 8249544 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit61,-15.855112,-69.983994,394641,8246844,UTM 19S (EPSG:32719) → WGS84,B Puno,394641 8246844 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit62,-15.841048,-69.993581,393607,8248395,UTM 19S (EPSG:32719) → WGS84,B Puno,393607 8248395 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit63,-15.850692,-69.995776,393377,8247327,UTM 19S (EPSG:32719) → WGS84,B Puno,393377 8247327 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit64,-15.835138,-69.985428,394477,8249053,UTM 19S (EPSG:32719) → WGS84,B Puno,394477 8249053 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit65,-15.859196,-69.935423,399844,8246416,UTM 19S (EPSG:32719) → WGS84,B Puno,399844 8246416 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit66,-15.846336,-69.949428,398338,8247832,UTM 19S (EPSG:32719) → WGS84,B Puno,398338 8247832 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit67,-15.830643,-69.909296,402628,8249587,UTM 19S (EPSG:32719) → WGS84,B Puno,402628 8249587 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit68,-15.868449,-69.904487,403161,8245407,UTM 19S (EPSG:32719) → WGS84,B Puno,403161 8245407 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit69,-15.868652,-69.86812,407055,8245401,UTM 19S (EPSG:32719) → WGS84,B Puno,407055 8245401 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit70,-15.826023,-69.872093,406610,8250115,UTM 19S (EPSG:32719) → WGS84,B Puno,406610 8250115 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit71,-15.775938,-69.857456,408155,8255662,UTM 19S (EPSG:32719) → WGS84,B Puno,408155 8255662 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit72,-15.753005,-69.800187,414280,8258223,UTM 19S (EPSG:32719) → WGS84,B Puno,414280 8258223 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit73,-15.713372,-69.834571,410579,8262593,UTM 19S (EPSG:32719) → WGS84,B Puno,410579 8262593 (UTM 19S),protocolo_binacional,PROTOCOLO-BINACIONAL_compressed.pdf,pdftotext_table,high,resolved,
+LTit78,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit79,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit80,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit81,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit82,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit83,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit84,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit85,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit86,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit87,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit88,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit89,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit90,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit91,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit92,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit93,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit94,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit95,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit96,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTit98,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)
+LTiti75,-15.651603,-69.867133,407062,8269412,UTM 19S (EPSG:32719) → WGS84,,407 062 8 269 412 (UTM 19S),coata_it_2021,84172-2021_IT N° 085-2021-ANA.AAA.TIT-RWAA_MON UH COATA MAYO 2021.pdf,pdftotext_table,high,resolved,
+LTiti76,-15.618706,-69.887656,404847,8273042,UTM 19S (EPSG:32719) → WGS84,,404 847 8 273 042 (UTM 19S),coata_it_2021,84172-2021_IT N° 085-2021-ANA.AAA.TIT-RWAA_MON UH COATA MAYO 2021.pdf,pdftotext_table,high,resolved,
+LTiti77,-15.580697,-69.904737,402998,8277239,UTM 19S (EPSG:32719) → WGS84,,402998 8 277 239 (UTM 19S),coata_it_2021,84172-2021_IT N° 085-2021-ANA.AAA.TIT-RWAA_MON UH COATA MAYO 2021.pdf,pdftotext_table,high,resolved,
+RCoat3,-15.593293,-69.910416,402395,8275843,UTM 19S (EPSG:32719) → WGS84,,402 395 8 275 843 (UTM 19S),coata_it_2021,84172-2021_IT N° 085-2021-ANA.AAA.TIT-RWAA_MON UH COATA MAYO 2021.pdf,pdftotext_table,high,resolved,consistente en coata_it_2021 | red_monitoreo
+RDesa1,-16.568692,-69.039031,495836,8168157,UTM 19S (EPSG:32719) → WGS84,Desaguadero,495836 8168157 (UTM 19S),red_monitoreo,RED MONITOREO UNIDADES HIDROGRAFICAS - TITICACA_.xls,xlsx_table,medium,resolved,
+RDesa2,,,,,,,,,,,,missing,sin coordenada en fuentes en disco; requiere SNIRH/partner (red expandida)

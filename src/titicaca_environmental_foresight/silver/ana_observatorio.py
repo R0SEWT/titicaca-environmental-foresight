@@ -232,15 +232,21 @@ _MASTER_FIRST = list(SILVER_SCHEMA)[:7]
 def _enrich_coords(df: pl.DataFrame) -> pl.DataFrame:
     """Puebla lat/lon desde el catálogo de coordenadas versionado, si existe.
 
-    Import lazy para no acoplar el parser a pyproj/PDF; si falta el CSV, deja lat/lon
-    en null (el join de coords es un paso aparte: silver.station_coords).
+    Prefiere el catálogo consolidado multi-fuente (station_catalog, filas resolved);
+    cae al CSV del protocolo (station_coords) si el catálogo no está. Import lazy para
+    no acoplar el parser a pyproj/PDF; si falta todo, deja lat/lon en null.
     """
+    from titicaca_environmental_foresight.silver import station_catalog as cat
     from titicaca_environmental_foresight.silver import station_coords as sc
 
-    if not sc.COORDS_CSV.exists():
-        return df
-    coords = pl.read_csv(sc.COORDS_CSV, schema_overrides=sc.COORDS_SCHEMA)
-    return sc.enrich_silver_coords(df, coords)
+    if cat.CATALOG_CSV.exists():
+        catalog = pl.read_csv(cat.CATALOG_CSV, schema_overrides=cat.CATALOG_SCHEMA)
+        coords = catalog.filter(pl.col("status") == "resolved").select("station_id", "lat", "lon")
+        return sc.enrich_silver_coords(df, coords)
+    if sc.COORDS_CSV.exists():
+        coords = pl.read_csv(sc.COORDS_CSV, schema_overrides=sc.COORDS_SCHEMA)
+        return sc.enrich_silver_coords(df, coords)
+    return df
 
 
 def build_silver(bronze_dir: Path = BRONZE_DIR, out_path: Path | None = OUT_PATH) -> pl.DataFrame:
