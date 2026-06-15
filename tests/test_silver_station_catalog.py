@@ -83,6 +83,10 @@ class TestConsolidate:
         }
         row = cat.consolidate(["X1"], sources)[0]
         assert row["status"] == "ambiguous"
+        # no se elige coord: lat/lon/utm quedan null; la evidencia va en notes
+        assert row["lat"] is None and row["lon"] is None
+        assert row["utm_este"] is None and row["utm_norte"] is None
+        assert "402395" in row["notes"] and "412395" in row["notes"]
 
     def test_status_counts(self):
         rows = cat.consolidate(

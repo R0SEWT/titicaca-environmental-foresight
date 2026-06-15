@@ -134,29 +134,46 @@ def consolidate(station_ids: list[str], sources: dict[str, dict]) -> list[dict]:
                 if name in sources and sid in sources[name]]
         if not hits:
             rows.append(_row_missing(sid))
-            continue
-        ambiguous = _is_ambiguous([h[1] for h in hits])
-        name, rec = hits[0]  # mayor prioridad
-        lat, lon = sc.utm19s_to_wgs84(rec["utm_este"], rec["utm_norte"])
-        agree = " | ".join(sorted({h[0] for h in hits}))
-        rows.append({
-            "station_id": sid,
-            "lat": round(lat, 6),
-            "lon": round(lon, 6),
-            "utm_este": rec["utm_este"],
-            "utm_norte": rec["utm_norte"],
-            "datum": "UTM 19S (EPSG:32719) → WGS84",
-            "water_body": rec.get("water_body"),
-            "coord_original_text": rec.get("coord_original_text"),
-            "coord_source": name,
-            "coord_source_file": rec.get("coord_source_file"),
-            "extraction_method": rec.get("extraction_method"),
-            "confidence": "high" if len(hits) > 1 and not ambiguous else rec.get("confidence", "medium"),
-            "status": "ambiguous" if ambiguous else "resolved",
-            "notes": (f"coords incompatibles entre fuentes ({agree})" if ambiguous
-                      else (f"consistente en {agree}" if len(hits) > 1 else None)),
-        })
+        elif _is_ambiguous([h[1] for h in hits]):
+            rows.append(_row_ambiguous(sid, hits))  # no se elige una coord
+        else:
+            rows.append(_row_resolved(sid, hits))
     return rows
+
+
+def _row_resolved(sid: str, hits: list[tuple[str, dict]]) -> dict:
+    name, rec = hits[0]  # mayor prioridad
+    lat, lon = sc.utm19s_to_wgs84(rec["utm_este"], rec["utm_norte"])
+    agree = " | ".join(sorted({h[0] for h in hits}))
+    return {
+        "station_id": sid,
+        "lat": round(lat, 6),
+        "lon": round(lon, 6),
+        "utm_este": rec["utm_este"],
+        "utm_norte": rec["utm_norte"],
+        "datum": "UTM 19S (EPSG:32719) → WGS84",
+        "water_body": rec.get("water_body"),
+        "coord_original_text": rec.get("coord_original_text"),
+        "coord_source": name,
+        "coord_source_file": rec.get("coord_source_file"),
+        "extraction_method": rec.get("extraction_method"),
+        "confidence": "high" if len(hits) > 1 else rec.get("confidence", "medium"),
+        "status": "resolved",
+        "notes": f"consistente en {agree}" if len(hits) > 1 else None,
+    }
+
+
+def _row_ambiguous(sid: str, hits: list[tuple[str, dict]]) -> dict:
+    """Fuentes en conflicto: NO se elige coord (lat/lon/utm null); se reporta la evidencia."""
+    detail = "; ".join(f"{name}: {r['utm_este']},{r['utm_norte']}" for name, r in hits)
+    return {
+        "station_id": sid, "lat": None, "lon": None, "utm_este": None, "utm_norte": None,
+        "datum": None, "water_body": None, "coord_original_text": None,
+        "coord_source": " | ".join(sorted({h[0] for h in hits})),
+        "coord_source_file": None, "extraction_method": None, "confidence": "low",
+        "status": "ambiguous",
+        "notes": f"coords incompatibles entre fuentes (no se elige): {detail}",
+    }
 
 
 def _is_ambiguous(recs: list[dict]) -> bool:
@@ -257,7 +274,7 @@ def main() -> None:
     catalog = build_catalog(station_ids)
 
     # Validaciones (fallan ruidosamente: el catálogo no debe contener coords absurdas).
-    resolved = catalog.filter(pl.col("status") != "missing")
+    resolved = catalog.filter(pl.col("status") == "resolved")
     bad_bbox = resolved.filter(
         ~pl.struct("lat", "lon").map_elements(
             lambda s: in_titicaca_bbox(s["lat"], s["lon"]), return_dtype=pl.Boolean
