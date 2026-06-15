@@ -86,23 +86,36 @@ def _silver_chla_fixture() -> pl.DataFrame:
     d18 = dt.datetime(2018, 11, 22, 13, 20)
     d19 = dt.datetime(2019, 10, 31, 10, 0)
     rows = [
-        # con valor → entra al scaffold
-        ("LTit02", d19, "2019-II", "chlorophyll_a", 0.00024),
-        ("LTit03", d19, "2019-II", "chlorophyll_a", 0.0003),
+        # con valor + coords resueltas → entra al scaffold con lat/lon
+        ("LTit02", d19, "2019-II", "chlorophyll_a", 0.00024, -15.82, -69.51),
+        ("LTit03", d19, "2019-II", "chlorophyll_a", 0.0003, -15.84, -69.55),
+        # con valor pero estación `missing` (sin coords) → entra con lat/lon nulas
+        ("LTit95", d18, "2018-II", "chlorophyll_a", 0.0002, None, None),
         # sin valor (null) → fuera del scaffold de matchup
-        ("LTit94", d18, "2018-II", "chlorophyll_a", None),
+        ("LTit94", d18, "2018-II", "chlorophyll_a", None, None, None),
         # parámetro distinto → fuera
-        ("LTit02", d19, "2019-II", "do_mg_l", 7.5),
+        ("LTit02", d19, "2019-II", "do_mg_l", 7.5, -15.82, -69.51),
     ]
-    schema = ["station_id", "datetime", "campaign", "parameter", "value"]
+    schema = ["station_id", "datetime", "campaign", "parameter", "value", "lat", "lon"]
     return pl.DataFrame(rows, schema=schema, orient="row")
 
 
 class TestMatchupScaffold:
     def test_only_chla_with_value(self):
         out = s2.build_matchup_scaffold(_silver_chla_fixture())
-        assert out.height == 2
-        assert set(out["station_id"]) == {"LTit02", "LTit03"}
+        assert out.height == 3
+        assert set(out["station_id"]) == {"LTit02", "LTit03", "LTit95"}
         # chl-a convertida a µg/L (mg/L * 1000) y ndci placeholder None
         assert out.filter(pl.col("station_id") == "LTit02")["chl_a_ug_l"][0] == pytest.approx(0.24)
         assert out["ndci"].is_null().all()
+
+    def test_propaga_coords_resueltas(self):
+        out = s2.build_matchup_scaffold(_silver_chla_fixture())
+        # estaciones resueltas arrastran lat/lon desde silver
+        r02 = out.filter(pl.col("station_id") == "LTit02")
+        assert r02["lat"][0] == pytest.approx(-15.82)
+        assert r02["lon"][0] == pytest.approx(-69.51)
+        # estación `missing` queda con coords nulas (no se inventan)
+        assert out.filter(pl.col("station_id") == "LTit95")["lat"][0] is None
+        # conteo resueltas vs total
+        assert int(out["lat"].is_not_null().sum()) == 2

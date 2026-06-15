@@ -2,9 +2,11 @@
 
 Esta iteración entrega la ADQUISICIÓN + ÍNDICES + resúmenes por zona del lago para
 las 2 campañas con chl-a in-situ (2018-II: 2018-11-22, 2019-II: 2019-10-31). El
-matchup por estación y la regresión chl-a quedan DIFERIDOS: las estaciones del
-observatorio (LTit##) no tienen coordenadas en disco (viven en tablas de PDFs ANA),
-así que aquí solo se emite un *scaffold* de matchup keyed by station_id con ndci=None.
+*scaffold* de matchup arrastra las coordenadas ya resueltas en silver (DECISION-006:
+las estaciones LTit## se georreferencian vía `silver/station_coords.py`); las que aún
+están `missing` quedan con lat/lon nulas. Lo que sigue DIFERIDO es la extracción del
+píxel NDCI por estación y la regresión chl-a (bead `0kd`, requiere creds CDSE), por eso
+`ndci` se emite en None.
 
 Regla CLAUDE.md / DECISION-005: chlorophyll_a vía satélite es un PROXY óptico inferido,
 NO una medición de laboratorio.
@@ -112,9 +114,10 @@ def zonal_stats(index: np.ndarray, mask: np.ndarray) -> dict:
 def build_matchup_scaffold(silver_df: pl.DataFrame) -> pl.DataFrame:
     """Panel silver → scaffold de matchup (estación×campaña con chl-a in-situ).
 
-    Solo filas de `chlorophyll_a` con valor; chl-a a µg/L (mg/L·1000). lat/lon/ndci
-    quedan en None: se completan en el paso diferido (coords desde PDFs ANA → extraer
-    el píxel NDCI en la posición de la estación). Convierte el contrato en un join.
+    Solo filas de `chlorophyll_a` con valor; chl-a a µg/L (mg/L·1000). `lat`/`lon` se
+    arrastran desde silver (pobladas por `silver/station_coords.py`; nulas en estaciones
+    aún `missing`). `ndci` queda en None: se completa en el paso diferido (extraer el
+    píxel NDCI en la posición de la estación — bead `0kd`, requiere creds CDSE).
     """
     return (
         silver_df.filter(
@@ -126,10 +129,10 @@ def build_matchup_scaffold(silver_df: pl.DataFrame) -> pl.DataFrame:
             "campaign",
             "datetime",
             (pl.col("value") * 1000).alias("chl_a_ug_l"),
+            "lat",
+            "lon",
         )
         .with_columns(
-            pl.lit(None, dtype=pl.Float64).alias("lat"),
-            pl.lit(None, dtype=pl.Float64).alias("lon"),
             pl.lit(None, dtype=pl.Float64).alias("ndci"),
         )
         .sort("station_id", "campaign")
@@ -304,8 +307,10 @@ def main() -> None:
         scaffold = build_matchup_scaffold(pl.read_parquet(SILVER_PATH))
         scaffold.write_parquet(MATCHUP_PATH)
         n_matchup = scaffold.height
+        n_coords = int(scaffold["lat"].is_not_null().sum())
     else:
         n_matchup = 0
+        n_coords = 0
 
     out = {
         "meta": {
@@ -320,8 +325,10 @@ def main() -> None:
                 else "BLOQUEADO — faltan credenciales S3 CDSE (AWS_ACCESS_KEY_ID/"
                      "AWS_SECRET_ACCESS_KEY); escenas seleccionadas pero píxeles no leídos."
             ),
-            "matchup_status": "DIFERIDO — sin coords de estaciones LTit## (viven en PDFs ANA); "
-                              f"scaffold con {n_matchup} estaciones-campaña en {MATCHUP_PATH.name}.",
+            "matchup_status": f"Coords resueltas {n_coords}/{n_matchup} estaciones-campaña "
+                              "(desde silver, DECISION-006); ndci DIFERIDO — extracción de "
+                              "píxel pendiente de creds CDSE (bead 0kd). "
+                              f"Scaffold en {MATCHUP_PATH.name}.",
             "caveats": [
                 "chlorophyll_a satelital es un PROXY óptico inferido, no medición (DECISION-005).",
                 "Corrección atmosférica sobre aguas interiores con incertidumbre apreciable.",
@@ -335,7 +342,8 @@ def main() -> None:
     print(f"\n{'='*60}\n  Tier-2 Sentinel-2 NDCI/MCI → {OUT_JSON.name}\n{'='*60}")
     for camp, meta in scenes_meta.items():
         print(f"  {camp}: {len(meta.get('scene_ids', []))} escenas (target {meta['target_date']})")
-    print(f"  matchup scaffold:             {n_matchup} estaciones-campaña → {MATCHUP_PATH.name}")
+    print(f"  matchup scaffold:             {n_matchup} estaciones-campaña "
+          f"({n_coords} con coords) → {MATCHUP_PATH.name}")
     print(f"\n  escrito en {OUT_JSON}\n")
 
 
