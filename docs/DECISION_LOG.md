@@ -52,3 +52,11 @@ No se edita el pasado; si una decisión se revierte, se añade una nueva entrada
 **Decisión:** Catálogo consolidado `data/sources/station_coords_catalog.csv` (módulo `silver/station_catalog.py`) con una fila por estación + columnas de evidencia (texto original, archivo, método, datum, confianza) y `status ∈ {resolved, ambiguous, missing}`. NO se infiere ni inventa: sin fuente → `missing`; fuentes incompatibles (>300 m) → `ambiguous`. Validaciones: bbox de la cuenca, duplicados, UTM→WGS84 testeada.
 **Cobertura:** 47/76 `resolved` (protocolo 42 + Coata 4 + RED 1), 0 `ambiguous`, 29 `missing`. De las 53 estaciones con chl-a, **38 resueltas** — el matchup Tier-2 desde datos en disco queda topado ahí.
 **Límite / siguiente fuente:** las 29 `missing` (red expandida LTit78-106 + LTit35 + RDesa2) requieren el catálogo online SNIRH o datos del partner; bead `dij` las deja documentadas como `missing`, no resueltas a la fuerza.
+
+## DECISION-007 — Calibración chl-a~NDCI: se reportan lineal y log, holdout indicativo, leakage documentado
+**Fecha:** 2026-06-15
+**Contexto:** Con el matchup georreferenciado (v74) se extrae el píxel NDCI por estación (`tier2/sentinel2.py:sample_index_at_points`) y se calibra chl-a~NDCI (`model.py`). Solo hay 2 campañas con chl-a in-situ (2018-II, 2019-II) y las mismas estaciones aparecen en ambas.
+**Opciones:** A) un solo modelo (lineal o log) presentado como validado · B) reportar ambas formas como calibración + holdout temporal indicativo + documentar la limitación de leakage.
+**Decisión:** B. Se ajustan y reportan **lineal** (`chl_a~ndci`) y **log10** (`log10(chl_a)~ndci`); se da un holdout *leave-one-campaign-out* (train 2018→test 2019 y viceversa) como señal **indicativa**, no como validación. Métricas en numpy (sin sklearn/scipy). `caveats` fijos en la salida.
+**Razón:** Con 2 fechas y estaciones colocadas no se puede separar temporal **y** espacialmente a la vez (regla de leakage de CLAUDE.md); fingir un CV limpio sería deshonesto. chl-a satelital sigue siendo PROXY óptico (DECISION-005).
+**Impacto:** `outputs/sentinel2_ndci.json` lleva `regression` (calibración + holdout + caveats); `matchup_sentinel2.parquet` queda con `ndci`/`mci` poblados donde hubo agua. Modelo Tier-2 robusto requiere más campañas/fechas (cola de extracción de PDFs limnológicos, dvj/T14).

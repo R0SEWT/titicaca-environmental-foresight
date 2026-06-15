@@ -119,3 +119,68 @@ class TestMatchupScaffold:
         assert out.filter(pl.col("station_id") == "LTit95")["lat"][0] is None
         # conteo resueltas vs total
         assert int(out["lat"].is_not_null().sum()) == 2
+
+
+# Grid sintético en EPSG:32719 (UTM 19S): píxel 20 m, norte-arriba.
+_X0, _Y0, _PX = 400000.0, 8300000.0, 20.0
+_XS = [_X0 + (c + 0.5) * _PX for c in range(5)]          # centros x (este, creciente)
+_YS = [_Y0 - (r + 0.5) * _PX for r in range(5)]          # centros y (norte, decreciente)
+
+
+def _da(values):
+    """Construye un xr.DataArray 5×5 con coords x/y proyectadas (EPSG:32719)."""
+    import xarray as xr
+
+    return xr.DataArray(np.asarray(values), dims=("y", "x"), coords={"y": _YS, "x": _XS})
+
+
+def _pixel_center_lonlat(row: int, col: int) -> tuple[float, float]:
+    """Centro del píxel (row,col) → (lat, lon) WGS84, para alimentar el sampler."""
+    from pyproj import Transformer
+
+    t = Transformer.from_crs("EPSG:32719", "EPSG:4326", always_xy=True)
+    lon, lat = t.transform(_XS[col], _YS[row])
+    return lat, lon
+
+
+class TestSampleIndexAtPoints:
+    def setup_method(self):
+        self.vals = np.arange(25, dtype=float).reshape(5, 5) / 100.0  # 0.00..0.24
+        self.index = _da(self.vals)
+        self.water = _da(np.ones((5, 5), dtype=bool))
+
+    def test_samples_known_pixel_window0(self):
+        lat, lon = _pixel_center_lonlat(2, 2)
+        out = s2.sample_index_at_points(
+            self.index, self.water, "EPSG:32719", [("S", lat, lon)], window=0,
+        )
+        assert out["S"] == pytest.approx(self.vals[2, 2])
+
+    def test_window_mean(self):
+        lat, lon = _pixel_center_lonlat(2, 2)
+        out = s2.sample_index_at_points(
+            self.index, self.water, "EPSG:32719", [("S", lat, lon)], window=1,
+        )
+        assert out["S"] == pytest.approx(self.vals[1:4, 1:4].mean())
+
+    def test_water_mask_excludes(self):
+        wmask = np.ones((5, 5), dtype=bool)
+        wmask[2, 2] = False  # único píxel de la ventana (window=0) no es agua
+        lat, lon = _pixel_center_lonlat(2, 2)
+        out = s2.sample_index_at_points(
+            self.index, _da(wmask), "EPSG:32719", [("S", lat, lon)], window=0,
+        )
+        assert out["S"] is None
+
+    def test_out_of_extent_is_none(self):
+        # Punto muy al sur/oeste del grid → fuera de extent.
+        out = s2.sample_index_at_points(
+            self.index, self.water, "EPSG:32719", [("S", -20.0, -75.0)], window=0,
+        )
+        assert out["S"] is None
+
+    def test_none_coords_is_none(self):
+        out = s2.sample_index_at_points(
+            self.index, self.water, "EPSG:32719", [("S", None, None)],
+        )
+        assert out["S"] is None
