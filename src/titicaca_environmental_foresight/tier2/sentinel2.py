@@ -337,11 +337,13 @@ def _load_dotenv(path: Path = ROOT / ".env") -> None:
 def main() -> None:
     _load_dotenv()
 
-    # Scheduler síncrono: dask computa un chunk a la vez (pico de memoria mínimo). Junto al
-    # chunking 1024² de load_scene y el coarsen del zonal, evita materializar el AOI completo.
+    # Scheduler dask configurable. Por defecto "threads" (lee chunks S3 en paralelo → rápido;
+    # ~2 GB de pico, ok con RAM holgada). En máquinas con poca RAM usar TITICACA_S2_SCHEDULER=
+    # synchronous (un chunk a la vez, ~1 GB pero lento). El cómputo de índices por campaña se
+    # materializa UNA vez (`.compute()`) y se muestrea/coarsena desde memoria (no re-lee S3).
     import dask
 
-    dask.config.set(scheduler="synchronous")
+    dask.config.set(scheduler=os.environ.get("TITICACA_S2_SCHEDULER", "threads"))
 
     bbox = aoi_bbox()
     GOLD_DIR.mkdir(parents=True, exist_ok=True)
@@ -378,13 +380,16 @@ def main() -> None:
         import odc.geo.xr  # noqa: F401  (registra el accessor .odc en xarray)
 
         bands, water = load_scene(items, bbox)  # DataArrays LAZY (dask)
-        # Índices ópticos como DataArrays LAZY (mantienen coords x/y; no se computan aún).
+        # Índices ópticos LAZY (mantienen coords x/y). Se materializan UNA vez por campaña:
+        # la reducción (mediana temporal) hace streaming por chunk → pico acotado, y luego
+        # el muestreo por estación y el coarsen leen de memoria (sin re-leer S3 por estación).
         b04 = (bands[BANDS["b04"]] + _REFL_OFFSET) / _REFL_SCALE
         b05 = (bands[BANDS["b05"]] + _REFL_OFFSET) / _REFL_SCALE
         b06 = (bands[BANDS["b06"]] + _REFL_OFFSET) / _REFL_SCALE
-        ndci_da = (b05 - b04) / (b05 + b04)
-        mci_da = b05 - b04 - (b06 - b04) * _MCI_FACTOR
         crs = bands.odc.geobox.crs
+        ndci_da = ((b05 - b04) / (b05 + b04)).compute()
+        mci_da = (b05 - b04 - (b06 - b04) * _MCI_FACTOR).compute()
+        water = water.compute()
 
         # Muestreo del píxel del índice en cada estación resuelta (solo ventanas → memory-safe).
         if scaffold is not None:
