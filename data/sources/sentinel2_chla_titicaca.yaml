@@ -64,7 +64,7 @@ citation: >
 related_reports:
   - ana_observatorio_calidad_lago
 
-status: in_progress  # pipeline Tier-2 iniciado: STAC + índices + scaffold de matchup
+status: pending_extraction  # pipeline Tier-2 iniciado; rásters pendientes (creds CDSE)
 priority: medium
 pipeline:
   module: src/titicaca_environmental_foresight/tier2/sentinel2.py
