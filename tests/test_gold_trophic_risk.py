@@ -117,10 +117,12 @@ def _silver_fixture():
         ("LTit01", d19, "Otros Lago Titicaca", "2019-II", "chlorophyll_a", 0.02, "<=0,008"),
         ("LTit01", d19, "Otros Lago Titicaca", "2019-II", "secchi_m", 1.0, None),
         ("LTit01", d19, "Otros Lago Titicaca", "2019-II", "do_mg_l", 6.0, "= 5"),
-        # LTit02 2018-II: eutrófico + hipoxia + excede ECA chl → alto
+        # LTit02 2018-II: eutrófico + hipoxia + excede ECA chl/P → alto
         ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "chlorophyll_a", 0.02, "<=0,008"),
         ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "secchi_m", 1.0, None),
         ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "do_mg_l", 4.0, "= 5"),
+        ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "total_phosphorus", 0.05, "<=0,035"),
+        ("LTit02", d18, "Otros Lago Titicaca", "2018-II", "total_nitrogen", 0.5, "<=0,315"),
         # LTit03 2018-II: solo OD (sin chl ni Secchi) → sin TSI ni risk
         ("LTit03", d18, "Otros Lago Titicaca", "2018-II", "do_mg_l", 7.5, "= 5"),
     ]
@@ -164,6 +166,13 @@ class TestBuildTrophicRisk:
         assert r["hypoxia"] is True
         assert "chlorophyll_a" in r["eca_exceedances"]
         assert "do_mg_l" in r["eca_exceedances"]
+
+    def test_record_includes_nutrient_values(self):
+        # P/N deben emitirse como valores (no solo como nombres en eca_exceedances)
+        r = self._rec("LTit02", "2018-II")
+        assert r["total_phosphorus_mg_l"] == pytest.approx(0.05)
+        assert r["total_nitrogen_mg_l"] == pytest.approx(0.5)
+        assert "total_phosphorus" in r["eca_exceedances"]
 
     def test_station_summary_worst_case(self):
         summ = {s["station_id"]: s for s in self.out["station_summary"]}

@@ -130,6 +130,8 @@ def build_trophic_risk(silver_df: pl.DataFrame) -> dict:
         chl_ug = chl_mg * 1000 if chl_mg is not None else None
         secchi = params.get("secchi_m", (None, None))[0]
         do_val, do_thr = params.get("do_mg_l", (None, None))
+        tp_val = params.get("total_phosphorus", (None, None))[0]
+        tn_val = params.get("total_nitrogen", (None, None))[0]
 
         t_chl, t_sd = tsi_chl(chl_ug), tsi_sd(secchi)
         tsi = combine_tsi(t_chl, t_sd)
@@ -150,6 +152,8 @@ def build_trophic_risk(silver_df: pl.DataFrame) -> dict:
             "chl_a_ug_l": round(chl_ug, 3) if chl_ug is not None else None,
             "secchi_m": secchi,
             "do_mg_l": do_val,
+            "total_phosphorus_mg_l": tp_val,
+            "total_nitrogen_mg_l": tn_val,
             "tsi_chl": round(t_chl, 1) if t_chl is not None else None,
             "tsi_sd": round(t_sd, 1) if t_sd is not None else None,
             "tsi": round(tsi, 1) if tsi is not None else None,
