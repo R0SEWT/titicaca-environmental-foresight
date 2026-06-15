@@ -42,6 +42,13 @@ class TestMCI:
         assert s2.mci(b04, b05, b06)[0] == pytest.approx(expected)
 
 
+class TestReflectance:
+    def test_dn_to_surface_reflectance(self):
+        # L2A baseline ≥04.00: refl = (DN - 1000) / 10000
+        out = s2.to_reflectance(np.array([0, 1000, 10000]))
+        assert out.tolist() == pytest.approx([-0.1, 0.0, 0.9])
+
+
 class TestWaterMask:
     def test_keeps_only_water_class(self):
         # SCL L2A: 6 = agua; el resto (veg, suelo, nube, sombra, nieve) fuera

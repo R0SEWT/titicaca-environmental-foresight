@@ -145,8 +145,17 @@ def to_reflectance(dn: np.ndarray) -> np.ndarray:
 # Funciones IO / red (imports lazy; NO cubiertas por CI)                      #
 # --------------------------------------------------------------------------- #
 def aoi_bbox() -> list[float]:
-    """[min_lon, min_lat, max_lon, max_lat] desde el AOI grueso del lago (PE)."""
-    geom = json.loads(AOI_PATH.read_text())["features"][0]["geometry"]
+    """[min_lon, min_lat, max_lon, max_lat] desde el AOI grueso del lago (PE).
+
+    Falla explícito si el AOI no es un único Polygon (evita un bbox silenciosamente
+    incorrecto si la estructura del geojson cambia).
+    """
+    features = json.loads(AOI_PATH.read_text())["features"]
+    if len(features) != 1:
+        raise ValueError(f"AOI esperado con 1 feature, encontrado {len(features)}")
+    geom = features[0]["geometry"]
+    if geom["type"] != "Polygon":
+        raise ValueError(f"AOI esperado Polygon, recibido {geom['type']!r}")
     ring = geom["coordinates"][0]
     xs = [p[0] for p in ring]
     ys = [p[1] for p in ring]
@@ -203,12 +212,17 @@ def configure_cdse_s3() -> None:
 
 
 def load_scene(items: list, bbox: list[float], resolution: int = 20):
-    """Carga B04/B05/B06/SCL recortados al AOI; mediana temporal de la ventana.
+    """Carga B04/B05/B06/SCL del AOI y compone un mosaico de agua-clara.
 
-    Devuelve (bandas_mediana, scl_compuesto). Requiere `configure_cdse_s3()` antes.
-    Import lazy de odc.stac.
+    Enmascara por SCL POR ESCENA antes de componer: la mediana de reflectancia se
+    calcula solo sobre observaciones de agua (SCL=6) — no folda píxeles nubosos/sombra —
+    y un píxel es agua si lo fue en ALGUNA escena válida de la ventana. Evita el sesgo de
+    promediar nubes y que un `max(SCL)` descarte agua intermitente. Devuelve
+    (bandas_mediana, máscara_agua bool). Requiere `configure_cdse_s3()` antes.
+    Import lazy de odc.stac / xarray.
     """
     import odc.stac
+    import xarray as xr
 
     ds = odc.stac.load(
         items,
@@ -218,11 +232,14 @@ def load_scene(items: list, bbox: list[float], resolution: int = 20):
         groupby="solar_day",
         chunks={},
     )
-    # Compuesto: mediana de reflectancias (rellena gaps de nubes en la ventana);
-    # SCL por máximo (clase de agua=6 se conserva si algún día válido la marca).
-    bands_med = ds[[BANDS["b04"], BANDS["b05"], BANDS["b06"]]].median(dim="time", skipna=True)
-    scl = ds[BANDS["scl"]].max(dim="time")
-    return bands_med, scl
+    # Máscara de agua por (time,y,x) reusando la regla pura water_mask (SCL=6).
+    scl = ds[BANDS["scl"]]
+    water = xr.DataArray(water_mask(scl.values), coords=scl.coords, dims=scl.dims)
+    # Reflectancia solo sobre agua-clara por escena; mediana temporal de esos valores.
+    refl = ds[[BANDS["b04"], BANDS["b05"], BANDS["b06"]]].where(water)
+    bands_med = refl.median(dim="time", skipna=True)
+    water_any = water.any(dim="time")
+    return bands_med, water_any
 
 
 def _build_zones(ds) -> dict[str, np.ndarray]:
@@ -265,13 +282,13 @@ def main() -> None:
         if not items or not have_creds:
             zonal[campaign] = {}
             continue
-        bands, scl = load_scene(items, bbox)
+        bands, water = load_scene(items, bbox)
         b04 = to_reflectance(bands[BANDS["b04"]].values)
         b05 = to_reflectance(bands[BANDS["b05"]].values)
         b06 = to_reflectance(bands[BANDS["b06"]].values)
         idx_ndci = ndci(b04, b05)
         idx_mci = mci(b04, b05, b06)
-        wmask = water_mask(scl.values)
+        wmask = water.values  # ya bool (agua en alguna escena válida de la ventana)
 
         zones = _build_zones(bands)
         zonal[campaign] = {
