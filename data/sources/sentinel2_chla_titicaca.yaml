@@ -64,8 +64,17 @@ citation: >
 related_reports:
   - ana_observatorio_calidad_lago
 
-status: pending_download
+status: in_progress  # pipeline Tier-2 iniciado: STAC + índices + scaffold de matchup
 priority: medium
+pipeline:
+  module: src/titicaca_environmental_foresight/tier2/sentinel2.py
+  stac_endpoint: "https://stac.dataspace.copernicus.eu/v1"
+  collection: sentinel-2-l2a
+  # Escenas seleccionadas por campaña (NDCI/MCI computados al tener credenciales S3 CDSE).
+  # IDs concretos y meta de query → outputs/sentinel2_ndci.json (meta.campaigns).
+  campaigns: ["2018-II (2018-11-22)", "2019-II (2019-10-31)"]
+  rasters_blocker: "credenciales S3 CDSE (AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY)"
+  matchup_blocker: "coords de estaciones LTit## (tablas de PDFs ANA; bead drt/T14)"
 notes: >
   COMPLEMENTO de la chl-a in-situ, no fuente única. La planilla principal ana_tributarias_2013_2025
   no tiene chl-a; sí existe in-situ en ana_observatorio_calidad_lago (57/81 con valor, 2018-II/2019-II).
