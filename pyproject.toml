@@ -7,6 +7,7 @@ dependencies = [
     "polars>=1.0",
     "duckdb>=1.2",
     "pyarrow>=15.0",
+    "numpy>=1.26",
     "rich>=13.0",
     "pyyaml>=6.0",
     "fastexcel>=0.20.2",
@@ -14,6 +15,18 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.4"]
+# Tier-2 satélite: solo para correr el pipeline real (STAC pull + rasters).
+# Los tests de CI cubren funciones puras (numpy/polars), por eso estas deps NO
+# están en el core ni en dev y se importan lazy dentro de las funciones IO.
+satellite = [
+    "pystac-client>=0.8,<0.9",
+    "odc-stac>=0.3.10,<0.4",
+    # odc-loader importa dask.base.quote, removido en dask >=2025 → pin compatible.
+    "dask>=2024.1,<2025",
+    "rioxarray>=0.15,<0.18",
+    "xarray>=2024.3,<2025",
+    "shapely>=2.0,<3.0",
+]
 
 [build-system]
 requires = ["hatchling"]
