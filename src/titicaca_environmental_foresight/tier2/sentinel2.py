@@ -344,6 +344,11 @@ def main() -> None:
     import dask
 
     dask.config.set(scheduler=os.environ.get("TITICACA_S2_SCHEDULER", "threads"))
+    # Resolución del zonal: coarsen ×N (default 5 → 100 m, acota RAM en máquinas chicas).
+    # En máquinas con RAM holgada usar TITICACA_S2_COARSEN=1 → zonal a 20 m nativo.
+    coarsen_n = max(1, int(os.environ.get("TITICACA_S2_COARSEN", str(COARSEN))))
+    # Exportar el ráster NDCI/MCI del lago (20 m) como producto espacial (GeoTIFF). Default on.
+    export_raster = os.environ.get("TITICACA_S2_EXPORT_RASTER", "1") != "0"
 
     bbox = aoi_bbox()
     GOLD_DIR.mkdir(parents=True, exist_ok=True)
@@ -365,6 +370,7 @@ def main() -> None:
 
     zonal: dict[str, dict] = {}
     scenes_meta: dict[str, dict] = {}
+    raster_paths: dict[str, dict] = {}  # {campaign: {ndci: file, mci: file}} (GeoTIFF 20 m)
     samples: list[dict] = []  # filas {station_id, campaign, ndci, mci} muestreadas del ráster
     for campaign, date in CAMPAIGNS.items():
         items = query_stac(bbox, date)
@@ -407,11 +413,24 @@ def main() -> None:
                 for sid, _, _ in pts
             )
 
-        # Zonal whole-lake: coarsen ×COARSEN (lazy) ANTES de materializar → arreglo chico.
-        kw = {"x": COARSEN, "y": COARSEN, "boundary": "trim"}
-        idx_ndci = ndci_da.coarsen(**kw).mean().values
-        idx_mci = mci_da.coarsen(**kw).mean().values
-        wmask = (water.coarsen(**kw).mean() >= 0.5).values
+        # Export del ráster NDCI/MCI del lago a 20 m (producto espacial para el mapa).
+        if export_raster:
+            import rioxarray  # noqa: F401  (habilita el accessor .rio)
+
+            epsg = f"EPSG:{crs.epsg}" if getattr(crs, "epsg", None) else str(crs)
+            for name, da in (("ndci", ndci_da), ("mci", mci_da)):
+                rpath = GOLD_DIR / f"{name}_{campaign}.tif"
+                da.rio.write_crs(epsg).rio.to_raster(rpath)
+                raster_paths.setdefault(campaign, {})[name] = rpath.name
+
+        # Zonal whole-lake: coarsen ×coarsen_n (1 = 20 m nativo). En memoria → numpy rápido.
+        if coarsen_n > 1:
+            kw = {"x": coarsen_n, "y": coarsen_n, "boundary": "trim"}
+            idx_ndci = ndci_da.coarsen(**kw).mean().values
+            idx_mci = mci_da.coarsen(**kw).mean().values
+            wmask = (water.coarsen(**kw).mean() >= 0.5).values
+        else:
+            idx_ndci, idx_mci, wmask = ndci_da.values, mci_da.values, water.values
         zones = _build_zones_shape(idx_ndci.shape)
         zonal[campaign] = {
             zname: {
@@ -462,11 +481,13 @@ def main() -> None:
             "campaigns": scenes_meta,
             "zones_note": "Particiones provisionales (lago_pe + N/S por fila); "
                           "faltan polígonos OAS/PNUMA TDPS.",
+            "zonal_resolution_m": 20 * coarsen_n,
             "rasters_status": (
                 "OK" if have_creds
                 else "BLOQUEADO — faltan credenciales S3 CDSE (AWS_ACCESS_KEY_ID/"
                      "AWS_SECRET_ACCESS_KEY); escenas seleccionadas pero píxeles no leídos."
             ),
+            "raster_files": raster_paths,
             "matchup_status": matchup_status,
             "caveats": [
                 "chlorophyll_a satelital es un PROXY óptico inferido, no medición (DECISION-005).",
