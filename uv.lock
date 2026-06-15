@@ -1267,6 +1267,7 @@ dependencies = [
     { name = "numpy" },
     { name = "polars" },
     { name = "pyarrow" },
+    { name = "pyproj" },
     { name = "pyyaml" },
     { name = "rich" },
 ]
@@ -1294,6 +1295,7 @@ requires-dist = [
     { name = "odc-stac", marker = "extra == 'satellite'", specifier = ">=0.3.10,<0.4" },
     { name = "polars", specifier = ">=1.0" },
     { name = "pyarrow", specifier = ">=15.0" },
+    { name = "pyproj", specifier = ">=3.6" },
     { name = "pystac-client", marker = "extra == 'satellite'", specifier = ">=0.8,<0.9" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pyyaml", specifier = ">=6.0" },

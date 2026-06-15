@@ -229,6 +229,20 @@ SILVER_SCHEMA: dict[str, pl.DataType] = {
 _MASTER_FIRST = list(SILVER_SCHEMA)[:7]
 
 
+def _enrich_coords(df: pl.DataFrame) -> pl.DataFrame:
+    """Puebla lat/lon desde el catálogo de coordenadas versionado, si existe.
+
+    Import lazy para no acoplar el parser a pyproj/PDF; si falta el CSV, deja lat/lon
+    en null (el join de coords es un paso aparte: silver.station_coords).
+    """
+    from titicaca_environmental_foresight.silver import station_coords as sc
+
+    if not sc.COORDS_CSV.exists():
+        return df
+    coords = pl.read_csv(sc.COORDS_CSV, schema_overrides=sc.COORDS_SCHEMA)
+    return sc.enrich_silver_coords(df, coords)
+
+
 def build_silver(bronze_dir: Path = BRONZE_DIR, out_path: Path | None = OUT_PATH) -> pl.DataFrame:
     """Parsea los .xls del Observatorio → panel long silver y (opcional) escribe parquet."""
     records: list[dict] = []
@@ -259,6 +273,7 @@ def build_silver(bronze_dir: Path = BRONZE_DIR, out_path: Path | None = OUT_PATH
     )
     rest = [c for c in df.columns if c not in _MASTER_FIRST]
     df = df.select(_MASTER_FIRST + rest)
+    df = _enrich_coords(df)
 
     if out_path is not None:
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)

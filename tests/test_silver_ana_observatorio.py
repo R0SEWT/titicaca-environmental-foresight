@@ -195,9 +195,17 @@ class TestBuildSilverIntegration:
     def test_chlorophyll_present(self, df):
         assert "chlorophyll_a" in set(df["parameter"].to_list())
 
-    def test_coords_pending_all_null(self, df):
-        assert df["lat"].null_count() == df.height
-        assert df["lon"].null_count() == df.height
+    def test_coords_populated_from_protocol(self, df):
+        import polars as pl
+
+        # drt: lat/lon poblados vía join con el catálogo del protocolo binacional
+        # (cobertura parcial: red expandida LTit78+ sin coords → algunos null).
+        assert df["lat"].null_count() < df.height  # ya no todo null
+        coords = df.filter(pl.col("lat").is_not_null())
+        assert coords.height > 0
+        # las coordenadas pobladas caen dentro del lago Titicaca (lado PE)
+        assert coords["lat"].min() > -16.7 and coords["lat"].max() < -15.0
+        assert coords["lon"].min() > -70.3 and coords["lon"].max() < -68.5
 
     def test_sampling_agency_constant(self, df):
         assert set(df["sampling_agency"].to_list()) == {"ANA-Observatorio"}

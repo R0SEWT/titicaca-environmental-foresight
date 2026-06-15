@@ -8,6 +8,7 @@ dependencies = [
     "duckdb>=1.2",
     "pyarrow>=15.0",
     "numpy>=1.26",
+    "pyproj>=3.6",
     "rich>=13.0",
     "pyyaml>=6.0",
     "fastexcel>=0.20.2",

@@ -58,3 +58,11 @@ notes: >
   - IT 179-2017 (58.5 MB) — Noviembre 2017
   - IT 36-2019 (88.7 MB) — Abril 2019
   Priorizar junto con peblt_monitoreo_lago para extracción de clorofila-a/Secchi.
+
+derived:
+  # El PROTOCOLO-BINACIONAL tabula los 72 puntos LTit## del lago con UTM (zona 19S).
+  # Extraído y convertido a WGS84 → data/sources/ana_observatorio_coords.csv (bead drt),
+  # usado para poblar lat/lon en silver ana_observatorio (cobertura 42/76; 38/53 chl-a).
+  - station_coords: data/sources/ana_observatorio_coords.csv
+    source_pdf: "PROTOCOLO-BINACIONAL_compressed.pdf"
+    module: src/titicaca_environmental_foresight/silver/station_coords.py
