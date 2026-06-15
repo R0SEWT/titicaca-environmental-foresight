@@ -18,7 +18,6 @@ import subprocess
 from pathlib import Path
 
 import polars as pl
-from pyproj import Transformer
 
 ROOT = Path(__file__).parents[3]
 PROTOCOL_PDF = (
@@ -47,7 +46,24 @@ COORDS_SCHEMA: dict[str, pl.DataType] = {
     "water_body_proto": pl.String,
 }
 
-_TRANSFORMER: Transformer | None = None
+# pyproj se importa lazy (en utm19s_to_wgs84): leer el CSV versionado y enriquecer
+# silver NO requiere el stack geoespacial; solo la conversión UTM desde el PDF lo usa.
+_TRANSFORMER = None
+
+# Código de estación dentro de una fila: prefijo (LTit/LTiti), número y sufijo opcional.
+_CODE_RE = re.compile(r"^(L\s*Tit[i]?)\s*(\d+)([a-z]?)$")
+
+
+def _canon_station_id(raw: str) -> str:
+    """Canonicaliza el código a la forma de silver: prefijo sin espacios + número con
+    2 dígitos (`L Tit 6` → `LTit06`; `LTit106` → `LTit106`). Preserva el prefijo tal
+    cual (NO colapsa `LTit`/`LTiti`, que son estaciones distintas) y el sufijo (`a`).
+    """
+    m = _CODE_RE.match(raw.strip())
+    if not m:
+        return re.sub(r"\s+", "", raw)
+    prefix = re.sub(r"\s+", "", m.group(1))
+    return f"{prefix}{int(m.group(2)):02d}{m.group(3)}"
 
 
 # --------------------------------------------------------------------------- #
@@ -56,15 +72,15 @@ _TRANSFORMER: Transformer | None = None
 def parse_protocol_table(text: str) -> list[dict]:
     """Texto del protocolo → filas {station_id, utm_este, utm_norte, water_body_proto}.
 
-    Solo filas con código LTit## + Este(6) + Norte(7); ignora texto/ruido. Normaliza
-    el código quitando espacios (`L Tit 06` → `LTit06`).
+    Solo filas con código LTit## + Este(6) + Norte(7); ignora texto/ruido. El código se
+    canonicaliza a la forma de silver (zero-pad) para que el join no falle por formato.
     """
     rows = []
     for line in text.splitlines():
         m = _ROW_RE.match(line)
         if m:
             rows.append({
-                "station_id": re.sub(r"\s+", "", m.group(1)),
+                "station_id": _canon_station_id(m.group(1)),
                 "utm_este": int(m.group(2)),
                 "utm_norte": int(m.group(3)),
                 "water_body_proto": m.group(4).strip(),
@@ -73,9 +89,11 @@ def parse_protocol_table(text: str) -> list[dict]:
 
 
 def utm19s_to_wgs84(este: float, norte: float) -> tuple[float, float]:
-    """(Este, Norte) UTM 19S → (lat, lon) WGS84."""
+    """(Este, Norte) UTM 19S → (lat, lon) WGS84. Import lazy de pyproj."""
     global _TRANSFORMER
     if _TRANSFORMER is None:
+        from pyproj import Transformer
+
         _TRANSFORMER = Transformer.from_crs(UTM_19S, WGS84, always_xy=True)
     lon, lat = _TRANSFORMER.transform(este, norte)
     return lat, lon

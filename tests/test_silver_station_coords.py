@@ -35,6 +35,17 @@ class TestParseProtocolTable:
         assert first["utm_norte"] == 8304485
         assert first["water_body_proto"] == "L Mayor"
 
+    def test_canonicalizes_code_to_silver_form(self):
+        # `L Tit 6` (espacios / sin zero-pad) → `LTit06`, para casar con silver.
+        text = "    9   L Tit 6   407580   8286901   L Mayor\n"
+        rows = sc.parse_protocol_table(text)
+        assert rows[0]["station_id"] == "LTit06"
+
+    def test_does_not_collapse_double_i_prefix(self):
+        # LTiti## y LTit## son estaciones distintas: no se deben fusionar.
+        text = "    9   LTiti75   407580   8286901   L Mayor\n"
+        assert sc.parse_protocol_table(text)[0]["station_id"] == "LTiti75"
+
 
 class TestUTM:
     def test_known_conversion_lake(self):
