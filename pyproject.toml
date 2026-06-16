@@ -15,17 +15,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.4"]
+dev = ["pytest>=9.1.0", "ruff>=0.15.17"]
 # Tier-2 satélite: solo para correr el pipeline real (STAC pull + rasters).
 # Los tests de CI cubren funciones puras (numpy/polars), por eso estas deps NO
 # están en el core ni en dev y se importan lazy dentro de las funciones IO.
 satellite = [
-    "pystac-client>=0.8,<0.9",
-    "odc-stac>=0.3.10,<0.4",
+    "pystac-client>=0.9.0,<0.10",
+    "odc-stac>=0.5.2,<0.6",
     # odc-loader importa dask.base.quote, removido en dask >=2025 → pin compatible.
-    "dask>=2024.1,<2025",
-    "rioxarray>=0.15,<0.18",
-    "xarray>=2024.3,<2025",
+    "dask>=2026.6.0,<2027",
+    "rioxarray>=0.19.0,<0.20",
+    "xarray>=2026.4.0,<2027",
     "shapely>=2.0,<3.0",
 ]
 
