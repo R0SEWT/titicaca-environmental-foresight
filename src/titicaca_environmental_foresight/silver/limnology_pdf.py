@@ -34,14 +34,48 @@ OUT_PATH = ROOT / "data" / "silver" / "limnology_insitu.parquet"
 # Columnas de parámetro admitidas en el CSV wide → ya en nombre canónico del master
 # schema (mismas etiquetas que produce ana_observatorio.canon, para unir ambos paneles).
 PARAM_UNITS: dict[str, str] = {
+    # campo / fisicoquímicos
     "secchi_m": "m",
     "water_temp_c": "°C",
     "ph": "pH",
     "do_mg_l": "mg/L",
     "conductivity_us_cm": "µS/cm",
-    "chlorophyll_a": "µg/L",
+    "bod5_mg_l": "mg/L",
+    "cod_mg_l": "mg/L",
+    "tss_mg_l": "mg/L",
+    # nutrientes
+    "phosphate_mg_l": "mg/L",
     "total_phosphorus": "mg/L",
+    "ammonia_n": "mg/L",
     "total_nitrogen": "mg/L",
+    # biológico (clorofila reportada en mg/m³ ≡ µg/L; ver README/DECISION-010)
+    "chlorophyll_a": "µg/L",
+    # metales (mismas etiquetas canónicas que ana_observatorio.CANON donde existen)
+    "aluminum": "mg/L",
+    "antimony": "mg/L",
+    "arsenic": "mg/L",
+    "barium": "mg/L",
+    "beryllium": "mg/L",
+    "boron": "mg/L",
+    "cadmium": "mg/L",
+    "calcium": "mg/L",
+    "cobalt": "mg/L",
+    "copper": "mg/L",
+    "chromium_total": "mg/L",
+    "iron": "mg/L",
+    "lithium": "mg/L",
+    "magnesium": "mg/L",
+    "manganese": "mg/L",
+    "mercury": "mg/L",
+    "nickel": "mg/L",
+    "silver": "mg/L",
+    "lead": "mg/L",
+    "selenium": "mg/L",
+    "sodium": "mg/L",
+    "thallium": "mg/L",
+    "uranium": "mg/L",
+    "vanadium": "mg/L",
+    "zinc": "mg/L",
 }
 
 # Metadata por estación (no son parámetros); el resto de columnas se funden a long.
@@ -73,6 +107,8 @@ SILVER_SCHEMA: dict[str, pl.DataType] = {
     "parameter": pl.String,
     "unit": pl.String,
     "value": pl.Float64,
+    "detection_limit": pl.Float64,
+    "censored": pl.Boolean,
     "source_file": pl.String,
     "source_page": pl.String,
 }
@@ -120,28 +156,38 @@ def station_latlon(utm_este: object, utm_norte: object) -> tuple[float | None, f
     return (lat, lon, "ok" if coords_plausible(lat, lon) else "off_lake")
 
 
-def _parse_cell(raw: object) -> tuple[float | None, str]:
-    """Celda de parámetro transcrita → (value, qa_flag).
+def _parse_cell(raw: object) -> tuple[float | None, str, float | None, bool]:
+    """Celda de parámetro transcrita → (value, qa_flag, detection_limit, censored).
 
-    - número                 → (value, "ok")
-    - "?"/sufijo "?"/"~"     → (value|None, "uncertain")  dígito ambiguo en el escaneo
-    - ""/None/"-"            → (None, "not_measured")
-    Las celdas `uncertain` no aportan número publicable: se dejan en null pero trazadas.
+    - número                 → (value, "ok", None, False)
+    - "<X" (bajo detección)  → (None, "censored", X, True)  no detectado al LD reportado
+    - "?"/sufijo "?"/"~"     → (None, "uncertain", None, False)  dígito ambiguo en el escaneo
+    - ""/None/"-"/"R.N.D."   → (None, "not_measured", None, False)
+    Las celdas `uncertain` y `censored` no aportan número publicable: value queda null pero
+    trazado (el LD se conserva en detection_limit). Alineado con ana_observatorio.
     """
     if raw is None:
-        return (None, "not_measured")
+        return (None, "not_measured", None, False)
     s = str(raw).strip()
-    if s == "" or set(s) <= {"-"}:
-        return (None, "not_measured")
+    if s == "" or set(s) <= {"-"} or s.upper().replace(".", "").replace(" ", "") in {"RND", "ND", "NR"}:
+        return (None, "not_measured", None, False)
     if s == "?":
-        return (None, "uncertain")
+        return (None, "uncertain", None, False)
+    if s.startswith("<") or s.startswith(">"):
+        try:
+            limit = float(s[1:].strip().replace(",", "."))
+        except ValueError:
+            return (None, "parse_error", None, False)
+        return (None, "censored", limit, True)
     uncertain = s.endswith("?") or s.startswith("~")
     s = s.lstrip("~").rstrip("?").strip()
     try:
         value = float(s.replace(",", "."))
     except ValueError:
-        return (None, "uncertain" if uncertain else "parse_error")
-    return ((None, "uncertain") if uncertain else (value, "ok"))
+        return (None, "uncertain" if uncertain else "parse_error", None, False)
+    if uncertain:
+        return (None, "uncertain", None, False)
+    return (value, "ok", None, False)
 
 
 def melt_station_row(
@@ -171,9 +217,9 @@ def melt_station_row(
     for param, unit in PARAM_UNITS.items():
         if param not in row:
             continue
-        value, qa = _parse_cell(row[param])
+        value, qa, detection_limit, censored = _parse_cell(row[param])
         if qa == "not_measured":
-            continue  # no se emite registro para celdas vacías
+            continue  # no se emite registro para celdas vacías (incl. R.N.D.)
         # qa del registro combina lectura del valor y plausibilidad de la coord.
         qa_flag = qa if coord_qa == "ok" else f"{qa}|{coord_qa}"
         records.append({
@@ -181,6 +227,8 @@ def melt_station_row(
             "parameter": param,
             "unit": unit,
             "value": value,
+            "detection_limit": detection_limit,
+            "censored": censored,
             "qa_flag": qa_flag,
         })
     return records

@@ -13,26 +13,44 @@ from titicaca_environmental_foresight.silver import limnology_pdf as lp
 
 
 class TestParseCell:
+    # _parse_cell → (value, qa_flag, detection_limit, censored)
     def test_plain_number(self):
-        assert lp._parse_cell("6.5") == (6.5, "ok")
+        assert lp._parse_cell("6.5") == (6.5, "ok", None, False)
 
     def test_comma_decimal(self):
-        assert lp._parse_cell("8,9") == (8.9, "ok")
+        assert lp._parse_cell("8,9") == (8.9, "ok", None, False)
 
     def test_question_mark_is_uncertain_null(self):
         # dígito ilegible en el escaneo: no se publica número, pero queda trazado
-        assert lp._parse_cell("?") == (None, "uncertain")
+        assert lp._parse_cell("?") == (None, "uncertain", None, False)
 
     def test_trailing_question_uncertain(self):
-        assert lp._parse_cell("8.5?") == (None, "uncertain")
+        assert lp._parse_cell("8.5?") == (None, "uncertain", None, False)
+
+    def test_tilde_prefix_uncertain(self):
+        # prefijo "~" (valor aproximado/dígito dudoso en el escaneo) → uncertain, value null
+        assert lp._parse_cell("~8.5") == (None, "uncertain", None, False)
 
     def test_empty_and_dash_are_not_measured(self):
-        assert lp._parse_cell("") == (None, "not_measured")
-        assert lp._parse_cell("----") == (None, "not_measured")
-        assert lp._parse_cell(None) == (None, "not_measured")
+        assert lp._parse_cell("") == (None, "not_measured", None, False)
+        assert lp._parse_cell("----") == (None, "not_measured", None, False)
+        assert lp._parse_cell(None) == (None, "not_measured", None, False)
+
+    def test_rnd_nd_are_not_measured(self):
+        # el laboratorio reporta "R.N.D."/"N.D." (no detectable/no disponible) → sin registro
+        assert lp._parse_cell("R.N.D.") == (None, "not_measured", None, False)
+        assert lp._parse_cell("N.D.") == (None, "not_measured", None, False)
+
+    def test_censored_below_detection(self):
+        # "<0,0002" (metal bajo el límite de detección): value null, LD conservado, censored
+        assert lp._parse_cell("<0,0002") == (None, "censored", 0.0002, True)
+        assert lp._parse_cell("<5,0") == (None, "censored", 5.0, True)
+
+    def test_censored_unparseable_limit_is_parse_error(self):
+        assert lp._parse_cell("<abc") == (None, "parse_error", None, False)
 
     def test_non_numeric_is_parse_error(self):
-        assert lp._parse_cell("ND") == (None, "parse_error")
+        assert lp._parse_cell("xyz") == (None, "parse_error", None, False)
 
 
 class TestCoords:
@@ -96,6 +114,28 @@ class TestMeltStationRow:
             campaign="c", sampling_agency="A", source_file="x", source_page="1",
         )
         assert recs == []  # única columna de parámetro vacía → sin registros
+
+    def test_emits_censored_metal_with_detection_limit(self):
+        # metal bajo el límite de detección: se emite registro con value null, LD y censored
+        recs = lp.melt_station_row(
+            self._row(arsenic="<0.0002"),
+            campaign="c", sampling_agency="A", source_file="x", source_page="1",
+        )
+        ars = next(r for r in recs if r["parameter"] == "arsenic")
+        assert ars["value"] is None
+        assert ars["detection_limit"] == 0.0002
+        assert ars["censored"] is True
+        assert ars["qa_flag"] == "censored"
+
+    def test_censored_with_offlake_coord_taints_qa_flag(self):
+        # censurado + coord fuera del bbox: el qa_flag combina ambos (censored|off_lake)
+        recs = lp.melt_station_row(
+            self._row(utm_este=500000, utm_norte=1000000, secchi_m="", arsenic="<0.0002"),
+            campaign="c", sampling_agency="A", source_file="x", source_page="1",
+        )
+        ars = next(r for r in recs if r["parameter"] == "arsenic")
+        assert ars["censored"] is True
+        assert ars["qa_flag"] == "censored|off_lake"
 
     def test_resolves_latlon_and_carries_metadata(self):
         recs = lp.melt_station_row(

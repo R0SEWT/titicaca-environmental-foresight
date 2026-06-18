@@ -75,3 +75,11 @@ derived:
                   "84172-2021_IT N° 085-2021-...MON UH COATA MAYO 2021.pdf"]
     source_xls: "RED MONITOREO UNIDADES HIDROGRAFICAS - TITICACA_.xls"
     module: src/titicaca_environmental_foresight/silver/station_catalog.py
+  # Limnología in-situ transcrita (bead kf5, DECISION-011): primer IT del binacional →
+  # suite completa incl. chl-a (el target Tier-1 ausente en PEBLT). PILOTO: IT 007-2013.
+  - vintage: data/sources/limnology_insitu/ana_binacional_lago_titicaca_2013.csv
+    source_pdf: "IT 007-2013-...MONITOREO LAGO TITICACA BAHIA PUNO ABRIL 2013.pdf"
+    module: src/titicaca_environmental_foresight/silver/limnology_pdf.py
+    silver_out: data/silver/limnology_insitu.parquet
+    status: complete  # 20 estaciones, 37 params; chl-a 10 valores (Bahía Interior)
+    pending: "10 ITs binacionales restantes 2013-2019 (kf5)"
