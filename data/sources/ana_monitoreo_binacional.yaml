@@ -57,7 +57,9 @@ notes: >
   - IT 132-2016 (32.6 MB) — Abril 2016
   - IT 179-2017 (58.5 MB) — Noviembre 2017
   - IT 36-2019 (88.7 MB) — Abril 2019
-  Priorizar junto con peblt_monitoreo_lago para extracción de clorofila-a/Secchi.
+  FUENTE PRINCIPAL de clorofila-a in-situ: IT 007-2013 confirma chl-a medida (Cuadro N°04, 20
+  puntos) + Secchi. A diferencia de peblt_monitoreo_lago, que NO mide chl-a (uy8/DECISION-010).
+  Priorizar para extracción de chl-a/Secchi (kf5).
 
 derived:
   # Capa 1 (bead drt): protocolo binacional → LTit01-73 (UTM 19S → WGS84), 42 estaciones.

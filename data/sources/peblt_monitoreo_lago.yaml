@@ -26,9 +26,9 @@ variables:
   - ph
   - conductividad
   - turbidez
-  - transparencia_secchi
+  - transparencia_secchi  # solo en cruceros (Cuadro N°4); las bahías usan turbidez NTU, no Secchi
   - nutrientes_no3_po4_nh4
-  - clorofila_a  # pendiente confirmar presencia en PDFs
+  # clorofila_a: NO se mide in-situ en ninguna campaña PEBLT (confirmado uy8) — ver limitations
   - coliformes_fecales
   - metales_disueltos
 granularity: "Campaña por crucero o monitoreo de bahía; datos por estación lacustre"
@@ -47,6 +47,14 @@ limitations:
   - "Cruceros irregulares: no hay una campaña por año en todos los años"
   - "Bahía interior de Puno puede no representar el lago abierto"
   - "Datos Bolivia (lago mayor parte boliviana) ausentes en este conjunto"
+  - >
+    Clorofila-a (target Tier-1) NO se mide in-situ en ninguna campaña PEBLT: confirmado por
+    lectura visual de los 5 informes (Bahía Lago 2019, Bahía Interior Puno 2020, Bahías Lago
+    2020, Aguas Superficiales Corrientes 2019 y 2020) — bead uy8 — y de los cruceros (Cuadro
+    N°4, DECISION-009). Instrumental in-situ: multiparamétrico Horiba + turbidímetro HACH (sin
+    fluorómetro de chl-a). chl-a aparece solo como criterio de clasificación trófica referencial
+    (umbrales OCDE/Vollenweider), nunca como valor medido. El único in-situ de chl-a/Secchi
+    disponible está en informes ANA (p.ej. IT 007-2013, Bahía Puno), familia binacional (kf5).
 
 citation: >
   PEBLT. Informes de Monitoreo: Bahía Lago Titicaca 2019 y 2020; Cruceros
@@ -59,7 +67,8 @@ related_reports:
 status: available
 priority: high
 notes: >
-  FUENTE CRÍTICA para clorofila-a / Secchi — la variable objetivo del Tier 1.
+  Fuente in-situ de fisicoquímicos + nutrientes + Secchi (solo cruceros). NO aporta clorofila-a
+  (target Tier-1): ver limitations. Para chl-a/Secchi in-situ ir a los informes ANA (kf5).
   Archivos clave:
   - INFORME BAHÍA LAGO TITICACA AÑO 2019.pdf (8.8 MB)
   - INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf (5.8 MB)
@@ -68,9 +77,10 @@ notes: >
   - INFORME AGUAS SUPERFICIALES CORRIENTES 2020.pdf (5.4 MB)
   - BOLETIN GESTION DE LA CALIDAD RRHH-TITICACA 2024.pdf (8 MB)
   EXTRACCIÓN (dvj/T14, DECISION-009): PDFs escaneados sin capa de texto → transcripción
-  asistida por visión a CSV versionados. HALLAZGO: los cruceros hidroquímicos NO miden
-  clorofila-a (sí Secchi/transparencia + fisicoquímicos + nutrientes); chl-a por confirmar
-  en los informes de Bahía. schema_confirmed sigue false: extracción parcial en curso.
+  asistida por visión a CSV versionados. HALLAZGO (DECISION-009 + uy8/DECISION-010): NINGUNA
+  campaña PEBLT mide clorofila-a — ni cruceros (Cuadro N°4) ni los 5 informes de Bahía/Aguas
+  (leídos visualmente). Sí Secchi/transparencia en cruceros + fisicoquímicos + nutrientes.
+  schema_confirmed sigue false: extracción parcial en curso.
 
 # Extracción en curso (DECISION-009): CSV transcritos + loader silver/limnology_pdf.py.
 # Vintage inicial PARCIAL: PEBLT Crucero I 2019 @20% (7 estaciones, solo Secchi).
