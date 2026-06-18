@@ -26,9 +26,9 @@ variables:
   - ph
   - conductividad
   - turbidez
-  - transparencia_secchi
+  - transparencia_secchi  # solo en cruceros (Cuadro N°4); las bahías usan turbidez NTU, no Secchi
   - nutrientes_no3_po4_nh4
-  - clorofila_a  # pendiente confirmar presencia en PDFs
+  # clorofila_a: NO se mide in-situ en ninguna campaña PEBLT (confirmado uy8) — ver limitations
   - coliformes_fecales
   - metales_disueltos
 granularity: "Campaña por crucero o monitoreo de bahía; datos por estación lacustre"
@@ -47,6 +47,14 @@ limitations:
   - "Cruceros irregulares: no hay una campaña por año en todos los años"
   - "Bahía interior de Puno puede no representar el lago abierto"
   - "Datos Bolivia (lago mayor parte boliviana) ausentes en este conjunto"
+  - >
+    Clorofila-a (target Tier-1) NO se mide in-situ en ninguna campaña PEBLT: confirmado por
+    lectura visual de los 5 informes (Bahía Lago 2019, Bahía Interior Puno 2020, Bahías Lago
+    2020, Aguas Superficiales Corrientes 2019 y 2020) — bead uy8 — y de los cruceros (Cuadro
+    N°4, DECISION-009). Instrumental in-situ: multiparamétrico Horiba + turbidímetro HACH (sin
+    fluorómetro de chl-a). chl-a aparece solo como criterio de clasificación trófica referencial
+    (umbrales OCDE/Vollenweider), nunca como valor medido. El único in-situ de chl-a/Secchi
+    disponible está en informes ANA (p.ej. IT 007-2013, Bahía Puno), familia binacional (kf5).
 
 citation: >
   PEBLT. Informes de Monitoreo: Bahía Lago Titicaca 2019 y 2020; Cruceros
