@@ -86,15 +86,36 @@ def coords_plausible(lat: float | None, lon: float | None) -> bool:
     return LAKE_LAT[0] < lat < LAKE_LAT[1] and LAKE_LON[0] < lon < LAKE_LON[1]
 
 
-def station_latlon(utm_este: float | None, utm_norte: float | None) -> tuple[float | None, float | None, str]:
+def _coord_to_float(raw: object) -> float | None:
+    """Celda UTM transcrita → float, o None si no parsea (vacío, guion, no-numérico)."""
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    s = str(raw).strip()
+    if s == "" or set(s) <= {"-"}:
+        return None
+    try:
+        return float(s.replace(",", "."))
+    except ValueError:
+        return None
+
+
+def station_latlon(utm_este: object, utm_norte: object) -> tuple[float | None, float | None, str]:
     """UTM 19S transcrito → (lat, lon, qa). qa: ok / off_lake / no_coords.
+
+    Las celdas UTM llegan transcritas (pueden ser str, traer coma decimal o venir vacías);
+    se castean a número antes del transform porque `utm19s_to_wgs84` exige floats. Si no
+    parsean → `no_coords`, sin romper el resto del registro.
 
     No descarta la coord fuera de bbox (puede ser un error de un dígito); la devuelve
     igual pero la marca `off_lake` para revisión, sin contaminar el resto del registro.
     """
-    if utm_este is None or utm_norte is None:
+    este = _coord_to_float(utm_este)
+    norte = _coord_to_float(utm_norte)
+    if este is None or norte is None:
         return (None, None, "no_coords")
-    lat, lon = utm19s_to_wgs84(utm_este, utm_norte)
+    lat, lon = utm19s_to_wgs84(este, norte)
     lat, lon = round(lat, 6), round(lon, 6)
     return (lat, lon, "ok" if coords_plausible(lat, lon) else "off_lake")
 

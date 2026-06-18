@@ -57,6 +57,15 @@ class TestCoords:
     def test_station_latlon_no_coords(self):
         assert lp.station_latlon(None, None) == (None, None, "no_coords")
 
+    def test_station_latlon_string_coords_cast(self):
+        # Celdas transcritas como str (incl. coma decimal) → se castean antes del transform
+        lat, lon, qa = lp.station_latlon("396947", "8247022,0")
+        assert qa == "ok"
+        assert -16.7 < lat < -15.0 and -70.3 < lon < -68.5
+
+    def test_station_latlon_unparseable_is_no_coords(self):
+        assert lp.station_latlon("s/d", "8247022") == (None, None, "no_coords")
+
 
 class TestMeltStationRow:
     def _row(self, **over):
