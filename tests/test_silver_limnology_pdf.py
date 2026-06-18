@@ -27,6 +27,10 @@ class TestParseCell:
     def test_trailing_question_uncertain(self):
         assert lp._parse_cell("8.5?") == (None, "uncertain", None, False)
 
+    def test_tilde_prefix_uncertain(self):
+        # prefijo "~" (valor aproximado/dígito dudoso en el escaneo) → uncertain, value null
+        assert lp._parse_cell("~8.5") == (None, "uncertain", None, False)
+
     def test_empty_and_dash_are_not_measured(self):
         assert lp._parse_cell("") == (None, "not_measured", None, False)
         assert lp._parse_cell("----") == (None, "not_measured", None, False)
@@ -122,6 +126,16 @@ class TestMeltStationRow:
         assert ars["detection_limit"] == 0.0002
         assert ars["censored"] is True
         assert ars["qa_flag"] == "censored"
+
+    def test_censored_with_offlake_coord_taints_qa_flag(self):
+        # censurado + coord fuera del bbox: el qa_flag combina ambos (censored|off_lake)
+        recs = lp.melt_station_row(
+            self._row(utm_este=500000, utm_norte=1000000, secchi_m="", arsenic="<0.0002"),
+            campaign="c", sampling_agency="A", source_file="x", source_page="1",
+        )
+        ars = next(r for r in recs if r["parameter"] == "arsenic")
+        assert ars["censored"] is True
+        assert ars["qa_flag"] == "censored|off_lake"
 
     def test_resolves_latlon_and_carries_metadata(self):
         recs = lp.melt_station_row(
