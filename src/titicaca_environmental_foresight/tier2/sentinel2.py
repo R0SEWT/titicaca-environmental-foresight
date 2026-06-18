@@ -1,17 +1,18 @@
 """Tier-2: adquisición Sentinel-2 L2A + proxies ópticos de clorofila-a (NDCI/MCI).
 
-Esta iteración entrega la ADQUISICIÓN + ÍNDICES + resúmenes por zona del lago para
-las 2 campañas con chl-a in-situ (2018-II: 2018-11-22, 2019-II: 2019-10-31). El
-matchup por estación y la regresión chl-a quedan DIFERIDOS: las estaciones del
-observatorio (LTit##) no tienen coordenadas en disco (viven en tablas de PDFs ANA),
-así que aquí solo se emite un *scaffold* de matchup keyed by station_id con ndci=None.
+Pipeline para las 2 campañas con chl-a in-situ (2018-II: 2018-11-22, 2019-II: 2019-10-31):
+ADQUISICIÓN (STAC + escenas S2 L2A) → ÍNDICES NDCI/MCI → resúmenes por zona + muestreo del
+píxel del índice en cada estación (coords resueltas en silver, DECISION-006) → calibración
+chl-a~NDCI (`model.regression_report`). Las estaciones aún `missing` quedan con lat/lon (y por
+tanto ndci) nulos; nunca se inventan. El raster pull requiere credenciales CDSE (S3 eodata);
+sin ellas se emiten scene IDs + scaffold y los rásters se marcan BLOQUEADO.
 
 Regla CLAUDE.md / DECISION-005: chlorophyll_a vía satélite es un PROXY óptico inferido,
 NO una medición de laboratorio.
 
-Diseño: funciones PURAS (ndci, mci, water_mask, zonal_stats, build_matchup_scaffold)
-operan sobre numpy/polars y se testean en CI sin red. Las funciones IO/red
-(query_stac, load_scene, main) importan las deps satelitales de forma LAZY para no
+Diseño: funciones PURAS (ndci, mci, water_mask, zonal_stats, sample_index_at_points,
+build_matchup_scaffold) operan sobre numpy/polars y se testean en CI sin red. Las funciones
+IO/red (query_stac, load_scene, main) importan las deps satelitales de forma LAZY para no
 exigirlas en CI (ver extra `satellite` en pyproject).
 """
 
@@ -19,10 +20,13 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 from pathlib import Path
 
 import numpy as np
 import polars as pl
+
+from ..model import regression_report
 
 ROOT = Path(__file__).parents[3]
 AOI_PATH = ROOT / "data" / "sources" / "aoi" / "titicaca_pe.geojson"
@@ -50,6 +54,9 @@ MAX_CLOUD = 40
 
 # Sentinel-2 L2A: clase 6 = agua en la Scene Classification Layer (SCL).
 SCL_WATER = 6
+# Factor de coarsen para el zonal whole-lake: 20 m → 100 m. Reduce el arreglo ~25× antes
+# de materializar (acota memoria); las zonas ya son provisionales, así que 100 m es aceptable.
+COARSEN = 5
 # Longitudes de onda (nm) de las bandas red-edge usadas por NDCI/MCI.
 _B04_NM, _B05_NM, _B06_NM = 665, 705, 740
 _MCI_FACTOR = (_B05_NM - _B04_NM) / (_B06_NM - _B04_NM)
@@ -109,12 +116,62 @@ def zonal_stats(index: np.ndarray, mask: np.ndarray) -> dict:
     }
 
 
+def sample_index_at_points(
+    index_da, water_da, raster_crs, points, window: int = 1
+) -> dict:
+    """Muestrea un índice (NDCI/MCI) en la posición de cada estación — memory-safe.
+
+    `index_da`/`water_da` son `xr.DataArray` (dims y/x, coords proyectadas) potencialmente
+    LAZY (dask). `points`: iterable de `(station_id, lat, lon)` en WGS84. Para cada estación
+    reproyecta lon/lat al CRS del ráster, halla el píxel más cercano y **solo computa una
+    ventana (2·window+1)²** (`.isel(...).compute()`) — nunca materializa el arreglo completo,
+    así que el pico de memoria queda acotado al tamaño de un chunk.
+
+    Promedia la ventana sobre agua (`water_da`) y valores finitos; devuelve `{station_id:
+    valor|None}` (None si cae fuera del extent o no hay píxel de agua válido). No inventa.
+
+    Testeable sin red con un `xr.DataArray` 5×5 de coords x/y en metros (EPSG:32719).
+    """
+    from pyproj import Transformer
+
+    crs_in = f"EPSG:{raster_crs.epsg}" if getattr(raster_crs, "epsg", None) else str(raster_crs)
+    transformer = Transformer.from_crs("EPSG:4326", crs_in, always_xy=True)
+    xv = np.asarray(index_da["x"].values, dtype=float)
+    yv = np.asarray(index_da["y"].values, dtype=float)
+    nx, ny = xv.size, yv.size
+    # Tamaño de píxel y bbox (con borde de medio píxel) para detectar puntos fuera del extent;
+    # argmin siempre da un índice válido, así que el bbox es lo que marca "fuera".
+    px = abs(xv[1] - xv[0]) if nx > 1 else 0.0
+    py = abs(yv[1] - yv[0]) if ny > 1 else 0.0
+    out: dict = {}
+    for station_id, lat, lon in points:
+        if lat is None or lon is None:
+            out[station_id] = None
+            continue
+        x, y = transformer.transform(lon, lat)
+        in_x = xv.min() - px / 2 <= x <= xv.max() + px / 2
+        in_y = yv.min() - py / 2 <= y <= yv.max() + py / 2
+        if not (in_x and in_y):
+            out[station_id] = None
+            continue
+        col = int(np.abs(xv - x).argmin())
+        row = int(np.abs(yv - y).argmin())
+        rsl = slice(max(0, row - window), min(ny, row + window + 1))
+        csl = slice(max(0, col - window), min(nx, col + window + 1))
+        sub = np.asarray(index_da.isel(y=rsl, x=csl).compute().values, dtype=float)
+        subw = np.asarray(water_da.isel(y=rsl, x=csl).compute().values, dtype=bool)
+        vals = sub[subw & np.isfinite(sub)]
+        out[station_id] = float(vals.mean()) if vals.size else None
+    return out
+
+
 def build_matchup_scaffold(silver_df: pl.DataFrame) -> pl.DataFrame:
     """Panel silver → scaffold de matchup (estación×campaña con chl-a in-situ).
 
-    Solo filas de `chlorophyll_a` con valor; chl-a a µg/L (mg/L·1000). lat/lon/ndci
-    quedan en None: se completan en el paso diferido (coords desde PDFs ANA → extraer
-    el píxel NDCI en la posición de la estación). Convierte el contrato en un join.
+    Solo filas de `chlorophyll_a` con valor; chl-a a µg/L (mg/L·1000). `lat`/`lon` se
+    arrastran desde silver (pobladas por `silver/station_coords.py`; nulas en estaciones
+    aún `missing`). `ndci`/`mci` quedan en None y se completan en `main()` muestreando el
+    píxel del índice en la posición de la estación (`sample_index_at_points`).
     """
     return (
         silver_df.filter(
@@ -126,11 +183,12 @@ def build_matchup_scaffold(silver_df: pl.DataFrame) -> pl.DataFrame:
             "campaign",
             "datetime",
             (pl.col("value") * 1000).alias("chl_a_ug_l"),
+            "lat",
+            "lon",
         )
         .with_columns(
-            pl.lit(None, dtype=pl.Float64).alias("lat"),
-            pl.lit(None, dtype=pl.Float64).alias("lon"),
             pl.lit(None, dtype=pl.Float64).alias("ndci"),
+            pl.lit(None, dtype=pl.Float64).alias("mci"),
         )
         .sort("station_id", "campaign")
     )
@@ -191,14 +249,27 @@ def configure_cdse_s3() -> None:
     genera el usuario en el dashboard CDSE). Lanza si faltan: el pipeline de rásters
     no puede leer los JP2 sin auth. Import lazy de odc.stac.
     """
-    import os
-
     if not (os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY")):
         raise RuntimeError(
             "Faltan credenciales S3 de CDSE. Genera las llaves en el dashboard de "
             "Copernicus Data Space y expórtalas como AWS_ACCESS_KEY_ID / "
             "AWS_SECRET_ACCESS_KEY antes de correr el pipeline de rásters."
         )
+    # GDAL lee estas config vars del ENTORNO en todos los caminos de lectura (incluido el
+    # reader dask de odc); pasarlas solo a configure_rio no basta → el endpoint CDSE se
+    # perdía y /vsis3/ resolvía a `eodata.s3.<region>.amazonaws.com` (DNS fail). Fijarlas
+    # en os.environ lo arregla (path-style contra el endpoint eodata de CDSE).
+    os.environ["AWS_S3_ENDPOINT"] = CDSE_S3_ENDPOINT
+    os.environ["AWS_VIRTUAL_HOSTING"] = "FALSE"
+    os.environ["AWS_HTTPS"] = "YES"
+    # Robustez de lectura JP2 sobre S3 CDSE: el endpoint trunca streams bajo alta
+    # concurrencia (errores GDAL "Stream too short"/opj_get_decoded_tile failed). Reintentos
+    # + desactivar HTTP/2 multiplex (causa truncados con CDSE) hacen el reintento efectivo.
+    # Va a os.environ porque GDAL las lee del entorno en TODOS los caminos (incl. reader dask).
+    os.environ.setdefault("GDAL_HTTP_MAX_RETRY", "10")
+    os.environ.setdefault("GDAL_HTTP_RETRY_DELAY", "1")
+    os.environ.setdefault("GDAL_HTTP_MULTIPLEX", "NO")
+
     import odc.stac
 
     odc.stac.configure_rio(
@@ -208,6 +279,9 @@ def configure_cdse_s3() -> None:
         AWS_VIRTUAL_HOSTING="FALSE",
         AWS_HTTPS="YES",
         GDAL_HTTP_TCP_KEEPALIVE="YES",
+        GDAL_HTTP_MAX_RETRY="10",
+        GDAL_HTTP_RETRY_DELAY="1",
+        GDAL_HTTP_MULTIPLEX="NO",
     )
 
 
@@ -218,11 +292,11 @@ def load_scene(items: list, bbox: list[float], resolution: int = 20):
     calcula solo sobre observaciones de agua (SCL=6) — no folda píxeles nubosos/sombra —
     y un píxel es agua si lo fue en ALGUNA escena válida de la ventana. Evita el sesgo de
     promediar nubes y que un `max(SCL)` descarte agua intermitente. Devuelve
-    (bandas_mediana, máscara_agua bool). Requiere `configure_cdse_s3()` antes.
-    Import lazy de odc.stac / xarray.
+    (bandas_mediana, máscara_agua bool) **lazy (dask)**: el cómputo se difiere a ventanas
+    por estación y al coarsen del zonal, para acotar la memoria (no materializar el AOI).
+    Requiere `configure_cdse_s3()` antes. Import lazy de odc.stac.
     """
     import odc.stac
-    import xarray as xr
 
     ds = odc.stac.load(
         items,
@@ -230,11 +304,10 @@ def load_scene(items: list, bbox: list[float], resolution: int = 20):
         bbox=bbox,
         resolution=resolution,
         groupby="solar_day",
-        chunks={},
+        chunks={"x": 1024, "y": 1024},
     )
-    # Máscara de agua por (time,y,x) reusando la regla pura water_mask (SCL=6).
-    scl = ds[BANDS["scl"]]
-    water = xr.DataArray(water_mask(scl.values), coords=scl.coords, dims=scl.dims)
+    # Máscara de agua por (time,y,x), LAZY (SCL=6). No se llama `.values` (evita eager).
+    water = ds[BANDS["scl"]] == SCL_WATER
     # Reflectancia solo sobre agua-clara por escena; mediana temporal de esos valores.
     refl = ds[[BANDS["b04"], BANDS["b05"], BANDS["b06"]]].where(water)
     bands_med = refl.median(dim="time", skipna=True)
@@ -242,21 +315,57 @@ def load_scene(items: list, bbox: list[float], resolution: int = 20):
     return bands_med, water_any
 
 
-def _build_zones(ds) -> dict[str, np.ndarray]:
+def _build_zones_shape(shape: tuple[int, int]) -> dict[str, np.ndarray]:
     """Particiones provisionales del AOI: lago completo + mitades N/S por fila.
 
-    Polígonos OAS/PNUMA TDPS aún no disponibles → N/S por la coordenada `y` (proj).
-    Documentado como provisional en el meta de salida.
+    `shape` = (ny, nx) del arreglo (coarsened). Polígonos OAS/PNUMA TDPS aún no
+    disponibles → N/S por la coordenada `y` (proj). Documentado como provisional.
     """
-    ny = ds.sizes["y"]
-    full = np.ones((ny, ds.sizes["x"]), dtype=bool)
+    ny, nx = shape
+    full = np.ones((ny, nx), dtype=bool)
     norte = np.zeros_like(full)
     norte[: ny // 2, :] = True  # filas superiores = norte (y mayor en CRS proyectado)
     return {"lago_pe": full, "norte": norte, "sur": ~norte}
 
 
+def _load_dotenv(path: Path = ROOT / ".env") -> None:
+    """Carga `KEY=VALUE` de un `.env` al entorno (sin sobrescribir vars ya presentes).
+
+    Parser mínimo (sin dep `python-dotenv`): ignora líneas vacías y comentarios. NO
+    imprime valores — son secretos (credenciales CDSE).
+    """
+    if not path.exists():
+        return
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
 def main() -> None:
-    import os
+    _load_dotenv()
+
+    # Scheduler dask configurable. Por defecto "threads" (lee chunks S3 en paralelo → rápido;
+    # ~2 GB de pico, ok con RAM holgada). En máquinas con poca RAM usar TITICACA_S2_SCHEDULER=
+    # synchronous (un chunk a la vez, ~1 GB pero lento). El cómputo de índices por campaña se
+    # materializa UNA vez (`.compute()`) y se muestrea/coarsena desde memoria (no re-lee S3).
+    import dask
+
+    # Concurrencia acotada: el scheduler "threads" usa nº de cores por defecto (p.ej. 32),
+    # lo que dispara demasiadas lecturas S3 simultáneas a CDSE y trunca los JP2. Limitar a
+    # pocos workers (default 4) evita el throttling/truncado sin volver al síncrono lento.
+    num_workers = max(1, int(os.environ.get("TITICACA_S2_NUM_WORKERS", "4")))
+    dask.config.set(
+        scheduler=os.environ.get("TITICACA_S2_SCHEDULER", "threads"),
+        num_workers=num_workers,
+    )
+    # Resolución del zonal: coarsen ×N (default 5 → 100 m, acota RAM en máquinas chicas).
+    # En máquinas con RAM holgada usar TITICACA_S2_COARSEN=1 → zonal a 20 m nativo.
+    coarsen_n = max(1, int(os.environ.get("TITICACA_S2_COARSEN", str(COARSEN))))
+    # Exportar el ráster NDCI/MCI del lago (20 m) como producto espacial (GeoTIFF). Default on.
+    export_raster = os.environ.get("TITICACA_S2_EXPORT_RASTER", "1") != "0"
 
     bbox = aoi_bbox()
     GOLD_DIR.mkdir(parents=True, exist_ok=True)
@@ -269,8 +378,17 @@ def main() -> None:
     if have_creds:
         configure_cdse_s3()
 
+    # Scaffold de matchup (estación×campaña con chl-a in-situ + coords desde silver).
+    scaffold = (
+        build_matchup_scaffold(pl.read_parquet(SILVER_PATH))
+        if SILVER_PATH.exists()
+        else None
+    )
+
     zonal: dict[str, dict] = {}
     scenes_meta: dict[str, dict] = {}
+    raster_paths: dict[str, dict] = {}  # {campaign: {ndci: file, mci: file}} (GeoTIFF 20 m)
+    samples: list[dict] = []  # filas {station_id, campaign, ndci, mci} muestreadas del ráster
     for campaign, date in CAMPAIGNS.items():
         items = query_stac(bbox, date)
         scenes_meta[campaign] = {
@@ -282,15 +400,55 @@ def main() -> None:
         if not items or not have_creds:
             zonal[campaign] = {}
             continue
-        bands, water = load_scene(items, bbox)
-        b04 = to_reflectance(bands[BANDS["b04"]].values)
-        b05 = to_reflectance(bands[BANDS["b05"]].values)
-        b06 = to_reflectance(bands[BANDS["b06"]].values)
-        idx_ndci = ndci(b04, b05)
-        idx_mci = mci(b04, b05, b06)
-        wmask = water.values  # ya bool (agua en alguna escena válida de la ventana)
+        import odc.geo.xr  # noqa: F401  (registra el accessor .odc en xarray)
 
-        zones = _build_zones(bands)
+        bands, water = load_scene(items, bbox)  # DataArrays LAZY (dask)
+        # Índices ópticos LAZY (mantienen coords x/y). Se materializan UNA vez por campaña:
+        # la reducción (mediana temporal) hace streaming por chunk → pico acotado, y luego
+        # el muestreo por estación y el coarsen leen de memoria (sin re-leer S3 por estación).
+        b04 = (bands[BANDS["b04"]] + _REFL_OFFSET) / _REFL_SCALE
+        b05 = (bands[BANDS["b05"]] + _REFL_OFFSET) / _REFL_SCALE
+        b06 = (bands[BANDS["b06"]] + _REFL_OFFSET) / _REFL_SCALE
+        crs = bands.odc.geobox.crs
+        ndci_da = ((b05 - b04) / (b05 + b04)).compute()
+        mci_da = (b05 - b04 - (b06 - b04) * _MCI_FACTOR).compute()
+        water = water.compute()
+
+        # Muestreo del píxel del índice en cada estación resuelta (solo ventanas → memory-safe).
+        if scaffold is not None:
+            pts = [
+                (r["station_id"], r["lat"], r["lon"])
+                for r in scaffold.filter(
+                    (pl.col("campaign") == campaign) & pl.col("lat").is_not_null()
+                ).iter_rows(named=True)
+            ]
+            ndci_at = sample_index_at_points(ndci_da, water, crs, pts)
+            mci_at = sample_index_at_points(mci_da, water, crs, pts)
+            samples.extend(
+                {"station_id": sid, "campaign": campaign,
+                 "ndci": ndci_at[sid], "mci": mci_at[sid]}
+                for sid, _, _ in pts
+            )
+
+        # Export del ráster NDCI/MCI del lago a 20 m (producto espacial para el mapa).
+        if export_raster:
+            import rioxarray  # noqa: F401  (habilita el accessor .rio)
+
+            epsg = f"EPSG:{crs.epsg}" if getattr(crs, "epsg", None) else str(crs)
+            for name, da in (("ndci", ndci_da), ("mci", mci_da)):
+                rpath = GOLD_DIR / f"{name}_{campaign}.tif"
+                da.rio.write_crs(epsg).rio.to_raster(rpath)
+                raster_paths.setdefault(campaign, {})[name] = rpath.name
+
+        # Zonal whole-lake: coarsen ×coarsen_n (1 = 20 m nativo). En memoria → numpy rápido.
+        if coarsen_n > 1:
+            kw = {"x": coarsen_n, "y": coarsen_n, "boundary": "trim"}
+            idx_ndci = ndci_da.coarsen(**kw).mean().values
+            idx_mci = mci_da.coarsen(**kw).mean().values
+            wmask = (water.coarsen(**kw).mean() >= 0.5).values
+        else:
+            idx_ndci, idx_mci, wmask = ndci_da.values, mci_da.values, water.values
+        zones = _build_zones_shape(idx_ndci.shape)
         zonal[campaign] = {
             zname: {
                 "ndci": zonal_stats(idx_ndci, zmask & wmask),
@@ -299,13 +457,38 @@ def main() -> None:
             for zname, zmask in zones.items()
         }
 
-    # Scaffold de matchup (estación×campaña con chl-a in-situ; ndci pendiente).
-    if SILVER_PATH.exists():
-        scaffold = build_matchup_scaffold(pl.read_parquet(SILVER_PATH))
+    # Poblar ndci/mci en el scaffold, persistir y calibrar chl-a~NDCI.
+    regression: dict | None = None
+    n_matchup = n_coords = n_ndci = 0
+    if scaffold is not None:
+        if samples:
+            samp_df = pl.DataFrame(
+                samples,
+                schema={"station_id": pl.Utf8, "campaign": pl.Utf8,
+                        "ndci": pl.Float64, "mci": pl.Float64},
+            )
+            scaffold = scaffold.drop("ndci", "mci").join(
+                samp_df, on=["station_id", "campaign"], how="left"
+            )
         scaffold.write_parquet(MATCHUP_PATH)
         n_matchup = scaffold.height
+        n_coords = int(scaffold["lat"].is_not_null().sum())
+        n_ndci = int(scaffold["ndci"].is_not_null().sum())
+        if n_ndci > 0:
+            regression = regression_report(scaffold)
+
+    if n_ndci > 0:
+        matchup_status = (
+            f"ndci poblado en {n_ndci}/{n_matchup} estaciones-campaña "
+            f"(coords resueltas {n_coords}/{n_matchup}); regresión chl-a~NDCI en "
+            f"regression. Scaffold en {MATCHUP_PATH.name}."
+        )
     else:
-        n_matchup = 0
+        matchup_status = (
+            f"Coords resueltas {n_coords}/{n_matchup} estaciones-campaña "
+            "(desde silver, DECISION-006); ndci DIFERIDO — píxel pendiente de creds CDSE "
+            f"(bead 0kd). Scaffold en {MATCHUP_PATH.name}."
+        )
 
     out = {
         "meta": {
@@ -315,19 +498,21 @@ def main() -> None:
             "campaigns": scenes_meta,
             "zones_note": "Particiones provisionales (lago_pe + N/S por fila); "
                           "faltan polígonos OAS/PNUMA TDPS.",
+            "zonal_resolution_m": 20 * coarsen_n,
             "rasters_status": (
                 "OK" if have_creds
                 else "BLOQUEADO — faltan credenciales S3 CDSE (AWS_ACCESS_KEY_ID/"
                      "AWS_SECRET_ACCESS_KEY); escenas seleccionadas pero píxeles no leídos."
             ),
-            "matchup_status": "DIFERIDO — sin coords de estaciones LTit## (viven en PDFs ANA); "
-                              f"scaffold con {n_matchup} estaciones-campaña en {MATCHUP_PATH.name}.",
+            "raster_files": raster_paths,
+            "matchup_status": matchup_status,
             "caveats": [
                 "chlorophyll_a satelital es un PROXY óptico inferido, no medición (DECISION-005).",
                 "Corrección atmosférica sobre aguas interiores con incertidumbre apreciable.",
                 "NDCI satura a alta biomasa; relación con chl-a no lineal.",
             ],
         },
+        "regression": regression,
         "zonal_indices": zonal,
     }
     OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=2))
@@ -335,7 +520,8 @@ def main() -> None:
     print(f"\n{'='*60}\n  Tier-2 Sentinel-2 NDCI/MCI → {OUT_JSON.name}\n{'='*60}")
     for camp, meta in scenes_meta.items():
         print(f"  {camp}: {len(meta.get('scene_ids', []))} escenas (target {meta['target_date']})")
-    print(f"  matchup scaffold:             {n_matchup} estaciones-campaña → {MATCHUP_PATH.name}")
+    print(f"  matchup:                      {n_matchup} estaciones-campaña "
+          f"({n_coords} coords, {n_ndci} ndci) → {MATCHUP_PATH.name}")
     print(f"\n  escrito en {OUT_JSON}\n")
 
 

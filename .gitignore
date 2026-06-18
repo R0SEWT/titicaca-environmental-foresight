@@ -20,3 +20,7 @@ __pycache__/
 .dolt/
 *.db
 .beads-credential-key
+
+# Secrets — credenciales CDSE u otras (nunca commitear)
+.env
+.env.*

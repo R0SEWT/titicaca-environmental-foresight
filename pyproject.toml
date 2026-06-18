@@ -27,6 +27,8 @@ satellite = [
     "rioxarray>=0.15,<0.18",
     "xarray>=2024.3,<2025",
     "shapely>=2.0,<3.0",
+    # rasterio AWSSession (lectura S3 de eodata CDSE con credenciales) requiere boto3.
+    "boto3>=1.34,<2.0",
 ]
 
 [build-system]

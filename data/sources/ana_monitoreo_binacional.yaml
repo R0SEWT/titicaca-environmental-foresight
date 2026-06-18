@@ -60,9 +60,16 @@ notes: >
   Priorizar junto con peblt_monitoreo_lago para extracción de clorofila-a/Secchi.
 
 derived:
-  # El PROTOCOLO-BINACIONAL tabula los 72 puntos LTit## del lago con UTM (zona 19S).
-  # Extraído y convertido a WGS84 → data/sources/ana_observatorio_coords.csv (bead drt),
-  # usado para poblar lat/lon en silver ana_observatorio (cobertura 42/76; 38/53 chl-a).
+  # Capa 1 (bead drt): protocolo binacional → LTit01-73 (UTM 19S → WGS84), 42 estaciones.
   - station_coords: data/sources/ana_observatorio_coords.csv
     source_pdf: "PROTOCOLO-BINACIONAL_compressed.pdf"
     module: src/titicaca_environmental_foresight/silver/station_coords.py
+  # Capa consolidada (bead dij): multi-fuente + status {resolved/ambiguous/missing}.
+  # 47/76 resolved (protocolo 42 + IT Coata 4 + RED MONITOREO 1), 29 missing (red expandida
+  # LTit78-106 sin coords en disco → SNIRH/partner). Es la fuente de lat/lon para silver.
+  # Ver docs/DECISION_LOG.md DECISION-006.
+  - station_catalog: data/sources/station_coords_catalog.csv
+    source_pdfs: ["PROTOCOLO-BINACIONAL_compressed.pdf",
+                  "84172-2021_IT N° 085-2021-...MON UH COATA MAYO 2021.pdf"]
+    source_xls: "RED MONITOREO UNIDADES HIDROGRAFICAS - TITICACA_.xls"
+    module: src/titicaca_environmental_foresight/silver/station_catalog.py

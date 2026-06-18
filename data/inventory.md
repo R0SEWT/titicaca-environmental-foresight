@@ -4,10 +4,28 @@
 > La **fuente de verdad** son las fichas YAML en `data/sources/` (una por dataset),
 > validadas por `catalog.py` (DECISION-001). La matriz de abajo se **genera** desde ellas
 > — no se edita a mano. Las secciones narrativas (gaps, roadmap) sí son hand-written.
+>
+> **Estado en disco (2026-06-15):** los 4 ZIP del Drive están extraídos por completo
+> (665 archivos en `data/bronze/data_limpia`); todos los locators `bronze/data_limpia/…`
+> de la matriz están presentes localmente.
 
 ---
 
 ## Matriz de procedencia (generada)
+
+**Cómo leer la matriz** (columnas generadas desde las fichas YAML):
+
+- **status** — `available` (el archivo está en disco) / `pending_download` (aún no descargado).
+- **schema** — `✓ confirmado` (columnas verificadas leyendo el archivo) / `⚠ sin confirmar`
+  (perfilado pendiente) / `○ pend. extracción`. La semántica depende del tipo (DECISION-004):
+  el flag es **gate de calidad solo para `tabular`/`gis`** (ahí `⚠` es defecto); en
+  `pdf_report`/`image_series` el `○` **no es defecto**, sino cola de extracción (OCR/parseo/descarga).
+- **prio** — prioridad para el baseline (`high`/`medium`/`low`).
+- **nº lim** — nº de limitaciones documentadas en la ficha (honestidad metodológica).
+- **locator** — ruta bajo `data/bronze/…` o referencia al Drive.
+
+> La fuente de verdad son las fichas `data/sources/*.yaml` (DECISION-001); esta sección
+> se regenera con `catalog.py` y los cambios manuales se sobrescriben.
 
 <!-- CATALOG:BEGIN -->
 _Generado automáticamente por `catalog.py` desde `data/sources/*.yaml` — no editar a mano (los cambios se sobrescriben)._
@@ -112,6 +130,32 @@ Variables y fuentes aún ausentes del catálogo, ordenadas por prioridad para el
 | Pasivos mineros georeferenciados | MINEM — GEOCATMIN | **Media** — fuente de metales | Portal MINEM |
 | Pesca artesanal | PRODUCE / RNT | **Baja** | Portal estadístico |
 
+## Georreferenciación de estaciones
+
+Subproducto del inventario para el mapa espacial y el matchup Tier-2. La **fuente de verdad** es
+`data/sources/station_coords_catalog.csv` (una fila por estación, con columnas de evidencia:
+`coord_original_text`, `coord_source`, `coord_source_file`, `extraction_method`, `datum`,
+`confidence`, `status`), generada por `silver/station_catalog.py`. Política (DECISION-006):
+**nunca se infiere ni inventa** — sin fuente en disco → `missing`; fuentes incompatibles (>300 m)
+→ `ambiguous`.
+
+| status | n | fuentes |
+|--------|---|---------|
+| `resolved` | 47 | protocolo binacional (42) + IT 085-2021 UH Coata (4) + RED MONITOREO (1) |
+| `ambiguous` | 0 | — |
+| `missing` | 29 | red expandida `LTit78–106` + `LTit35` + `RDesa2` |
+
+**Gap de crosswalk de códigos.** Las 29 `missing` arrastran una correspondencia documental no
+resuelta entre códigos históricos (`BInte`, `BPuno`, `LTiti`, `RDesa`) y los nuevos del bronze
+(`LTit78–106`, `RDesa2`). `LTit35` aparece con coords oficiales en el informe nov-2018, pero sin
+mapeo seguro. No se asignan por orden ni cercanía (riesgo de ubicar estaciones incorrectamente).
+Se rastrea en el bead `t3l.5.1.1` (solicitud al partner de la tabla maestra: códigos +
+coordenadas + CRS + documentos de respaldo).
+
+**Impacto en el modelo.** De las 53 estaciones con chl-a, solo **38 están georreferenciadas** →
+el matchup Tier-2 desde datos en disco queda topado ahí hasta resolver las 29 `missing`.
+Ver DECISION-006.
+
 ## Gaps críticos para el modelo
 
 1. **Clorofila-a / Secchi in situ**: ausente de las fuentes tabulares confirmadas; vive en los
@@ -120,7 +164,11 @@ Variables y fuentes aún ausentes del catálogo, ordenadas por prioridad para el
 2. **Cobertura temporal discreta**: los monitoreos de cuencas son eventos discretos (no series
    continuas); 2013–2025 con gaps. Respetar frontera estación seca/húmeda en los splits (no random).
 3. **Datos Bolivia**: ausentes; todo el conjunto actual es de la parte peruana.
-4. **Matchups satélite-campo**: aún no preparados — el componente de mayor esfuerzo para el Tier 2.
+4. **Matchups satélite-campo**: el componente de mayor esfuerzo para el Tier 2, aún no preparado.
+   Dos cuellos de botella: (a) la georreferenciación topa el matchup en 38/53 estaciones con chl-a
+   hasta resolver las 29 `missing` (ver "Georreferenciación de estaciones"); (b) el matchup
+   Sentinel-2 actual emite `lat/lon` nulos incluso para estaciones resueltas — defecto abierto en el
+   bead `v74` (propagación de coordenadas). El pipeline Tier-2 completo es el bead `0kd`.
 5. **Metales en formato numérico**: solo `ana_metales_cuencas` trae valores numéricos (formato largo);
    en `ana_tributarias_2013_2025` los metales figuran como texto de excedencia. Cruce relacional vía
    `UBIGEO` (PK designada en el diccionario RAMIS).
