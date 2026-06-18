@@ -50,7 +50,8 @@ Columnas de **parámetro** (nombre canónico del master schema; mismas etiquetas
 | vintage | informe | cobertura | pendiente |
 |---|---|---|---|
 | `peblt_crucero_hidroquimico_i_2019.csv` | INFORME I CRUCERO HIDROQUIMICO 2019 (Anexo N°1, 20% prof) | **parcial**: 7 estaciones, solo `secchi_m` | 2ª lectura de celdas `uncertain`; OD/nutrientes/temp/pH; profundidad 80% (Anexo N°2); resto de estaciones |
-| `ana_binacional_lago_titicaca_2013.csv` | IT 007-2013 ANA (Bahía Puno, CUADRO 07 + 12) | **suite completa**: 20 estaciones (11 BInte + 9 BPuno/RWill), 37 parámetros incl. chl-a, nutrientes y corrida de metales | resto de los 10 ITs binacionales 2013-2019 (kf5) |
+| `ana_binacional_lago_titicaca_2013.csv` | IT 007-2013 ANA (Bahía Puno, CUADRO 07 + 12) | **suite completa**: 20 estaciones (11 BInte + 9 BPuno/RWill), 37 parámetros incl. chl-a, nutrientes y corrida de metales | — |
+| `ana_binacional_lago_titicaca_2014_mar.csv` | IT 018-2014 ANA (marzo, **sector peruano**, CUADRO 5/6/7) | **suite completa**: 40 estaciones (11 BInte + 9 BPuno + 20 LTiti lago mayor/Wiñaymarca), 43 parámetros | resto de los 9 ITs binacionales 2014-2019 (kf5) |
 
 **Clorofila-a in-situ**: la fuente es **ANA binacional**, NO PEBLT (los cruceros e informes de
 Bahía PEBLT no la miden — uy8/DECISION-010). En `ana_binacional_lago_titicaca_2013.csv` hay 10
@@ -61,4 +62,11 @@ se **excluyó**: el laboratorio la reportó como "Resultado Referencial" (reacti
 > ECA 10 solo son coherentes en **mg/m³ ≡ µg/L** (5.8 mg/L sería hipereutrófico extremo). Se
 > registra en `µg/L`; el rótulo `mg/L` del PDF es un error de etiqueta. Ver DECISION-011.
 
-Resto de informes PEBLT + 10 ITs binacionales: cola de extracción (beads de seguimiento de dvj/T14, kf5).
+**IT 018-2014** (DECISION-012): informe binacional con sectores Bolivia + Perú; se transcribe
+**solo el sector peruano** (lado boliviano fuera del AOI). Las 40 estaciones caen en el bbox del
+lago. La **chl-a es `<0.004 mg/L` (= `<4 µg/L`) en las 40** → toda bajo detección: se transcribe
+en µg/L (`<4`, censurada). El punto auxiliar `LTiti13.1` (isla Anapia) tiene nutrientes ambiguos
+en el escaneo → `?` (uncertain). Los códigos `LTiti##` son la red principal del lago (matchea el
+catálogo de estaciones); `BInte/BPuno` son las bahías de Puno.
+
+Resto de informes PEBLT + 9 ITs binacionales: cola de extracción (beads de seguimiento de dvj/T14, kf5).

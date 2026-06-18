@@ -43,11 +43,18 @@ PARAM_UNITS: dict[str, str] = {
     "bod5_mg_l": "mg/L",
     "cod_mg_l": "mg/L",
     "tss_mg_l": "mg/L",
+    "cyanide_wad": "mg/L",
+    "silicates": "mg/L",
+    "sulfate_mg_l": "mg/L",
+    "sulfides": "mg/L",
     # nutrientes
     "phosphate_mg_l": "mg/L",
     "total_phosphorus": "mg/L",
     "ammonia_n": "mg/L",
     "total_nitrogen": "mg/L",
+    "nitrate_mg_l": "mg/L",
+    "nitrite_mg_l": "mg/L",
+    "kjeldahl_n_mg_l": "mg/L",
     # biológico (clorofila reportada en mg/m³ ≡ µg/L; ver README/DECISION-010)
     "chlorophyll_a": "µg/L",
     # metales (mismas etiquetas canónicas que ana_observatorio.CANON donde existen)
@@ -76,6 +83,10 @@ PARAM_UNITS: dict[str, str] = {
     "uranium": "mg/L",
     "vanadium": "mg/L",
     "zinc": "mg/L",
+    "chromium_hexavalent": "mg/L",
+    # orgánicos / microbiológicos
+    "oils_grease": "mg/L",
+    "fecal_coliforms": "NMP/100mL",
 }
 
 # Metadata por estación (no son parámetros); el resto de columnas se funden a long.

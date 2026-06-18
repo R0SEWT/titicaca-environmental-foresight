@@ -82,4 +82,10 @@ derived:
     module: src/titicaca_environmental_foresight/silver/limnology_pdf.py
     silver_out: data/silver/limnology_insitu.parquet
     status: complete  # 20 estaciones, 37 params; chl-a 10 valores (Bahía Interior)
-    pending: "10 ITs binacionales restantes 2013-2019 (kf5)"
+    pending: "9 ITs binacionales restantes 2014-2019 (kf5)"
+  - vintage: data/sources/limnology_insitu/ana_binacional_lago_titicaca_2014_mar.csv
+    source_pdf: "IT 018-2014-...MONITOREO LAGO TITICACA-PERU MARZO 2014.pdf"
+    module: src/titicaca_environmental_foresight/silver/limnology_pdf.py
+    silver_out: data/silver/limnology_insitu.parquet
+    status: complete  # 40 estaciones sector peruano, 43 params; chl-a TODA <4 µg/L (bajo det.)
+    note: "DECISION-012: solo sector peruano (lado boliviano fuera de AOI)"
