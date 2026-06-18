@@ -121,7 +121,8 @@ Variables y fuentes aún ausentes del catálogo, ordenadas por prioridad para el
 
 | Dato | Fuente probable | Prioridad | Método de captura |
 |------|-----------------|-----------|-------------------|
-| Clorofila-a / Secchi in situ del lago | PDFs PEBLT/IMARPE (`peblt_monitoreo_lago`) y monitoreo binacional (`ana_monitoreo_binacional`) | **Alta** — variable objetivo del Tier 1 | Extracción tabular de PDFs (issue dedicado; binacional depende de T5) |
+| Clorofila-a in situ del lago | Informes ANA (`ana_monitoreo_binacional`; IT 007-2013 confirma chl-a) — **NO** PEBLT (uy8/DECISION-010: cruceros y bahías no miden chl-a) | **Alta** — variable objetivo del Tier 1 | Transcripción visión de PDFs ANA (kf5) |
+| Secchi in situ del lago | Cruceros PEBLT (`peblt_monitoreo_lago`) + informes ANA | **Alta** — proxy de transparencia Tier 1 | Transcripción visión (dvj/T14; bahías PEBLT solo turbidez NTU) |
 | Clorofila-a satelital (proxy óptico) | Sentinel-2 vía Copernicus | **Alta** — Tier 2 | T13 (`sentinelhub`/`openeo`) |
 | Series de nivel del lago (diarias/mensuales) | ANA-SNIRH, PEBLT, SENAMHI | **Alta** — contexto estacional y temporal splits | SNIRH API / descarga |
 | Caudal diario de ríos principales | SENAMHI-SNIRH | **Media** — covariable hidrológica | SNIRH descarga |
@@ -158,9 +159,11 @@ Ver DECISION-006.
 
 ## Gaps críticos para el modelo
 
-1. **Clorofila-a / Secchi in situ**: ausente de las fuentes tabulares confirmadas; vive en los
-   PDFs de cruceros PEBLT y del monitoreo binacional, que son la **cola de extracción** (no defecto
-   de catálogo — ver la línea de gate del resumen). Es la variable objetivo principal del Tier 1.
+1. **Clorofila-a / Secchi in situ**: ausente de las fuentes tabulares confirmadas. **chl-a NO está
+   en PEBLT** (cruceros y bahías; uy8/DECISION-010) — solo vive en los PDFs del monitoreo binacional
+   ANA (IT 007-2013 lo confirma), que son la **cola de extracción** (kf5, no defecto de catálogo).
+   Secchi sí está en los cruceros PEBLT (las bahías solo reportan turbidez NTU). Es la variable
+   objetivo principal del Tier 1.
 2. **Cobertura temporal discreta**: los monitoreos de cuencas son eventos discretos (no series
    continuas); 2013–2025 con gaps. Respetar frontera estación seca/húmeda en los splits (no random).
 3. **Datos Bolivia**: ausentes; todo el conjunto actual es de la parte peruana.
