@@ -96,3 +96,22 @@ No se edita el pasado; si una decisión se revierte, se añade una nueva entrada
 **Decisión:** (1) Se transcribe **solo el sector peruano** (lado boliviano fuera del AOI): vintage `ana_binacional_lago_titicaca_2014_mar.csv`, 40 estaciones (11 Bahía Interior + 9 Bahía de Puno + 20 lago mayor/Wiñaymarca, red `LTiti##` que matchea el catálogo), 43 parámetros (CUADRO 5/6/7). Las 40 caen en el bbox del lago. (2) **chl-a `<0.004 mg/L` en las 40** → toda bajo detección; se convierte a **µg/L** (`<4`, censurada) para consistencia con DECISION-011 (canonical chlorophyll_a en µg/L). (3) Params nuevos en el loader: cyanide_wad, silicates, sulfate_mg_l, sulfides, nitrate_mg_l, nitrite_mg_l, kjeldahl_n_mg_l, chromium_hexavalent, oils_grease, fecal_coliforms. (4) Punto auxiliar `LTiti13.1` (isla Anapia): nutrientes ambiguos en el escaneo → `?` (uncertain), no se inventan.
 **Razón:** Densifica la red principal del lago (LTiti) con limnología in-situ marzo-2014. La chl-a censurada (<4 µg/L) es señal de lago **no hipereutrófico** en aguas abiertas esa campaña — útil aunque no aporte valor puntual para la regresión Tier-2.
 **Impacto:** `limnology_insitu.parquet`: 2439 filas (PEBLT crucero + ANA 2013 + ANA 2014-mar); IT 018 aporta 1720 registros (961 censored / 756 ok / 3 uncertain). chl-a usable in-situ sigue siendo solo la de IT 007 (Bahía Interior). Cola kf5: 9 ITs binacionales restantes (2014-2019).
+
+## DECISION-013 — Censo de chl-a en los 9 ITs binacionales restantes: priorizar por señal, no transcribir a ciegas
+**Fecha:** 2026-06-18
+**Contexto:** IT 018-2014 costó ~1720 celdas y su chl-a salió toda bajo detección (DECISION-012). Antes de transcribir la suite completa de los 9 ITs restantes, se hizo un **censo barato**: leer solo la fila/sección de Clorofila (y Secchi) de cada IT y clasificar la señal. La presencia de chl-a varía por laboratorio/campaña.
+**Censo (sector peruano):**
+| IT | Campaña | chl-a | Secchi | Evidencia |
+|----|---------|-------|--------|-----------|
+| 061-2014 | oct 2013 | **detectable** | — | "Monitoreo Integral"; CUADRO 12.1/12.3 con valores numéricos, varios > ECA |
+| 039-2014 | oct 2014 | no | **sí** | CUADRO 5/6/7 fila "Transparencia al disco Sechi"; sin fila clorofila |
+| 16-2016 | oct 2015 | no | no | Cuadro de parámetros (CORPLAB) sin clorofila ni Secchi |
+| 132-2016 | abr 2016 | no | **sí** | protocolo de campo "Registro transparencia (disco Secchi)"; sin clorofila |
+| 179-2017 | nov 2017 | no | **sí** | Cuadro N°4 de parámetros sin clorofila; Secchi de campo |
+| 42-2018 | jul 2018 | **por confirmar** | sí | serie ALS; chl-a no aparece en su análisis multitemporal (confirmar fila al transcribir) |
+| 09-2019 | nov 2018 | **detectable** | — | conclusiones: Clorofila A Bahía Interior prom 24.8 µg/L (>ECA), LTiti12 |
+| 36-2019 | abr 2019 | **detectable** | — | referida por IT 09/70: chl-a abril 2019 = 0.066 mg/L (66 µg/L) |
+| 70-2019 | nov 2019 | **detectable** | — | Figura N°9 Clorofila A: Bahía Interior 25–46 µg/L (Eutrófico) |
+**Decisión:** Orden de transcripción completa por valor Tier-1 (chl-a detectable): **IT 061-2014, IT 09-2019, IT 36-2019, IT 70-2019** (la serie ALS reporta chl-a en mg/L → convertir a µg/L como DECISION-011/012). Luego confirmar+decidir **IT 42-2018**. Los 4 sin chl-a (039, 16, 132, 179) quedan en prioridad baja: registro ligero o transcripción posterior por sus nutrientes/físicoquímicos/**Secchi** (039/132/179 sí traen Secchi, otro proxy Tier-1).
+**Razón:** Evita repetir el gasto de IT 018 (suite completa sin chl-a). El censo (≈30 lecturas) reordena la cola hacia los ~4 ITs que sí mueven el target Tier-1. Honra el rigor: lo no leído con confianza queda "por confirmar", no inventado.
+**Impacto:** kf5 pasa de "transcribir 9 informes" a una cola priorizada. Sin cambios de código/CSV en esta fase (solo censo + registro).
