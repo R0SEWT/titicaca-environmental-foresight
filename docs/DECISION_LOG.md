@@ -109,7 +109,7 @@ No se edita el pasado; si una decisión se revierte, se añade una nueva entrada
 | 132-2016 | abr 2016 | no | **sí** | protocolo de campo "Registro transparencia (disco Secchi)"; sin clorofila |
 | 179-2017 | nov 2017 | no | **sí** | Cuadro N°4 de parámetros sin clorofila; Secchi de campo |
 | 42-2018 | jul 2018 | **por confirmar** | sí | serie ALS; chl-a no aparece en su análisis multitemporal (confirmar fila al transcribir) |
-| 09-2019 | nov 2018 | **detectable** | — | conclusiones: Clorofila A Bahía Interior prom 24.8 µg/L (>ECA), LTit12 |
+| 09-2019 | nov 2018 | **detectable** | — | conclusiones: Clorofila A Bahía Interior prom 24.8 µg/L (>ECA), LTiti12 |
 | 36-2019 | abr 2019 | **detectable** | — | referida por IT 09/70: chl-a abril 2019 = 0.066 mg/L (66 µg/L) |
 | 70-2019 | nov 2019 | **detectable** | — | Figura N°9 Clorofila A: Bahía Interior 25–46 µg/L (Eutrófico) |
 **Decisión:** Orden de transcripción completa por valor Tier-1 (chl-a detectable): **IT 061-2014, IT 09-2019, IT 36-2019, IT 70-2019** (la serie ALS reporta chl-a en mg/L → convertir a µg/L como DECISION-011/012). Luego confirmar+decidir **IT 42-2018**. Los 4 sin chl-a (039, 16, 132, 179) quedan en prioridad baja: registro ligero o transcripción posterior por sus nutrientes/físicoquímicos/**Secchi** (039/132/179 sí traen Secchi, otro proxy Tier-1).
