@@ -29,7 +29,8 @@ except Exception:  # nombre/ruta puede variar entre versiones
 
 def main():
     inp = Path(sys.argv[1])
-    out = Path(sys.argv[2]); out.mkdir(parents=True, exist_ok=True)
+    out = Path(sys.argv[2])
+    out.mkdir(parents=True, exist_ok=True)
 
     # ¿CUDA visible?
     try:
