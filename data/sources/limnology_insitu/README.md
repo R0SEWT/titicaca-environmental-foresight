@@ -52,6 +52,7 @@ Columnas de **parámetro** (nombre canónico del master schema; mismas etiquetas
 | `peblt_crucero_hidroquimico_i_2019.csv` | INFORME I CRUCERO HIDROQUIMICO 2019 (Anexo N°1, 20% prof) | **parcial**: 7 estaciones, solo `secchi_m` | 2ª lectura de celdas `uncertain`; OD/nutrientes/temp/pH; profundidad 80% (Anexo N°2); resto de estaciones |
 | `ana_binacional_lago_titicaca_2013.csv` | IT 007-2013 ANA (Bahía Puno, CUADRO 07 + 12) | **suite completa**: 20 estaciones (11 BInte + 9 BPuno/RWill), 37 parámetros incl. chl-a, nutrientes y corrida de metales | — |
 | `ana_binacional_lago_titicaca_2014_mar.csv` | IT 018-2014 ANA (marzo, **sector peruano**, CUADRO 5/6/7) | **suite completa**: 40 estaciones (11 BInte + 9 BPuno + 20 LTiti lago mayor/Wiñaymarca), 43 parámetros | resto de los 9 ITs binacionales 2014-2019 (kf5) |
+| `ana_binacional_lago_titicaca_2013_oct.csv` | IT 061-2014 "Monitoreo Integral" (oct 2013, CUADRO 12.1) | **núcleo Tier-1**: 11 estaciones Bahía Interior, 17 params (chl-a **10 valores 15–34 µg/L**, físicoquímicos, nutrientes, As/Pb/Cd, coliformes) | metales traza de 12.1; Bahía de Puno y Lago Mayor (chl-a all-censored) |
 
 **Clorofila-a in-situ**: la fuente es **ANA binacional**, NO PEBLT (los cruceros e informes de
 Bahía PEBLT no la miden — uy8/DECISION-010). En `ana_binacional_lago_titicaca_2013.csv` hay 10
@@ -69,4 +70,12 @@ en µg/L (`<4`, censurada). El punto auxiliar `LTiti13.1` (isla Anapia) tiene nu
 en el escaneo → `?` (uncertain). Los códigos `LTiti##` son la red principal del lago (matchea el
 catálogo de estaciones); `BInte/BPuno` son las bahías de Puno.
 
-Resto de informes PEBLT + 9 ITs binacionales: cola de extracción (beads de seguimiento de dvj/T14, kf5).
+**IT 061-2014** (DECISION-014): "Monitoreo Integral" (campaña oct 2013), lago + cuencas. La tabla
+es muy densa y el escaneo trae `/Rotate 270` → se extrajo con **Docling+GPU en gorgo** (enderezando
+la imagen primero; ver memoria `gorgo-docling-ocr-pipeline`), cross-validado con lectura visual
+(crop-zoom) celda a celda en chl-a. Solo el **núcleo Tier-1** de la **Bahía Interior** (donde la
+chl-a es detectable, 10 valores 15–34 µg/L): los metales traza de 12.1 y los cuadros de **Bahía de
+Puno (12.2)** y **Lago Mayor (12.3)** quedan diferidos — en esos dos la chl-a es **toda `<0.004`
+(bajo detección)** salvo un punto. Celdas implausibles (OD BInte02=15) o ambiguas → `?` (uncertain).
+
+Resto de informes PEBLT + ITs binacionales 09/36/70-2019 (chl-a detectable, vía Docling): cola de extracción (kf5).
