@@ -89,3 +89,11 @@ derived:
     silver_out: data/silver/limnology_insitu.parquet
     status: complete  # 40 estaciones sector peruano, 43 params; chl-a TODA <4 µg/L (bajo det.)
     note: "DECISION-012: solo sector peruano (lado boliviano fuera de AOI)"
+  # IT 061-2014 "Monitoreo Integral" (oct 2013) — vía OCR Docling+GPU (DECISION-014)
+  - vintage: data/sources/limnology_insitu/ana_binacional_lago_titicaca_2013_oct.csv
+    source_pdf: "IT 061-2014-ANA-VIG_EVALUACION INTEGRAL LAGO TITICACA OCTUBRE 2013.pdf"
+    module: src/titicaca_environmental_foresight/silver/limnology_pdf.py
+    silver_out: data/silver/limnology_insitu.parquet
+    extraction: "Docling+GPU (gorgo) + verificación crop-zoom — ver DECISION-014"
+    status: partial  # núcleo Tier-1 Bahía Interior (11 est, chl-a 10 valores 15-34 µg/L)
+    pending: "metales traza 12.1; Bahía de Puno (12.2) + Lago Mayor (12.3) — chl-a all-censored"
