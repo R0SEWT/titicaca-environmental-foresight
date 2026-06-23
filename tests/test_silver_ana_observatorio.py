@@ -172,7 +172,10 @@ class TestBuildSilverIntegration:
         return ao.build_silver(ao.BRONZE_DIR, out)
 
     def test_processes_all_81_reports(self, df):
-        assert df["source_file"].n_unique() == 81
+        # 81 XLS leídos desde bronze; 5 son exportaciones duplicadas (todos sus registros
+        # colisionan con otro archivo por la clave station×campaign×datetime×parameter)
+        # → quedan 76 archivos con ≥1 fila única tras el dedup (DECISION-017).
+        assert df["source_file"].n_unique() == 76
 
     def test_has_master_schema_columns(self, df):
         master = {"station_id", "datetime", "lat", "lon", "depth_m", "qa_flag", "sampling_agency"}
@@ -191,6 +194,13 @@ class TestBuildSilverIntegration:
 
         dups = df.group_by("source_file", "parameter").len().filter(pl.col("len") > 1)
         assert dups.height == 0
+
+    def test_no_cross_file_duplicates(self, df):
+        import polars as pl
+
+        key = ["station_id", "campaign", "datetime", "parameter"]
+        dups = df.filter(pl.struct(key).is_duplicated())
+        assert dups.height == 0, f"{dups.height} filas duplicadas cross-archivo tras dedup"
 
     def test_chlorophyll_present(self, df):
         assert "chlorophyll_a" in set(df["parameter"].to_list())
