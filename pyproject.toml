@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9.1.0", "ruff>=0.15.17"]
+dev = ["pytest>=9.1.1", "ruff>=0.15.18"]
 # Tier-2 satélite: solo para correr el pipeline real (STAC pull + rasters).
 # Los tests de CI cubren funciones puras (numpy/polars), por eso estas deps NO
 # están en el core ni en dev y se importan lazy dentro de las funciones IO.
@@ -28,7 +28,7 @@ satellite = [
     "xarray>=2026.4.0,<2027",
     "shapely>=2.0,<3.0",
     # rasterio AWSSession (lectura S3 de eodata CDSE con credenciales) requiere boto3.
-    "boto3>=1.43.32,<2.0",
+    "boto3>=1.43.35,<2.0",
 ]
 
 [build-system]
