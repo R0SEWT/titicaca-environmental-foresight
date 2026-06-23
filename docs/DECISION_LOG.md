@@ -126,8 +126,8 @@ No se edita el pasado; si una decisión se revierte, se añade una nueva entrada
 ## DECISION-015 — IT 036-2019 clorofila: mg/L → µg/L (×1000); gap Lago Mayor (Cuadro 9)
 **Fecha:** 2026-06-23
 **Contexto:** IT 036-2019 (abril 2019) — 148 tablas extraídas vía Docling+GPU. Cuadros 7 (BInte), 8 (BPuno) y 10 (Lago Menor) extraídos correctamente. La fila Clorofila reporta unidades `mg/L` con valores coherentes con esa unidad (p.ej. BInte LTiti59: 0.08935 mg/L → 89.35 µg/L), confirmado porque la columna ECA = 0.008 mg/L (= 8 µg/L) y las tablas ECA del informe muestran excedencias en BInte. A diferencia de IT 007-2013 (donde el rótulo `mg/L` era error de etiqueta y los valores eran en realidad µg/L), en IT 036-2019 los valores en `mg/L` son correctos: se convierten ×1000 para almacenar en la unidad canónica `µg/L`.
-**Decisión:** Almacenar chl-a en `µg/L` (×1000 sobre el valor PDF). Cuadro 9 (Lago Mayor, 21 estaciones) no fue extraído por Docling (tabla demasiado ancha, ~24 columnas incluyendo Param + Unidad + ECA + 21 estaciones). Gap documentado en el README. IT 009-2019 BInte: ECA exceedance histórica confirma chl-a > 10 µg/L pero la tabla de resultados del PDF 128 MB no fue extraída por Docling.
-**Impacto:** `limnology_insitu.parquet`: 2844 filas (5 campañas), n=42 chl-a numérico post IT 036. Vintage: `data/sources/limnology_insitu/ana_binacional_lago_titicaca_2019_apr.csv` (22 estaciones).
+**Decisión:** Almacenar chl-a en `µg/L` (×1000 sobre el valor PDF). Cuadro 9 (Lago Mayor, 21 estaciones) no fue extraído por Docling (tabla demasiado ancha, ~24 columnas incluyendo Param + Unidad + ECA + 21 estaciones). Gap documentado en el README. IT 009-2019 BInte: ECA exceedance histórica confirma chl-a > 10 µg/L pero la tabla de resultados del PDF de 128 MB no fue extraída por Docling.
+**Impacto:** `limnology_insitu.parquet`: 2844 filas (5 campañas), n=42 valores de chl-a numéricos post IT 036. Vintage: `data/sources/limnology_insitu/ana_binacional_lago_titicaca_2019_apr.csv` (22 estaciones).
 
 ## DECISION-016 — IT 070-2019 clorofila: mg/L → µg/L (×1000); gap BPuno/Lago Menor en OCR
 **Fecha:** 2026-06-23

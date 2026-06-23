@@ -284,7 +284,11 @@ def build_silver(bronze_dir: Path = BRONZE_DIR, out_path: Path | None = OUT_PATH
     # Dedup cross-file: mismo XLS exportado en 2 archivos distintos produce filas idénticas.
     # Clave: (station_id, campaign, datetime, parameter) — keep="first" (orden alfabético de source_file).
     _DEDUP_KEY = ["station_id", "campaign", "datetime", "parameter"]
+    _n_before = df.height
     df = df.unique(subset=_DEDUP_KEY, keep="first", maintain_order=True)
+    _n_dropped = _n_before - df.height
+    if _n_dropped:
+        print(f"  [dedup] eliminadas {_n_dropped} filas duplicadas cross-archivo (station×campaign×datetime×param)")
 
     if out_path is not None:
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
@@ -296,14 +300,12 @@ def main() -> None:
     if not BRONZE_DIR.exists():
         raise SystemExit(f"No existe el directorio bronze: {BRONZE_DIR}")
     df = build_silver(BRONZE_DIR, OUT_PATH)
-    _DEDUP_KEY = ["station_id", "campaign", "datetime", "parameter"]
-    dups = df.filter(pl.struct(_DEDUP_KEY).is_duplicated()).height
     vc = df["qa_flag"].value_counts(sort=True)
     qa = dict(zip(vc["qa_flag"], vc["count"]))
     campaigns = sorted(c for c in df["campaign"].unique().to_list() if c is not None)
     chl = df.filter(pl.col("parameter") == "chlorophyll_a")
     print(f"\n{'='*60}\n  ana_observatorio → silver\n{'='*60}")
-    print(f"  filas:        {df.height}  (dups cross-archivo: {dups})")
+    print(f"  filas:        {df.height}")
     print(f"  archivos:     {df['source_file'].n_unique()}")
     print(f"  estaciones:   {df['station_id'].n_unique()}")
     print(f"  campañas:     {', '.join(campaigns)}")
