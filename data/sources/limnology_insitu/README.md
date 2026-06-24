@@ -49,7 +49,7 @@ Columnas de **parámetro** (nombre canónico del master schema; mismas etiquetas
 
 | vintage | informe | cobertura | pendiente |
 |---|---|---|---|
-| `peblt_crucero_hidroquimico_i_2019.csv` | INFORME I CRUCERO HIDROQUIMICO 2019 (Anexo N°1, 20% prof) | **parcial**: 7 estaciones, solo `secchi_m` | 2ª lectura de celdas `uncertain`; OD/nutrientes/temp/pH; profundidad 80% (Anexo N°2); resto de estaciones |
+| `peblt_crucero_hidroquimico_i_2019.csv` | INFORME I CRUCERO HIDROQUIMICO 2019 (Anexo N°1, 20% prof) | **parcial**: 7 estaciones, solo `secchi_m`; CHB-2=`8.5?`, CHB-3=`4?` (mejor lectura visual, uncertain) | Extracción completa (29 est., OD/pH/T/conductividad/nutrientes/turbidez) requiere Docling+GPU en gorgo — escaneo ~150 DPI efectivo, celdas de 5×26 px, por debajo del umbral de lectura visual fiable (DECISION-018) |
 | `ana_binacional_lago_titicaca_2013.csv` | IT 007-2013 ANA (Bahía Puno, CUADRO 07 + 12) | **suite completa**: 20 estaciones (11 BInte + 9 BPuno/RWill), 37 parámetros incl. chl-a, nutrientes y corrida de metales | — |
 | `ana_binacional_lago_titicaca_2014_mar.csv` | IT 018-2014 ANA (marzo, **sector peruano**, CUADRO 5/6/7) | **suite completa**: 40 estaciones (11 BInte + 9 BPuno + 20 LTiti lago mayor/Wiñaymarca), 43 parámetros | resto de los 9 ITs binacionales 2014-2019 (kf5) |
 | `ana_binacional_lago_titicaca_2013_oct.csv` | IT 061-2014 "Monitoreo Integral" (oct 2013, CUADRO 12.1) | **núcleo Tier-1**: 11 estaciones Bahía Interior, 17 params (chl-a **10 valores 15–34 µg/L**, físicoquímicos, nutrientes, As/Pb/Cd, coliformes) | metales traza de 12.1; Bahía de Puno y Lago Mayor (chl-a all-censored) |
