@@ -106,17 +106,19 @@ sin dejar espacio a interpretación:
 
 ### Desarrollo (interno)
 
-Antes de sumar gente de otras áreas, confirmar disponibilidad real del resto
-del equipo de Desarrollo para tomar trabajo técnico que ya está listo para
-avanzar (sin bloqueos pendientes).
+Hay trabajo técnico ya listo para avanzar (sin bloqueos pendientes) que puede
+tomar el resto del equipo de Desarrollo — no requiere perfiles nuevos, solo
+manos disponibles del equipo actual.
 
 ### Audiovisuales y Redes Sociales
 
 Sin pedido por ahora. El dataset y los resultados todavía pueden cambiar en
 la fase de validación técnica; cualquier pieza audiovisual hoy se haría sobre
-datos no definitivos. Se retoma en cuanto cierre esa validación.
+datos no definitivos. Se retoma en cuanto se cierre esa validación.
 
 ### Coordinación de Proyecto
 
-Confirmar disponibilidad real del equipo interno de Desarrollo antes de
-tramitar los pedidos de perfiles nuevos hacia otras áreas.
+Decisión de secuencia: confirmar la disponibilidad real del equipo interno de
+Desarrollo (ver punto anterior) *antes* de tramitar pedidos de perfiles nuevos
+hacia otras áreas. Puede que parte del "atasco" se resuelva activando gente
+que ya está en el proyecto.
