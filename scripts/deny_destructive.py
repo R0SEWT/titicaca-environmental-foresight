@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import os
+import posixpath
 import re
 import shlex
 import subprocess
@@ -223,6 +224,26 @@ def pushes_to_protected(args: list[str]) -> bool:
 BROAD_ADD_FLAGS = {"-A", "--all", "-u", "--update", "--no-ignore-removal"}
 
 
+def _normalize_pathspec(pathspec: str) -> str:
+    """`./.beads/`, `.//.beads` y `.beads` designan lo mismo para git; aquí también.
+
+    Sin normalizar, `git add ./.beads/config.yaml` escapaba del guard (hallado por Codex, #34).
+    """
+    if pathspec in (":/", ":"):
+        return "."
+    candidate = pathspec.rstrip("/")
+    if not candidate:
+        return "."
+    return posixpath.normpath(candidate)
+
+
+def _pathspec_covers(pathspec: str, target: str) -> bool:
+    candidate = _normalize_pathspec(pathspec)
+    if candidate == ".":
+        return True
+    return candidate == target or target.startswith(f"{candidate}/")
+
+
 def add_covers(args: list[str], target: str) -> bool:
     """True si el `git add` podría stagear `target`.
 
@@ -236,20 +257,57 @@ def add_covers(args: list[str], target: str) -> bool:
     if not paths:
         return True
 
-    for path in paths:
-        candidate = path.rstrip("/")
-        if candidate in (".", ":/", ""):
-            return True
-        if candidate == target or target.startswith(f"{candidate}/"):
-            return True
-    return False
+    return any(_pathspec_covers(p, target) for p in paths)
 
 
-def is_dirty(rel_path: str) -> bool:
-    """True si `rel_path` difiere de HEAD (en índice o en árbol de trabajo).
+# `git commit -a` stagea las modificaciones de archivos trackeados sin pasar por `git add`, y
+# `git commit <ruta>` commitea esa ruta directamente. Ambos saltaban el guard (Codex, #34).
+_COMMIT_LONG_WITH_ARG = {
+    "--message", "--file", "--reuse-message", "--reedit-message",
+    "--author", "--date", "--fixup", "--squash", "--trailer",
+}  # fmt: skip
+_COMMIT_SHORT_WITH_ARG = set("mFcC")
 
-    Falla CERRADO: si git no responde, se asume sucio. Denegar un `git add` porque `git status`
-    no corre es inocuo — con git roto el `git add` tampoco iba a funcionar.
+
+def _consumes_next(token: str) -> bool:
+    """`-m wip` y `-am wip` consumen su argumento; si no, `wip` parecería un pathspec."""
+    if token.startswith("--"):
+        return token in _COMMIT_LONG_WITH_ARG
+    return len(token) > 1 and token[-1] in _COMMIT_SHORT_WITH_ARG
+
+
+def commit_paths(args: list[str]) -> list[str]:
+    paths: list[str] = []
+    i = 0
+    while i < len(args):
+        token = args[i]
+        if token == "--":
+            paths.extend(args[i + 1 :])
+            break
+        if token.startswith("-"):
+            i += 2 if _consumes_next(token) and i + 1 < len(args) else 1
+            continue
+        paths.append(token)
+        i += 1
+    return paths
+
+
+def commit_stages_worktree(args: list[str]) -> bool:
+    short, long_flags = _flags(args)
+    return "a" in short or "--all" in long_flags
+
+
+def commit_covers(args: list[str], target: str) -> bool:
+    if commit_stages_worktree(args):
+        return True
+    return any(_pathspec_covers(p, target) for p in commit_paths(args))
+
+
+def _porcelain(rel_path: str) -> str:
+    """Columnas XY de `git status --porcelain` para `rel_path` (`""` si está limpio).
+
+    Falla CERRADO devolviendo `"MM"`: si git no responde, se asume sucio Y staged. Denegar por
+    eso es inocuo — con git roto el `git add`/`git commit` tampoco iba a funcionar.
     """
     try:
         out = subprocess.run(
@@ -261,10 +319,33 @@ def is_dirty(rel_path: str) -> bool:
             cwd=PROJECT_ROOT,
         )
     except (OSError, subprocess.SubprocessError):
-        return True
+        return "MM"
     if out.returncode != 0:
-        return True
-    return bool(out.stdout.strip())
+        return "MM"
+    lines = out.stdout.splitlines()
+    return lines[0][:2] if lines else ""
+
+
+def is_dirty(rel_path: str) -> bool:
+    """Difiere de HEAD, sea en el índice o en el árbol de trabajo."""
+    return _porcelain(rel_path) != ""
+
+
+def is_staged(rel_path: str) -> bool:
+    """Ya está en el índice: un `git commit` a secas lo publicaría."""
+    status = _porcelain(rel_path)
+    return bool(status) and status[0] not in (" ", "?")
+
+
+def _deny_beads_config(paths: list[str], salida: str) -> None:
+    rutas = ", ".join(f"`{p}`" for p in paths)
+    deny(
+        f"{rutas}: config local del backend de beads, modificada respecto de HEAD. "
+        "Suele ser Gas Town (`gt rig add`) reescribiendo el clon: pone `dolt_mode: server` "
+        'y `export.auto: "false"`. Commitearlo apagaría el auto-export de beads para todo '
+        f"el repo. Descartá los cambios (`git restore --staged --worktree {' '.join(paths)}`) "
+        f"o {salida}."
+    )
 
 
 def export_beads() -> None:
@@ -324,16 +405,22 @@ def check_bash(command: str) -> None:
         # un `git add` que no se va a ejecutar.
         dirty = [p for p in BEADS_LOCAL_CONFIG if add_covers(args, p) and is_dirty(p)]
         if dirty:
-            rutas = ", ".join(f"`{p}`" for p in dirty)
-            deny(
-                f"{rutas}: config local del backend de beads, modificada respecto de HEAD. "
-                "Suele ser Gas Town (`gt rig add`) reescribiendo el clon: pone `dolt_mode: server` "
-                'y `export.auto: "false"`. Commitearlo apagaría el auto-export de beads para todo '
-                f"el repo. Descartá los cambios (`git restore {' '.join(dirty)}`) o stageá rutas "
-                "concretas en vez de `git add .`."
-            )
+            _deny_beads_config(dirty, "stageá rutas concretas en vez de `git add .`")
 
         if add_covers(args, BEADS_JSONL):
+            export_beads()
+
+    for args in _invocations(command, "git", "commit"):
+        if commit_stages_worktree(args) or commit_paths(args):
+            # `-a` stagea el árbol de trabajo; una ruta explícita commitea esa ruta.
+            offenders = [p for p in BEADS_LOCAL_CONFIG if commit_covers(args, p) and is_dirty(p)]
+        else:
+            # `git commit` a secas publica el índice tal como está.
+            offenders = [p for p in BEADS_LOCAL_CONFIG if is_staged(p)]
+        if offenders:
+            _deny_beads_config(offenders, "commiteá rutas concretas sin `-a`")
+
+        if commit_covers(args, BEADS_JSONL):
             export_beads()
 
 
