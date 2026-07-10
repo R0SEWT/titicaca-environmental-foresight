@@ -38,7 +38,7 @@
             "type": "command"
           }
         ],
-        "matcher": "Bash|Write|Edit|NotebookEdit"
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit"
       }
     ],
     "PreCompact": [

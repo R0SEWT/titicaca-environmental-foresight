@@ -42,6 +42,11 @@ BLOCKED_WRITE_PREFIXES = (
 
 BEADS_JSONL = ".beads/issues.jsonl"
 
+# `MultiEdit` no existe en Claude Code 2.1.x, pero sí en otras versiones/harnesses. Incluirlo no
+# cuesta nada y evita que la protección dependa de qué herramienta de edición esté disponible.
+# Debe mantenerse sincronizado con el `matcher` de .claude/settings.json.
+WRITE_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
+
 ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 
 
@@ -134,6 +139,25 @@ def current_branch() -> str:
         return ""
 
 
+def _target_branch(refspec: str) -> str:
+    """Rama destino de un refspec. `+HEAD:refs/heads/main` -> `main`."""
+    dest = refspec.lstrip("+").split(":")[-1]
+    return dest.removeprefix("refs/heads/")
+
+
+def is_force_push(args: list[str]) -> bool:
+    """Cubre `-f`, `--force`, `--force-with-lease[=<refname>[:<expect>]]` y el refspec `+rama`.
+
+    `--no-force-with-lease` no cuenta: empieza con `--no`.
+    """
+    short, _ = _flags(args)
+    if "f" in short:
+        return True
+    if any(a.startswith("--force") for a in args):
+        return True
+    return any(a.startswith("+") for a in args if not a.startswith("-"))
+
+
 def pushes_to_protected(args: list[str]) -> bool:
     """True si el push apunta a main/master: por refspec explícito, o por la rama checkouteada.
 
@@ -143,8 +167,7 @@ def pushes_to_protected(args: list[str]) -> bool:
     positional = [a for a in args if not a.startswith("-")]
 
     for arg in positional:
-        target = arg.split(":")[-1]
-        if target in PROTECTED_BRANCHES:
+        if _target_branch(arg) in PROTECTED_BRANCHES:
             return True
 
     if current_branch() not in PROTECTED_BRANCHES:
@@ -152,6 +175,31 @@ def pushes_to_protected(args: list[str]) -> bool:
 
     # En rama protegida, solo es seguro un refspec que nombre otro destino (`HEAD:feat`).
     return not any(":" in a for a in positional)
+
+
+BROAD_ADD_FLAGS = {"-A", "--all", "-u", "--update", "--no-ignore-removal"}
+
+
+def add_touches_beads(args: list[str]) -> bool:
+    """True si el `git add` podría stagear el JSONL de beads.
+
+    No alcanza con buscar la ruta literal: `git add .`, `git add -A` y `git add .beads` lo stagean
+    igual, y son el flujo de commit más común.
+    """
+    if any(a in BROAD_ADD_FLAGS for a in args):
+        return True
+
+    paths = [a for a in args if not a.startswith("-")]
+    if not paths:
+        return True
+
+    for path in paths:
+        candidate = path.rstrip("/")
+        if candidate in (".", ":/", ""):
+            return True
+        if candidate == BEADS_JSONL or BEADS_JSONL.startswith(f"{candidate}/"):
+            return True
+    return False
 
 
 def export_beads() -> None:
@@ -195,8 +243,7 @@ def check_bash(command: str) -> None:
             )
 
     for args in _invocations(command, "git", "push"):
-        short, long_flags = _flags(args)
-        if "f" in short or {"--force", "--force-with-lease"} & long_flags:
+        if is_force_push(args):
             deny("Force-push denegado: reescribe historia publicada.")
         if pushes_to_protected(args):
             deny(
@@ -208,7 +255,7 @@ def check_bash(command: str) -> None:
         deny("`rm -rf` denegado: borrado recursivo irreversible. Borrá rutas concretas.")
 
     for args in _invocations(command, "git", "add"):
-        if any(BEADS_JSONL in a for a in args):
+        if add_touches_beads(args):
             export_beads()
 
 
@@ -232,19 +279,22 @@ def check_write(file_path: str) -> None:
             )
 
 
-def main() -> None:
-    try:
-        payload = json.load(sys.stdin)
-    except (json.JSONDecodeError, ValueError):
-        return
-
+def dispatch(payload: dict) -> None:
     tool = payload.get("tool_name", "")
     tool_input = payload.get("tool_input", {}) or {}
 
     if tool == "Bash":
         check_bash(tool_input.get("command", "") or "")
-    elif tool in ("Write", "Edit", "NotebookEdit"):
+    elif tool in WRITE_TOOLS:
         check_write(tool_input.get("file_path", "") or "")
+
+
+def main() -> None:
+    try:
+        payload = json.load(sys.stdin)
+    except (json.JSONDecodeError, ValueError):
+        return
+    dispatch(payload)
 
 
 if __name__ == "__main__":

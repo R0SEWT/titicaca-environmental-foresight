@@ -81,7 +81,17 @@ DESTRUCTIVE = [
     "sudo rm -rf /tmp/x",
     "cd /tmp && git push --force",
     "true; git push origin main",
+    # Formas que el guard dejaba pasar (halladas por Codex en el PR #29).
+    "git push --force-with-lease=feature origin feature",
+    "git push --force-with-lease=feature:abc123 origin feature",
+    "git push origin +feature",
+    "git push origin HEAD:refs/heads/main",
+    "git push origin refs/heads/master",
 ]
+
+
+def test_no_force_with_lease_no_se_confunde_con_force(capsys):
+    assert decide_bash("git push --no-force-with-lease origin feat", capsys) == "neutral"
 
 
 @pytest.mark.parametrize("command", DESTRUCTIVE)
@@ -142,6 +152,28 @@ def test_escrituras_permitidas(rel, capsys):
     assert decide_write(str(guard.PROJECT_ROOT / rel), capsys) == "neutral"
 
 
+# --- despacho por herramienta ---
+
+
+@pytest.mark.parametrize("tool", guard.WRITE_TOOLS)
+def test_toda_herramienta_de_escritura_pasa_por_check_write(tool, capsys):
+    payload = {"tool_name": tool, "tool_input": {"file_path": str(guard.PROJECT_ROOT / ".env")}}
+    guard.current_branch = lambda: "feature/x"
+    with pytest.raises(SystemExit):
+        guard.dispatch(payload)
+    out = json.loads(capsys.readouterr().out)
+    assert out["hookSpecificOutput"]["permissionDecision"] == "deny"
+
+
+def test_el_matcher_del_settings_cubre_todas_las_write_tools():
+    """Si el matcher y WRITE_TOOLS se desincronizan, el guard nunca se invoca para la que falte."""
+    settings = json.loads((REPO_ROOT / ".claude" / "settings.json").read_text())
+    matchers = [g["matcher"] for g in settings["hooks"]["PreToolUse"]]
+    cubiertas = {tool for m in matchers for tool in m.split("|")}
+    assert set(guard.WRITE_TOOLS) <= cubiertas
+    assert "Bash" in cubiertas
+
+
 # --- auto-export de beads antes de versionar el JSONL ---
 
 
@@ -163,18 +195,39 @@ def fake_run(monkeypatch):
     return factory
 
 
-def test_git_add_del_jsonl_dispara_bd_export(fake_run, capsys):
+# `git add .` y `git add -A` stagean el JSONL igual que nombrarlo: son el flujo de commit más
+# común, y el guard los ignoraba (hallado por Codex en el PR #29).
+ADD_QUE_TOCA_BEADS = [
+    ".beads/issues.jsonl",
+    ".",
+    "./",
+    "-A",
+    "--all",
+    "-u",
+    ".beads",
+    ".beads/",
+    "-A .beads",
+    "src/model.py .beads/issues.jsonl",
+]
+
+
+@pytest.mark.parametrize("pathspec", ADD_QUE_TOCA_BEADS)
+def test_git_add_que_toca_beads_dispara_export(pathspec, fake_run, capsys):
     calls = fake_run()
     guard.current_branch = lambda: "feature/x"
-    guard.check_bash(f"git add {guard.BEADS_JSONL}")
+    guard.check_bash(f"git add {pathspec}")
     assert ["bd", "export", "-o", guard.BEADS_JSONL] in calls
     assert capsys.readouterr().out == ""
 
 
-def test_git_add_de_otro_archivo_no_dispara_export(fake_run, capsys):
+ADD_QUE_NO_TOCA_BEADS = ["src/model.py", "docs/DECISION_LOG.md", "tests/", "src docs"]
+
+
+@pytest.mark.parametrize("pathspec", ADD_QUE_NO_TOCA_BEADS)
+def test_git_add_de_otros_archivos_no_dispara_export(pathspec, fake_run, capsys):
     calls = fake_run()
     guard.current_branch = lambda: "feature/x"
-    guard.check_bash("git add src/model.py")
+    guard.check_bash(f"git add {pathspec}")
     assert calls == []
 
 
