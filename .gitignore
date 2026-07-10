@@ -24,3 +24,7 @@ __pycache__/
 # Secrets — credenciales CDSE u otras (nunca commitear)
 .env
 .env.*
+
+# Contexto local que Gas Town inyecta en el clon del polecat. Su auto-checkpoint
+# ("WIP: checkpoint (auto)") lo commitea, y de ahí llegaría a un PR.
+CLAUDE.local.md
