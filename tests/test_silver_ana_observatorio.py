@@ -219,3 +219,102 @@ class TestBuildSilverIntegration:
 
     def test_sampling_agency_constant(self, df):
         assert set(df["sampling_agency"].to_list()) == {"ANA-Observatorio"}
+
+
+class TestEnrichCoordsFallback:
+    """AUDIT-003 (tef-a87): precedencia catálogo/fallback en _enrich_coords.
+
+    El catálogo consolidado gobierna los IDs que contiene (resolved → coord;
+    ambiguous/missing → null, sin excepciones). El CSV histórico del protocolo
+    solo aplica como fallback para IDs FUERA del catálogo (reingestas / legacy).
+    """
+
+    @pytest.fixture()
+    def paths(self, tmp_path, monkeypatch):
+        import polars as pl
+
+        from titicaca_environmental_foresight.silver import station_catalog as cat
+        from titicaca_environmental_foresight.silver import station_coords as sc
+
+        catalog_csv = tmp_path / "station_coords_catalog.csv"
+        coords_csv = tmp_path / "ana_observatorio_coords.csv"
+        monkeypatch.setattr(cat, "CATALOG_CSV", catalog_csv)
+        monkeypatch.setattr(sc, "COORDS_CSV", coords_csv)
+
+        # Catálogo: LTit01 resolved; LTit50 ambiguous; LTit60 missing (sin coord).
+        pl.DataFrame(
+            {
+                "station_id": ["LTit01", "LTit50", "LTit60"],
+                "lat": [-15.335, None, None],
+                "lon": [-69.762, None, None],
+                "utm_este": [418233, None, None],
+                "utm_norte": [8304485, None, None],
+                "datum": ["UTM 19S (EPSG:32719) → WGS84", None, None],
+                "water_body": ["L Mayor", None, None],
+                "coord_original_text": ["418233 8304485 (UTM 19S)", None, None],
+                "coord_source": ["protocolo_binacional", "protocolo_binacional | coata_it_2021", None],
+                "coord_source_file": ["PROTOCOLO.pdf", None, None],
+                "extraction_method": ["pdftotext_table", None, None],
+                "confidence": ["high", "low", None],
+                "status": ["resolved", "ambiguous", "missing"],
+                "notes": [None, "coords incompatibles entre fuentes (no se elige)", None],
+            },
+            schema=cat.CATALOG_SCHEMA,
+        ).write_csv(catalog_csv)
+
+        # CSV histórico: trae coords para TODOS, incluido un ID legacy (LTit99)
+        # ausente del catálogo y coords divergentes para los IDs catalogados.
+        pl.DataFrame(
+            {
+                "station_id": ["LTit01", "LTit50", "LTit60", "LTit99"],
+                "lat": [-15.9, -15.5, -15.6, -15.4],
+                "lon": [-69.9, -69.5, -69.6, -69.4],
+                "utm_este": [400000, 400001, 400002, 400003],
+                "utm_norte": [8300000, 8300001, 8300002, 8300003],
+                "water_body_proto": ["L Mayor", "L Mayor", "L Mayor", "L Menor"],
+            },
+            schema=sc.COORDS_SCHEMA,
+        ).write_csv(coords_csv)
+        return catalog_csv, coords_csv
+
+    @pytest.fixture()
+    def enriched(self, paths):
+        import polars as pl
+
+        n = 5
+        silver = pl.DataFrame(
+            {
+                "station_id": ["LTit01", "LTit50", "LTit60", "LTit99", "LTitZZ"],
+                "lat": [None] * n,
+                "lon": [None] * n,
+            },
+            schema_overrides={"lat": pl.Float64, "lon": pl.Float64},
+        )
+        return ao._enrich_coords(silver)
+
+    def _row(self, enriched, sid):
+        import polars as pl
+
+        return enriched.filter(pl.col("station_id") == sid).row(0, named=True)
+
+    def test_catalog_wins_for_resolved(self, enriched):
+        row = self._row(enriched, "LTit01")
+        assert row["lat"] == pytest.approx(-15.335)  # catálogo, NO el CSV histórico
+
+    def test_ambiguous_stays_null_despite_legacy_coords(self, enriched):
+        row = self._row(enriched, "LTit50")
+        assert row["lat"] is None and row["lon"] is None
+
+    def test_missing_in_catalog_stays_null(self, enriched):
+        row = self._row(enriched, "LTit60")
+        assert row["lat"] is None and row["lon"] is None
+
+    def test_legacy_id_outside_catalog_gets_fallback(self, enriched):
+        # AUDIT-003: ID fuera del catálogo pero con coord legacy válida → fallback.
+        row = self._row(enriched, "LTit99")
+        assert row["lat"] == pytest.approx(-15.4)
+        assert row["lon"] == pytest.approx(-69.4)
+
+    def test_unknown_everywhere_stays_null(self, enriched):
+        row = self._row(enriched, "LTitZZ")
+        assert row["lat"] is None and row["lon"] is None
