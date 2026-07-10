@@ -49,7 +49,10 @@ Primary variables: `chlorophyll_a`, `secchi_m`, `turbidity_ntu`, `do_mg_l`, `wat
 
 ## Conventions
 
-- Issue prefix: `titicaca-enironmental-foresight` (beads, matches directory name with typo — do not rename)
+- Issue prefix: `tef` (beads). IDs quedan como `tef-a87`. Fijado explícitamente en `.beads/config.yaml`, no derivado del nombre del directorio.
+  - Migrado desde `titicaca-enironmental-foresight` el 2026-07-10 (`bd rename-prefix`). Gas Town valida el prefijo contra `^[a-zA-Z][a-zA-Z0-9-]{0,19}$` y exige que coincida con el del repo, así que el prefijo de 31 chars impedía enrigar el proyecto. Ver DECISION-020.
+  - Los **sufijos** no cambiaron: `a87`, `dqz.1`, `kf5` siguen siendo válidos, y con ellos toda la convención de commits `tipo(sufijo): ...`.
+  - El **directorio** conserva la errata (`titicaca-enironmental-foresight`) — eso sí sigue sin renombrarse.
 - Scenario outputs must be reproducible: seed all random processes, pin library versions in `pyproject.toml`.
 - All zone labels must match OAS/PNUMA TDPS geographic names for cross-referencing with institutional reports.
 - **No AI tool metadata in commits**: never include `Co-Authored-By: Claude` or similar AI attribution lines in commit messages.
