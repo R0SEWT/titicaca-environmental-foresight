@@ -6,7 +6,9 @@
 # Issue prefix for this repository (used by bd init)
 # If not set, bd init will auto-detect from directory name
 # Example: issue-prefix: "myproject" creates issues like "myproject-1", "myproject-2", etc.
-# issue-prefix: ""
+# Explícito a propósito: sin esta línea, bd lo deriva del nombre del directorio y un clon fresco
+# (p.ej. el que crea `gt rig add`) reintroduciría el prefijo largo con la errata. Ver DECISION-020.
+issue-prefix: "tef"
 
 # Use no-db mode: JSONL-only, no Dolt database
 # When true, bd will use .beads/issues.jsonl as the source of truth
