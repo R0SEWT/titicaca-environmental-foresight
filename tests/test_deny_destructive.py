@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -138,3 +140,66 @@ ALLOWED_WRITES = [
 @pytest.mark.parametrize("rel", ALLOWED_WRITES)
 def test_escrituras_permitidas(rel, capsys):
     assert decide_write(str(guard.PROJECT_ROOT / rel), capsys) == "neutral"
+
+
+# --- auto-export de beads antes de versionar el JSONL ---
+
+
+@pytest.fixture
+def fake_run(monkeypatch):
+    """Sustituye subprocess.run dentro del guard y registra las invocaciones."""
+    calls: list[list[str]] = []
+
+    def factory(returncode=0, stderr="", exc=None):
+        def _run(cmd, **kwargs):
+            calls.append(cmd)
+            if exc is not None:
+                raise exc
+            return SimpleNamespace(returncode=returncode, stdout="", stderr=stderr)
+
+        monkeypatch.setattr(guard.subprocess, "run", _run)
+        return calls
+
+    return factory
+
+
+def test_git_add_del_jsonl_dispara_bd_export(fake_run, capsys):
+    calls = fake_run()
+    guard.current_branch = lambda: "feature/x"
+    guard.check_bash(f"git add {guard.BEADS_JSONL}")
+    assert ["bd", "export", "-o", guard.BEADS_JSONL] in calls
+    assert capsys.readouterr().out == ""
+
+
+def test_git_add_de_otro_archivo_no_dispara_export(fake_run, capsys):
+    calls = fake_run()
+    guard.current_branch = lambda: "feature/x"
+    guard.check_bash("git add src/model.py")
+    assert calls == []
+
+
+def test_export_fallido_deniega_el_git_add(fake_run, capsys):
+    fake_run(returncode=1, stderr="dolt: database is locked")
+    with pytest.raises(SystemExit):
+        guard.check_bash(f"git add {guard.BEADS_JSONL}")
+    payload = json.loads(capsys.readouterr().out)
+    reason = payload["hookSpecificOutput"]["permissionDecisionReason"]
+    assert payload["hookSpecificOutput"]["permissionDecision"] == "deny"
+    assert "database is locked" in reason
+
+
+def test_bd_ausente_deniega_el_git_add(fake_run, capsys):
+    fake_run(exc=FileNotFoundError())
+    with pytest.raises(SystemExit):
+        guard.check_bash(f"git add {guard.BEADS_JSONL}")
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["hookSpecificOutput"]["permissionDecision"] == "deny"
+    assert "PATH" in payload["hookSpecificOutput"]["permissionDecisionReason"]
+
+
+def test_timeout_de_export_deniega_el_git_add(fake_run, capsys):
+    fake_run(exc=subprocess.TimeoutExpired(cmd="bd", timeout=30))
+    with pytest.raises(SystemExit):
+        guard.check_bash(f"git add {guard.BEADS_JSONL}")
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["hookSpecificOutput"]["permissionDecision"] == "deny"

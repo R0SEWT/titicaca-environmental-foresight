@@ -154,6 +154,37 @@ def pushes_to_protected(args: list[str]) -> bool:
     return not any(":" in a for a in positional)
 
 
+def export_beads() -> None:
+    """Refresca el JSONL desde la DB antes de versionarlo. Si falla, deniega.
+
+    Tragarse el error sería peor que no tener el hook: `git add` versionaría el JSONL viejo y el
+    backlog remoto divergiría en silencio — el modo de falla exacto que esto viene a prevenir.
+    """
+    try:
+        result = subprocess.run(
+            ["bd", "export", "-o", BEADS_JSONL],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+            cwd=PROJECT_ROOT,
+        )
+    except FileNotFoundError:
+        deny(
+            f"`bd` no está en PATH, así que no se pudo refrescar `{BEADS_JSONL}` antes de "
+            "versionarlo. Instalá beads o quitá ese archivo del `git add`."
+        )
+    except subprocess.SubprocessError as exc:
+        deny(f"`bd export` no pudo completarse ({type(exc).__name__}); `{BEADS_JSONL}` sin refrescar.")
+
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip().splitlines()
+        deny(
+            f"`bd export` falló (exit {result.returncode}): {detail[-1] if detail else 'sin salida'}. "
+            f"Versionar `{BEADS_JSONL}` ahora publicaría un backlog desactualizado."
+        )
+
+
 def check_bash(command: str) -> None:
     for args in _invocations(command, "gh", "pr", "merge"):
         if "--admin" in args:
@@ -178,13 +209,7 @@ def check_bash(command: str) -> None:
 
     for args in _invocations(command, "git", "add"):
         if any(BEADS_JSONL in a for a in args):
-            subprocess.run(
-                ["bd", "export", "-o", BEADS_JSONL],
-                capture_output=True,
-                timeout=30,
-                check=False,
-                cwd=PROJECT_ROOT,
-            )
+            export_beads()
 
 
 def check_write(file_path: str) -> None:
