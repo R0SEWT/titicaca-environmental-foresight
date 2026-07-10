@@ -42,6 +42,12 @@ BLOCKED_WRITE_PREFIXES = (
 
 BEADS_JSONL = ".beads/issues.jsonl"
 
+# Config local del backend de beads. Está versionada, pero `gt rig add` (Gas Town) la reescribe en
+# el clon: metadata.json pasa a `dolt_mode: server` y config.yaml gana `export.auto: "false"`.
+# Commitear eso apaga el auto-export de beads para todo el repo — la misma divergencia silenciosa
+# que arregló el PR #28. Ver tef-vtt.
+BEADS_LOCAL_CONFIG = (".beads/config.yaml", ".beads/metadata.json")
+
 # `MultiEdit` no existe en Claude Code 2.1.x, pero sí en otras versiones/harnesses. Incluirlo no
 # cuesta nada y evita que la protección dependa de qué herramienta de edición esté disponible.
 # Debe mantenerse sincronizado con el `matcher` de .claude/settings.json.
@@ -217,11 +223,11 @@ def pushes_to_protected(args: list[str]) -> bool:
 BROAD_ADD_FLAGS = {"-A", "--all", "-u", "--update", "--no-ignore-removal"}
 
 
-def add_touches_beads(args: list[str]) -> bool:
-    """True si el `git add` podría stagear el JSONL de beads.
+def add_covers(args: list[str], target: str) -> bool:
+    """True si el `git add` podría stagear `target`.
 
-    No alcanza con buscar la ruta literal: `git add .`, `git add -A` y `git add .beads` lo stagean
-    igual, y son el flujo de commit más común.
+    No alcanza con buscar la ruta literal: `git add .`, `git add -A` y `git add .beads` stagean
+    `.beads/issues.jsonl` igual, y son el flujo de commit más común.
     """
     if any(a in BROAD_ADD_FLAGS for a in args):
         return True
@@ -234,9 +240,31 @@ def add_touches_beads(args: list[str]) -> bool:
         candidate = path.rstrip("/")
         if candidate in (".", ":/", ""):
             return True
-        if candidate == BEADS_JSONL or BEADS_JSONL.startswith(f"{candidate}/"):
+        if candidate == target or target.startswith(f"{candidate}/"):
             return True
     return False
+
+
+def is_dirty(rel_path: str) -> bool:
+    """True si `rel_path` difiere de HEAD (en índice o en árbol de trabajo).
+
+    Falla CERRADO: si git no responde, se asume sucio. Denegar un `git add` porque `git status`
+    no corre es inocuo — con git roto el `git add` tampoco iba a funcionar.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain", "--", rel_path],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+            cwd=PROJECT_ROOT,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return True
+    if out.returncode != 0:
+        return True
+    return bool(out.stdout.strip())
 
 
 def export_beads() -> None:
@@ -292,7 +320,20 @@ def check_bash(command: str) -> None:
         deny("`rm -rf` denegado: borrado recursivo irreversible. Borrá rutas concretas.")
 
     for args in _invocations(command, "git", "add"):
-        if add_touches_beads(args):
+        # El deny va ANTES del export: si `bd export` corriera igual, reescribiría el JSONL para
+        # un `git add` que no se va a ejecutar.
+        dirty = [p for p in BEADS_LOCAL_CONFIG if add_covers(args, p) and is_dirty(p)]
+        if dirty:
+            rutas = ", ".join(f"`{p}`" for p in dirty)
+            deny(
+                f"{rutas}: config local del backend de beads, modificada respecto de HEAD. "
+                "Suele ser Gas Town (`gt rig add`) reescribiendo el clon: pone `dolt_mode: server` "
+                'y `export.auto: "false"`. Commitearlo apagaría el auto-export de beads para todo '
+                f"el repo. Descartá los cambios (`git restore {' '.join(dirty)}`) o stageá rutas "
+                "concretas en vez de `git add .`."
+            )
+
+        if add_covers(args, BEADS_JSONL):
             export_beads()
 
 

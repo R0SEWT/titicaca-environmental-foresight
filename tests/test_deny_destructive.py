@@ -240,12 +240,21 @@ def test_el_matcher_del_settings_cubre_todas_las_write_tools():
 
 @pytest.fixture
 def fake_run(monkeypatch):
-    """Sustituye subprocess.run dentro del guard y registra las invocaciones."""
+    """Sustituye subprocess.run dentro del guard y registra las invocaciones.
+
+    `git status` se responde aparte de `bd export`: `dirty` lista las rutas que el guard debe
+    ver como modificadas, y `status_rc` permite simular que git falla. Así `exc`/`returncode`
+    siguen describiendo solo al `bd export`, como en los tests que ya existían.
+    """
     calls: list[list[str]] = []
 
-    def factory(returncode=0, stderr="", exc=None):
+    def factory(returncode=0, stderr="", exc=None, dirty=(), status_rc=0):
         def _run(cmd, **kwargs):
             calls.append(cmd)
+            if cmd[:2] == ["git", "status"]:
+                path = cmd[-1]
+                out = f" M {path}\n" if path in dirty else ""
+                return SimpleNamespace(returncode=status_rc, stdout=out, stderr="")
             if exc is not None:
                 raise exc
             return SimpleNamespace(returncode=returncode, stdout="", stderr=stderr)
@@ -315,5 +324,75 @@ def test_timeout_de_export_deniega_el_git_add(fake_run, capsys):
     fake_run(exc=subprocess.TimeoutExpired(cmd="bd", timeout=30))
     with pytest.raises(SystemExit):
         guard.check_bash(f"git add {guard.BEADS_JSONL}")
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["hookSpecificOutput"]["permissionDecision"] == "deny"
+
+
+# --- config local de backend que Gas Town reescribe en el clon (tef-vtt) ---
+#
+# `gt rig add` muta archivos VERSIONADOS: metadata.json pasa a dolt_mode=server y config.yaml
+# gana `export.auto: "false"`. Si un polecat los commitea, el auto-export de beads queda apagado
+# para todos. Solo se deniega cuando están realmente modificados: `git add .` con el árbol limpio
+# es el flujo de commit normal y debe seguir pasando.
+
+CONFIG = ".beads/config.yaml"
+METADATA = ".beads/metadata.json"
+
+
+@pytest.mark.parametrize("pathspec", [".", "-A", "--all", "-u", ".beads", ".beads/", CONFIG])
+def test_git_add_de_config_local_modificada_se_deniega(pathspec, fake_run, capsys):
+    fake_run(dirty={CONFIG})
+    guard.current_branch = lambda: "feature/x"
+    with pytest.raises(SystemExit):
+        guard.check_bash(f"git add {pathspec}")
+    payload = json.loads(capsys.readouterr().out)
+    reason = payload["hookSpecificOutput"]["permissionDecisionReason"]
+    assert payload["hookSpecificOutput"]["permissionDecision"] == "deny"
+    assert CONFIG in reason
+    assert "restore" in reason
+
+
+def test_metadata_modificada_tambien_se_deniega(fake_run, capsys):
+    fake_run(dirty={METADATA})
+    guard.current_branch = lambda: "feature/x"
+    with pytest.raises(SystemExit):
+        guard.check_bash("git add .")
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["hookSpecificOutput"]["permissionDecision"] == "deny"
+    assert METADATA in payload["hookSpecificOutput"]["permissionDecisionReason"]
+
+
+def test_se_deniega_antes_de_exportar_beads(fake_run, capsys):
+    """El deny no debe dejar rastro: si igual corriera `bd export`, reescribiría el JSONL."""
+    calls = fake_run(dirty={CONFIG})
+    guard.current_branch = lambda: "feature/x"
+    with pytest.raises(SystemExit):
+        guard.check_bash("git add .")
+    assert not any(cmd[:2] == ["bd", "export"] for cmd in calls)
+
+
+def test_git_add_con_config_limpia_no_se_deniega(fake_run, capsys):
+    """Falso positivo a evitar: `git add .` con el árbol limpio es el flujo normal."""
+    calls = fake_run(dirty=set())
+    guard.current_branch = lambda: "feature/x"
+    guard.check_bash("git add .")
+    assert capsys.readouterr().out == ""
+    assert ["bd", "export", "-o", guard.BEADS_JSONL] in calls
+
+
+@pytest.mark.parametrize("pathspec", ["src/model.py", "docs/DECISION_LOG.md", "tests/"])
+def test_add_que_no_cubre_la_config_no_se_deniega_aunque_este_sucia(pathspec, fake_run, capsys):
+    fake_run(dirty={CONFIG, METADATA})
+    guard.current_branch = lambda: "feature/x"
+    guard.check_bash(f"git add {pathspec}")
+    assert capsys.readouterr().out == ""
+
+
+def test_git_status_fallido_deniega_el_git_add(fake_run, capsys):
+    """Fail closed: sin poder saber si la config está sucia, no se stagea."""
+    fake_run(status_rc=128)
+    guard.current_branch = lambda: "feature/x"
+    with pytest.raises(SystemExit):
+        guard.check_bash("git add .")
     payload = json.loads(capsys.readouterr().out)
     assert payload["hookSpecificOutput"]["permissionDecision"] == "deny"
