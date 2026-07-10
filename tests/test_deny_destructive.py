@@ -100,6 +100,28 @@ def test_no_force_with_lease_no_se_confunde_con_force(capsys):
     assert decide_bash("git push --no-force-with-lease origin feat", capsys) == "neutral"
 
 
+# Una comilla sin cerrar hacía que shlex lanzara ValueError y `_segments` devolviera []. El guard
+# quedaba inerte: no denegaba nada y tampoco corría `bd export`. Debe fallar CERRADO.
+MALFORMADOS_DESTRUCTIVOS = [
+    "git push origin main; echo it's fine",
+    "rm -rf build; echo don't",
+    'git push --force origin feat && echo "sin cerrar',
+    "gh pr merge 1 --admin; echo can't stop me",
+]
+
+
+@pytest.mark.parametrize("command", MALFORMADOS_DESTRUCTIVOS)
+def test_comillas_rotas_no_desactivan_el_guard(command, capsys):
+    assert decide_bash(command, capsys, branch="main") == "deny"
+
+
+def test_comillas_rotas_no_impiden_el_export_de_beads(fake_run, capsys):
+    calls = fake_run()
+    guard.current_branch = lambda: "feature/x"
+    guard.check_bash(f"git add {guard.BEADS_JSONL} && echo \"sin cerrar")
+    assert ["bd", "export", "-o", guard.BEADS_JSONL] in calls
+
+
 @pytest.mark.parametrize("command", DESTRUCTIVE)
 def test_comandos_destructivos_denegados(command, capsys):
     assert decide_bash(command, capsys) == "deny"

@@ -77,20 +77,35 @@ def _strip_wrappers(seg: list[str]) -> list[str]:
     return seg
 
 
+def _tokenize(command: str) -> list[str]:
+    """Tokeniza respetando comillas. Ante entrada malformada, falla CERRADO.
+
+    `shlex` posix lanza ValueError con comillas sin cerrar. Devolver una lista vacía ahí
+    desactivaría el guard entero: `git push origin main; echo it's fine` pasaría limpio, y el
+    `bd export` previo al `git add` no correría. Un guard debe fallar cerrado, así que se degrada
+    a un lexer más tolerante y, en última instancia, a un split ingenuo (que puede sobre-denegar,
+    pero nunca deja pasar).
+    """
+    for posix in (True, False):
+        lexer = shlex.shlex(command, posix=posix, punctuation_chars=True)
+        lexer.whitespace_split = True
+        try:
+            return list(lexer)
+        except ValueError:
+            continue
+    spaced = re.sub(r"(&&|\|\||[;|&\n])", r" \1 ", command)
+    return spaced.split()
+
+
 def _segments(command: str) -> list[list[str]]:
-    """Tokeniza respetando comillas y trocea por operadores de shell.
+    """Tokeniza y trocea por operadores de shell.
 
     Tokenizar ANTES de trocear es lo que importa. Si se parte la cadena por `;` o `|` primero,
     un `;` dentro de comillas rompe el string por la mitad y `echo "ojo con git push --force"`
     termina pareciendo un force-push. Con `punctuation_chars` el lexer emite los operadores como
     tokens propios y deja el texto citado como un único token inerte.
     """
-    lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
-    lexer.whitespace_split = True
-    try:
-        tokens = list(lexer)
-    except ValueError:
-        return []
+    tokens = _tokenize(command)
 
     segments: list[list[str]] = []
     current: list[str] = []
