@@ -1,7 +1,7 @@
 station_id,station_name,utm_este,utm_norte,monitoring_date,monitoring_time,campaign,sampling_agency,source_file,source_page,secchi_m
 CHB-1,Bahía exterior de Puno - Frente a punta de Captación Chimu,396947,8247022,,06:18,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,6.5
-CHB-2,Bahía exterior de Puno - Frente a Península de Chucuito,401118,8253044,,09:28,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,?
-CHB-3,Bahía exterior de Puno - Desembocadura del río Coata,406227,8267855,,11:32,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,?
+CHB-2,Bahía exterior de Puno - Frente a Península de Chucuito,401118,8253044,,09:28,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,8.5?
+CHB-3,Bahía exterior de Puno - Desembocadura del río Coata,406227,8267855,,11:32,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,4?
 CHB-4,Bahía exterior de Puno - Entre Penínsulas de Capachica y Chucuito,415908,8264606,,06:55,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,11.5
 CHB-5,Lago mayor - Frente a Islas Iscaña y Toranta,415692,8271178,,12:55,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,8.9
 CHB-7,Lago mayor - Frente a Pusi,410738,8281542,,06:00,Crucero Hidroquímico I 2019,PEBLT-IMARPE,INFORME I CRUCERO HIDROQUIMICO AÑO 2019.pdf,33,3
