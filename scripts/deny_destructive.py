@@ -51,7 +51,30 @@ ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 
 
 OPERATORS = {";", "&&", "||", "|", "&", "\n"}
-NOISE_PREFIXES = ("sudo", "command", "time", "env", "nohup", "xargs")
+WRAPPERS = ("sudo", "command", "time", "env", "nohup", "xargs", "doas")
+
+# Flags de wrapper que consumen el token siguiente. Si no se descartan junto con su argumento,
+# `sudo -u root rm -rf x` deja el segmento empezando en `-u` y el comando real queda invisible.
+WRAPPER_FLAGS_WITH_ARG = {
+    "-u", "-g", "-p", "-C", "-h", "-U", "-r", "-t", "-n",
+    "--user", "--group", "--prompt", "--host", "--role", "--type",
+}  # fmt: skip
+
+
+def _strip_wrappers(seg: list[str]) -> list[str]:
+    """Descarta prefijos inertes (`sudo`, `env`, asignaciones) y los flags que traigan."""
+    while seg:
+        if ENV_ASSIGN.match(seg[0]):
+            seg = seg[1:]
+            continue
+        if seg[0] in WRAPPERS:
+            seg = seg[1:]
+            while seg and seg[0].startswith("-"):
+                consume = 2 if seg[0] in WRAPPER_FLAGS_WITH_ARG and len(seg) > 1 else 1
+                seg = seg[consume:]
+            continue
+        break
+    return seg
 
 
 def _segments(command: str) -> list[list[str]]:
@@ -81,10 +104,9 @@ def _segments(command: str) -> list[list[str]]:
 
     out: list[list[str]] = []
     for seg in segments:
-        while seg and (ENV_ASSIGN.match(seg[0]) or seg[0] in NOISE_PREFIXES):
-            seg = seg[1:]
-        if seg:
-            out.append(seg)
+        stripped = _strip_wrappers(seg)
+        if stripped:
+            out.append(stripped)
     return out
 
 
@@ -260,16 +282,30 @@ def check_bash(command: str) -> None:
 
 
 def check_write(file_path: str) -> None:
+    """Deniega escrituras a credenciales y capas generadas.
+
+    Las rutas relativas se anclan a PROJECT_ROOT, no al cwd del proceso: el hook puede correr
+    desde cualquier directorio, y resolver contra el cwd hacía que `./data/bronze/x.zip` escapara
+    del prefijo bloqueado.
+    """
     if not file_path:
         return
-    try:
-        rel = Path(file_path).resolve().relative_to(PROJECT_ROOT).as_posix()
-    except ValueError:
-        rel = file_path
 
-    name = Path(rel).name
+    candidate = Path(file_path)
+    if not candidate.is_absolute():
+        candidate = PROJECT_ROOT / candidate
+    candidate = candidate.resolve()
+
+    # Las credenciales se bloquean por nombre, esté el archivo donde esté.
+    name = candidate.name
     if name == ".env" or name.startswith(".env."):
-        deny(f"Escritura a `{rel}` denegada: contiene credenciales (CDSE).")
+        deny(f"Escritura a `{name}` denegada: contiene credenciales (CDSE).")
+
+    try:
+        rel = candidate.relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        # Fuera del repo: las capas generadas son un concepto relativo a este proyecto.
+        return
 
     for prefix in BLOCKED_WRITE_PREFIXES:
         if rel.startswith(prefix):

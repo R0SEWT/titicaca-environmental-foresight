@@ -79,6 +79,12 @@ DESTRUCTIVE = [
     "rm -r -f build",
     "rm --recursive --force build",
     "sudo rm -rf /tmp/x",
+    # Los flags del wrapper deben consumirse junto con su argumento, o el comando real queda
+    # invisible tras `-u root` (hallado por Copilot en el PR #29).
+    "sudo -u root rm -rf build",
+    "sudo -E rm -rf build",
+    "sudo -u root -E rm -rf build",
+    "env FOO=bar rm -rf build",
     "cd /tmp && git push --force",
     "true; git push origin main",
     # Formas que el guard dejaba pasar (halladas por Codex en el PR #29).
@@ -150,6 +156,39 @@ ALLOWED_WRITES = [
 @pytest.mark.parametrize("rel", ALLOWED_WRITES)
 def test_escrituras_permitidas(rel, capsys):
     assert decide_write(str(guard.PROJECT_ROOT / rel), capsys) == "neutral"
+
+
+# El hook corre con cualquier cwd. Si `check_write` resolviera las rutas relativas contra el cwd
+# del proceso, `./data/bronze/x.zip` escaparía del prefijo bloqueado (hallado por Copilot, #29).
+RELATIVAS_BLOQUEADAS = [
+    "data/bronze/x.zip",
+    "./data/bronze/x.zip",
+    "./outputs/a.json",
+    "data/gold/../gold/x.tif",
+    "./.env",
+    ".env",
+]
+
+
+@pytest.mark.parametrize("rel", RELATIVAS_BLOQUEADAS)
+def test_rutas_relativas_se_anclan_al_repo(rel, capsys, monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    assert decide_write(rel, capsys) == "deny"
+
+
+@pytest.mark.parametrize("rel", ["./src/model.py", "docs/DECISION_LOG.md", "./data/sources/x.csv"])
+def test_rutas_relativas_permitidas_siguen_pasando(rel, capsys, monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    assert decide_write(rel, capsys) == "neutral"
+
+
+def test_env_se_bloquea_este_donde_este(capsys):
+    """Las credenciales se bloquean por nombre, aunque el path caiga fuera del repo."""
+    assert decide_write("/home/otro/proyecto/.env", capsys) == "deny"
+
+
+def test_archivo_ajeno_fuera_del_repo_no_es_asunto_del_guard(capsys):
+    assert decide_write("/home/otro/proyecto/data/bronze/x.zip", capsys) == "neutral"
 
 
 # --- despacho por herramienta ---
