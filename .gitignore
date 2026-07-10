@@ -2,7 +2,13 @@
 data/bronze/
 data/silver/
 data/gold/
-data/_metadata/
+
+# data/_metadata/ es capa generada, pero los TSV de provenance se versionan como
+# evidencia de trazabilidad para el paper (Scientific Data exige métodos reproducibles).
+# Se ignora el resto — en particular inventario_partners/ (5.7M). Ver tef-m8d.
+# Nota: se excluye el CONTENIDO (`/*`), no el directorio, para que la negación `!` funcione.
+data/_metadata/*
+!data/_metadata/*.tsv
 
 # Raw data files in root (partner-provided, too large for git)
 *.zip
